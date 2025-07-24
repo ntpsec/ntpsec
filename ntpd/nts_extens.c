@@ -136,7 +136,6 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 
 	while (buf.left >= NTS_KE_HDR_LNG) {
 		uint16_t type;
-		bool critical = false;
 		int length, adlength;
 		size_t outlen;
 		uint8_t *nonce, *cmac;
@@ -145,10 +144,6 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 		type = ex_next_record(&buf, &length); /* length excludes header */
 		if (length&3 || length > buf.left || length < 0) {
 			return false;
-		}
-		if (NTS_CRITICAL & type) {
-			critical = true;
-			type &= ~NTS_CRITICAL;
 		}
 		switch (type) {
 		    case Unique_Identifier:
@@ -238,13 +233,10 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 		    default:
 			/* Non NTS extensions on requests at server.
 			 * Call out when we get some that we want.
-			 * Until then, it's probably a bug. */
-			if (critical) {
-				return false;
-			}
+			 * Until then, just ignore it */
 			buf.next += length;
 			buf.left -= length;
-			return false;
+			break;
 		}
 	}
 
@@ -358,7 +350,6 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 
 	while (buf.left >= NTS_KE_HDR_LNG) {
 		uint16_t type;
-		bool critical = false;
 		int length, adlength, noncelen;
 		uint8_t *nonce, *ciphertext, *plaintext;
 		size_t outlen;
@@ -367,10 +358,6 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 		type = ex_next_record(&buf, &length); /* length excludes header */
 		if (length&3 || length > buf.left || length < 0)
 			return false;
-		if (NTS_CRITICAL & type) {
-			critical = true;
-			type &= ~NTS_CRITICAL;
-		}
 		//     printf("ECR: %d, %d, %d\n", type, length, buf.left);
 		switch (type) {
 		    case Unique_Identifier:
@@ -427,12 +414,10 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 		    default:
 			/* Non NTS extensions on reply from server.
 			 * Call out when we get some that we want.
-			 * For now, it's probably a bug. */
-			if (critical)
-				return false;
+			 * For now, just ignore it */
 			buf.next += length;
 			buf.left -= length;
-			return false;
+			break;
 		}
 	}
 
