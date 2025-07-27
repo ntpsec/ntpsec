@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 
-FROM python:2-slim
+FROM debian:bullseye
 
 RUN apt-get update -qq
 RUN apt-get install -y -qq \
@@ -12,4 +12,5 @@ RUN apt-get install -y -qq \
 	libcap-dev \
 	libssl-dev \
 	netbase \
-	pps-tools
+	pps-tools \
+	python2

@@ -10,6 +10,7 @@ RUN apt-get update
 RUN apt-get install -y \
 	bison \
 	curl \
+	file \
 	gcc \
 	git \
 	libbsd-dev \
