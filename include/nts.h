@@ -49,9 +49,8 @@ struct BufCtl_t {
 };
 typedef struct BufCtl_t BufCtl;
 
+/* Here for test routines */
 bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead);
-bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
-       uint8_t *c2s, uint8_t *s2c, int keylen);
 
 /***********************************************************/
 

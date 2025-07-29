@@ -290,30 +290,70 @@ bool nts_load_certificate(SSL_CTX *ctx) {
 }
 
 
-int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length) {
-	int bytes_read;
-	char errbuf[100];
-	bytes_read = SSL_read(ssl, buff, buff_length);
-	if (0 >= bytes_read) {
-		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-		msyslog(LOG_INFO, "NTS: SSL_read error: %s", errbuf);
-		nts_log_ssl_error();
-		return -1;
-	}
-	return bytes_read;
+int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length, const char** errtxt) {
+  int bytes_read = SSL_read(ssl, buff, buff_length);
+  if (0 >= bytes_read) {
+    int code = SSL_get_error(ssl, bytes_read);
+    unsigned long err = ERR_peek_error();
+    if (SSL_ERROR_ZERO_RETURN == code) {
+      *errtxt = "SSL_read Connection reset1";
+      return 0;
+    }
+    if (SSL_ERROR_WANT_READ == code) {
+      *errtxt = "SSL_read Timeout";
+      return 0;
+    }
+#ifdef SSL_R_UNEXPECTED_EOF_WHILE_READING
+    if (SSL_ERROR_SSL == code &&
+        SSL_R_UNEXPECTED_EOF_WHILE_READING == ERR_GET_REASON(err)) {
+      *errtxt = "SSL_read Connection reset2";
+      return 0;
+    }
+#else
+    // Hack for OpenSSL 1.1.1w  11 Sep 2023
+    // Debian GNU/Linux 11 (bullseye)
+    if (SSL_ERROR_SYSCALL == code) {
+      *errtxt = "SSL_read Timeout";
+      return 0;
+    }
+#endif
+    // Strange error condition
+    msyslog(LOG_INFO, "NTS: SSL_read strange error: %d bytes, code %d, err %lx",
+      bytes_read, code, err);
+    *errtxt = ERR_reason_error_string(err);
+    if (NULL == *errtxt) {
+      *errtxt = "SSL_read unknown error text";
+    }
+    nts_log_ssl_error();
+    return -1;
+  }
+  return bytes_read;
 }
 
-int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length) {
-	int bytes_written;
-	char errbuf[100];
-	bytes_written = SSL_write(ssl, buff, buff_length);
-	if (0 >= bytes_written) {
-		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-		msyslog(LOG_INFO, "NTS: SSL_write error: %s", errbuf);
-		nts_log_ssl_error();
-		return -1;
-	}
-	return bytes_written;
+int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length, const char** errtxt) {
+  int bytes_written = SSL_write(ssl, buff, buff_length);
+  if (0 >= bytes_written) {
+    int code = SSL_get_error(ssl, bytes_written);
+    unsigned long err = ERR_peek_error();
+    if (SSL_ERROR_ZERO_RETURN == code) {
+      *errtxt = "SSL_Write Connection closed";
+      return 0;
+    }
+    if (SSL_ERROR_WANT_WRITE == code) {
+      *errtxt = "SSL_write Timeout";
+      return 0;
+    }
+    // Strange error condition
+    msyslog(LOG_INFO, "NTS: SSL_write strange error: %d bytes, code %d, err %lx",
+      bytes_written, code, err);
+    *errtxt = ERR_reason_error_string(err);
+    if (NULL == *errtxt) {
+      *errtxt = "SSL_write unknown error text";
+    }
+    nts_log_ssl_error();
+    return -1;
+  }
+  return bytes_written;
 }
 
 /* Each thread has it's own queue of errors */

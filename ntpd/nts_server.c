@@ -35,8 +35,8 @@
 static bool create_listener4(int port);
 static bool create_listener6(int port);
 static void* nts_ke_listener(void*);
-static bool nts_ke_request(SSL *ssl);
-static void nts_ke_accept_fail(char* addrbuf, double sec);
+static void nts_ke_request(SSL *ssl, const char **errtxt);
+static void nts_ke_accept_fail(char* hostname, double sec, int code);
 
 static void nts_lock_certlock(void);
 static void nts_unlock_certlock(void);
@@ -45,6 +45,9 @@ static void nts_unlock_certlock(void);
 static SSL_CTX *server_ctx = NULL;
 static int listener4_sock = -1;
 static int listener6_sock = -1;
+
+static void nts_ke_setup_send(struct BufCtl_t *buf, int aead,
+       uint8_t *c2s, uint8_t *s2c, int keylen);
 
 /* We need a lock to protect reloading our certificate.
  * This seems like overkill, but it doesn't happen often. */
@@ -201,8 +204,7 @@ void* nts_ke_listener(void* arg) {
 	char usingbuf[100];
 	struct timespec start, finish;		/* wall clock */
 	l_fp wall;
-	bool worked;
-	const char *good;
+	const char *errtxt;	/* not NULL if error */
 #ifdef RUSAGE_THREAD
 	struct timespec start_u, finish_u;	/* CPU user */
 	struct timespec start_s, finish_s;	/* CPU system */
@@ -230,13 +232,14 @@ void* nts_ke_listener(void* arg) {
 		SSL *ssl;
 		int client, err;
 
+		sleep(1);			/* FIXME: log clutter/DoS */
+		errtxt = NULL;
 		client = accept(sock, &addr.sa, &len);
 		if (client < 0) {
 			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 			msyslog(LOG_ERR, "NTSs: TCP accept failed: %s", errbuf);
 			if (EBADF == errno)
 				return NULL;
-			sleep(1);		/* avoid log clutter on bug */
 			continue;
 		}
 		clock_gettime(CLOCK_MONOTONIC, &start);
@@ -263,7 +266,16 @@ void* nts_ke_listener(void* arg) {
 			&timeout, sizeof(timeout));
 		if (0 > err) {
 			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-			msyslog(LOG_ERR, "NTSs: can't setsockopt: %s", errbuf);
+			msyslog(LOG_ERR, "NTSs: can't set recv timeout: %s", errbuf);
+			close(client);
+			ntske_cnt.serves_bad++;
+			continue;
+		}
+		err = setsockopt(client, SOL_SOCKET, SO_SNDTIMEO,
+			&timeout, sizeof(timeout));
+		if (0 > err) {
+			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+			msyslog(LOG_ERR, "NTSs: can't set send timeout: %s", errbuf);
 			close(client);
 			ntske_cnt.serves_bad++;
 			continue;
@@ -275,10 +287,12 @@ void* nts_ke_listener(void* arg) {
 		nts_unlock_certlock();
 		SSL_set_fd(ssl, client);
 
-		if (SSL_accept(ssl) <= 0) {
+		err = SSL_accept(ssl);
+		if (0 >= err) {
+			int code = SSL_get_error(ssl, err);
 			clock_gettime(CLOCK_MONOTONIC, &finish);
 			wall = tspec_intv_to_lfp(sub_tspec(finish, start));
-			nts_ke_accept_fail(addrbuf, lfptox(wall));
+			nts_ke_accept_fail(addrbuf, lfptox(wall), code);
 			SSL_free(ssl);
 			close(client);
 			ntske_cnt.serves_nossl++;
@@ -303,13 +317,7 @@ void* nts_ke_listener(void* arg) {
 			SSL_get_cipher_name(ssl),
 			SSL_get_cipher_bits(ssl, NULL));
 
-		if (nts_ke_request(ssl)) {
-			worked = true;
-			good = "OK";
-		} else {
-			worked = false;
-			good = "Failed";
-		}
+		nts_ke_request(ssl, &errtxt);
 
 		SSL_shutdown(ssl);
 		SSL_free(ssl);
@@ -317,7 +325,7 @@ void* nts_ke_listener(void* arg) {
 
 		clock_gettime(CLOCK_MONOTONIC, &finish);
 		wall = tspec_intv_to_lfp(sub_tspec(finish, start));
-		if (worked) {
+		if (NULL == errtxt) {
 			ntske_cnt.serves_good++;
 			ntske_cnt.serves_good_wall += wall;
 		} else {
@@ -332,19 +340,32 @@ void* nts_ke_listener(void* arg) {
 		sys = tspec_intv_to_lfp(sub_tspec(finish_s, start_s));
 		start_u = finish_u;
 		start_s = finish_s;
-		if (worked) {
+		if (NULL == errtxt) {
 			ntske_cnt.serves_good_cpu += usr;
 			ntske_cnt.serves_good_cpu += sys;
+			msyslog(LOG_INFO,
+				"NTSs: NTS-KE from %s, OK, Using %s, took %.3f sec, CPU: %.3f+%.3f ms",
+				addrbuf, usingbuf, lfptox(wall),
+				lfptox(usr*1000), lfptox(sys*1000));
 		} else {
 			ntske_cnt.serves_bad_cpu += usr;
 			ntske_cnt.serves_bad_cpu += sys;
+			msyslog(LOG_INFO,
+				"NTSs: NTS-KE from %s, Failed, Using %s, took %.3f sec, CPU: %.3f+%.3f ms, %s",
+				addrbuf, usingbuf, lfptox(wall),
+				lfptox(usr*1000), lfptox(sys*1000),
+				errtxt);
 		}
-		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, %s, Using %s, took %.3f sec, CPU: %.3f+%.3f ms",
-			addrbuf, good, usingbuf, lfptox(wall),
-			lfptox(usr*1000), lfptox(sys*1000));
 #else
-		msyslog(LOG_INFO, "NTSs: NTS-KE from %s, %s, Using %s, took %.3f sec",
-			addrbuf, good, usingbuf, lfptox(wall));
+		if (NULL == errtxt) {
+			msyslog(LOG_INFO,
+				"NTSs: NTS-KE from %s, OK, Using %s, took %.3f sec",
+				addrbuf, usingbuf, lfptox(wall));
+		} else {
+			msyslog(LOG_INFO,
+				"NTSs: NTS-KE from %s, Failed, Using %s, took %.3f sec, %s",
+				addrbuf, usingbuf, lfptox(wall), errtxt);
+		}
 #endif
 	}
 	return NULL;
@@ -352,31 +373,78 @@ void* nts_ke_listener(void* arg) {
 
 /* Analyze failure from SSL_accept
  * print single error message for common cases.
+ * Similar code in nts.c, nts_ssl_read() and nts_ssl_write()
  */
-void nts_ke_accept_fail(char* addrbuf, double sec) {
+void nts_ke_accept_fail(char* hostname, double sec, int code) {
 	unsigned long err = ERR_peek_error();
-	int lib = ERR_GET_LIB(err);
-	int reason = ERR_GET_REASON(err);
+	char errbuf[100];
+	char buff[200];
 	const char *msg = NULL;
-	if (ERR_LIB_SSL == lib && SSL_R_WRONG_VERSION_NUMBER == reason)
-		msg = "wrong version number";
-	if (ERR_LIB_SSL == lib && SSL_R_HTTP_REQUEST == reason)
-		msg = "http request";
-	if (ERR_LIB_SSL == lib && SSL_R_NO_SHARED_CIPHER == reason)
-		msg = "no shared cipher";
-	if (ERR_LIB_SSL == lib && SSL_R_UNSUPPORTED_PROTOCOL == reason)
-		msg = "unsupported protocol (TLSv1.2?)";
-	if (NULL == msg) {
-		msyslog(LOG_INFO, "NTSs: SSL accept from %s failed, took %.3f sec",
-			addrbuf, sec);
-		nts_log_ssl_error();
-		return;
+	if (0 == err) {
+	  switch (code) {
+	    case SSL_ERROR_WANT_READ:
+	      msg = "Timeout";
+	      break;
+	    case SSL_ERROR_SYSCALL:
+	      if (ECONNRESET==errno) {
+	        msg = "Connection reset1";
+	        break;
+	      }
+	      /* fall through */
+	    default:
+	      ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+	      snprintf(buff, sizeof(buff), "code %d, errno=>%d, %s",
+		code, errno, errbuf);
+	      msg = buff;
+	      break;
+	  }
+	} else {
+	  switch (code) {
+	    case SSL_ERROR_SSL:
+	      switch (ERR_GET_REASON(err)) {
+		case SSL_R_HTTP_REQUEST:
+		  msg = "HTTP request";
+		  break;
+		case SSL_R_NO_SHARED_CIPHER:
+                  msg = "no shared cipher";
+                  break;
+		case SSL_R_WRONG_VERSION_NUMBER:
+                  msg = "wrong version number";
+                  break;
+		case SSL_R_UNSUPPORTED_PROTOCOL:
+                  msg = "unsupported protocol";
+                  break;
+#ifdef SSL_R_UNEXPECTED_EOF_WHILE_READING
+/* Not available in OpenSSL 1.1.1w as used by Debian 11 (bullseye), Jul 2025 */
+	        case SSL_R_UNEXPECTED_EOF_WHILE_READING:
+		  msg = "Connection reset2";
+                  break;
+#endif
+		default:
+		  // cc (Debian 8.3.0-6) 8.3.0
+		  //   error: label at end of compound statement
+		  NULL;
+	        /* fall through */
+	      }
+	      if (NULL != msg) {
+		err = 0;
+	        break;
+	      }
+	      /* fall through */
+	    default:
+	      ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+	      snprintf(buff, sizeof(buff), "code %d, errno=>%d, %s, %lx=>%s",
+		code, errno, errbuf, err, ERR_reason_error_string(err));
+	      msg = buff;
+	  }
 	}
-	msyslog(LOG_INFO, "NTSs: SSL accept from %s failed: %s, took %.3f sec",
-		addrbuf, msg, sec);
+	msyslog(LOG_INFO, "NTSs: SSL_accept from %s, Failed, took %.3f sec, %s",
+		hostname, sec, msg);
+	if (err)
+	    nts_log_ssl_error();
 }
 
-bool nts_ke_request(SSL *ssl) {
+void nts_ke_request(SSL *ssl, const char **errtxt) {
 	/* RFC 4: servers must accept 1024
 	 * Our cookies can be 104, 136, or 168 for AES_SIV_CMAC_xxx
 	 * 8*168 fits comfortably into 2K.
@@ -388,14 +456,16 @@ bool nts_ke_request(SSL *ssl) {
 	int bytes_read, bytes_written;
 	int used;
 
-	bytes_read = nts_ssl_read(ssl, buff, sizeof(buff));
-	if (0 > bytes_read)
-		return false;
+	bytes_read = nts_ssl_read(ssl, buff, sizeof(buff), errtxt);
+	if (0 >= bytes_read)
+		return;
 
 	buf.next = buff;
 	buf.left = bytes_read;
-	if (!nts_ke_process_receive(&buf, &aead))
-		return false;
+	if (!nts_ke_process_receive(&buf, &aead)) {
+		*errtxt = "xx";
+		return;
+	}
 
 	if ((NO_AEAD == aead) && (NULL != ntsconfig.aead))
 		aead = nts_string_to_aead(ntsconfig.aead);
@@ -403,25 +473,23 @@ bool nts_ke_request(SSL *ssl) {
 		aead = AEAD_AES_SIV_CMAC_256;    /* default */
 
 	keylen = nts_get_key_length(aead);
-	if (!nts_make_keys(ssl, aead, c2s, s2c, keylen))
-		return false;
+	if (!nts_make_keys(ssl, aead, c2s, s2c, keylen)) {
+		*errtxt = "Can't make keys";
+		return;
+	}
 
 	buf.next = buff;
 	buf.left = sizeof(buff);
-	if (!nts_ke_setup_send(&buf, aead, c2s, s2c, keylen))
-		return false;
+	nts_ke_setup_send(&buf, aead, c2s, s2c, keylen);
 
 	used = sizeof(buff)-buf.left;
-	bytes_written = nts_ssl_write(ssl, buff, used);
+	bytes_written = nts_ssl_write(ssl, buff, used, errtxt);
 	if (bytes_written != used)
-		return false;
+		return;
 
-	/* Skip logging the normal case. */
-	if ((bytes_read!=16) || (aead!=15) )
-		msyslog(LOG_INFO, "NTSs: Read %d, wrote %d bytes.  AEAD=%d",
-			bytes_read, bytes_written, aead);
+/* FIXME: Need counters for AEAD */
 
-	return true;
+	return;
 }
 
 bool create_listener4(int port) {
@@ -530,7 +598,13 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
 		int length;
 		bool critical = false;
 
+		// FIXME: msyslogs need rate limiting
 		type = ke_next_record(buf, &length);
+                if (length > buf->left){
+                        msyslog(LOG_ERR, "NTSs: Chunk too big: 0x%x, %d, %d",
+                                type, buf->left, length);
+                        return false;
+                }
 		if (NTS_CRITICAL & type) {
 			critical = true;
 			type &= ~NTS_CRITICAL;
@@ -597,6 +671,7 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
 		} /* case */
 	}   /* while */
 
+// FIXME: check for missing EOM.  Need to read more?
 	if (buf->left > 0)
 		return false;
 
@@ -604,7 +679,7 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead) {
 
 }
 
-bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
+void nts_ke_setup_send(struct BufCtl_t *buf, int aead,
        uint8_t *c2s, uint8_t *s2c, int keylen) {
 
 	/* 4.1.2 Next Protocol */
@@ -625,9 +700,6 @@ bool nts_ke_setup_send(struct BufCtl_t *buf, int aead,
 
 	/* 4.1.1: End, Critical */
 	ke_append_record_null(buf, NTS_CRITICAL+nts_end_of_message);
-
-	return true;
-
 }
 
 /* end */

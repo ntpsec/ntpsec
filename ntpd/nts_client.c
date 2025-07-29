@@ -88,12 +88,16 @@ bool nts_probe(struct peer * peer) {
 			inet_ntop(af, PSOCK_ADDR4(&peer->srcadr), hostbuf, sizeof(hostbuf));
 			break;
 		    case AF_INET6:
-			inet_ntop(af, PSOCK_ADDR6(&peer->srcadr), hostbuf, sizeof(hostbuf));
+			/* Add [] in case [xxx]:port */
+			hostbuf[0] = '[';
+			inet_ntop(af, PSOCK_ADDR6(&peer->srcadr), hostbuf+1, sizeof(hostbuf)-1);
+			strlcat(hostbuf, "]", sizeof(hostbuf));
 			break;
 		    default:
 			return false;
 		}
 		hostname = hostbuf;
+//		msyslog(LOG_INFO, "NTSc: Address Literal: %s", hostbuf);
 	}
 
 	server = open_TCP_socket(peer, hostname);
@@ -105,7 +109,15 @@ bool nts_probe(struct peer * peer) {
 	err = setsockopt(server, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 	if (0 > err) {
 		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-		msyslog(LOG_ERR, "NTSc: can't setsockopt: %s", errbuf);
+		msyslog(LOG_ERR, "NTSc: can't set recv timeout: %s", errbuf);
+		close(server);
+		ntske_cnt.probes_bad++;
+		return false;
+	}
+	err = setsockopt(server, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+	if (0 > err) {
+		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+		msyslog(LOG_ERR, "NTSc: can't set send timeout: %s", errbuf);
 		close(server);
 		ntske_cnt.probes_bad++;
 		return false;
@@ -237,6 +249,22 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
 	return ctx;
 }
 
+/* FIXME - split out DNS work. */
+
+/* Note that there are 2 DNS lookups.
+ *   One for the NTS-KE server and another for the NTP server.
+ *   The latter is optional.
+ *   The default is to use the same IP Address as NTS-KE server.
+ *
+ * In the non-NTS case, when a server name returns multiple addresses,
+ * we skip the ones that are already in use.
+ *
+ * If the NTS-KE server has multiple addresses, we also skip the ones
+ * that are already in use for NTP.  That works great if the NTS-KE server
+ * is running on the same system as the NTP server which is true
+ * for most servers.
+ */
+
 /* return -1 on error */
 int open_TCP_socket(struct peer *peer, const char *hostname) {
 	char host[256], port[32];
@@ -248,16 +276,31 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	int sockfd;
 	struct timespec start, finish;
 
-	/* copy avoids dancing around const warnings */
+	/* FIXME -- const bug in OpenSSL */
 	strlcpy(host, hostname, sizeof(host));
 
 	/* handle xxx:port case */
-	tmp = strchr(host, ']');
-	if (NULL == tmp) {
-		tmp = strchr(host, ':');
+	if ('[' == host[0]) {
+		/* IPv6 case, drop [], start search after ] */
+		SET_AF(&peer->srcadr, AF_INET6);
+		strlcpy(host, hostname+1, sizeof(host));
+		tmp = strchr(host, ']');
+		if (NULL == tmp) {
+		  msyslog(LOG_ERR, "NTSc: open_TCP_socket: missing ']': %s",
+		    hostname);
+		  return -1;
+		}
+		*tmp++ = 0;
+		/* We have chopped off the [] around the host literal.
+		 * There should be nothing left or :<port> */
+		if ((0 != *tmp) && (':' != *tmp)) {
+		  msyslog(LOG_ERR, "NTSc: open_TCP_socket: missing ':': %s",
+		    hostname);
+		  return -1;
+		}
+		if (0 == *tmp) tmp = NULL; /* no : */
 	} else {
-		/* IPv6 case, start search after ] */
-		tmp = strchr(tmp, ':');
+		tmp = strchr(host, ':');
 	}
 	if (NULL == tmp) {
 		/* simple case, no : */
@@ -266,6 +309,7 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 		/* Complicated case, found a : */
 		*tmp++ = 0;
 		strlcpy(port, tmp, sizeof(port));
+		msyslog(LOG_INFO, "NTSc: open_TCP_socket: found port %s", port);
 	}
 
 	ZERO(hints);
@@ -275,23 +319,31 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	gai_rc = getaddrinfo(host, port, &hints, &answer);
 	if (0 != gai_rc) {
-		msyslog(LOG_INFO, "NTSc: open_TCP_socket: DNS error trying to contact %s: %d, %s",
+		msyslog(LOG_INFO, "NTSc: open_TCP_socket: DNS error trying to contact %s, %d, %s",
 			hostname, gai_rc, gai_strerror(gai_rc));
 		return -1;
 	}
 	clock_gettime(CLOCK_MONOTONIC, &finish);
 	finish = sub_tspec(finish, start);
-	msyslog(LOG_INFO, "NTSc: DNS lookup of %s took %.3f sec",
-		hostname, tspec_to_d(finish));
+	msyslog(LOG_INFO, "NTSc: DNS lookup of %s (%d) took %.3f sec",
+		hostname, hints.ai_family, tspec_to_d(finish));
 
-	/* Use first answer
-	 * sockaddr is global for NTP address
-	 * also use as temp for printing here
-	 */
-	worker = find_best_addr(answer);
+	/* sockaddr is global for NTP address
+	 * also use as temp for printing here */
+	if (NULL == peer->hostname) {
+		/* Address literal case, use first/only answer */
+		worker = answer;
+	} else {
+		worker = find_best_addr(answer);
+		if (NULL == worker) {
+			msyslog(LOG_INFO, "NTSc: All addresses in use.");
+			freeaddrinfo(answer);
+			return -1;
+		}
+	}
 	memcpy(&sockaddr, worker->ai_addr, worker->ai_addrlen);
 	sockporttoa_r(&sockaddr, errbuf, sizeof(errbuf));
-	msyslog(LOG_INFO, "NTSc: connecting to %s:%s => %s",
+	msyslog(LOG_INFO, "NTSc: connecting to %s+%s => %s",
 		host, port, errbuf);
 
 	/* setup default NTP port now
@@ -303,7 +355,6 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_INFO, "NTSc: open_TCP_socket: no socket: %s", errbuf);
 	} else {
-		/* Use first IP Address */
 		if (!connect_TCP_socket(sockfd, worker)) {
 			close(sockfd);
 			sockfd = -1;
@@ -316,7 +367,26 @@ int open_TCP_socket(struct peer *peer, const char *hostname) {
 }
 
 struct addrinfo *find_best_addr(struct addrinfo *answer) {
-	/* default to first one */
+	for ( ; NULL != answer; answer = answer->ai_next) {
+		sockaddr_u addr;
+		struct peer *pp;
+		if (sizeof(sockaddr_u) < answer->ai_addrlen)
+			continue;  /* Weird */
+		memcpy(&addr, answer->ai_addr, answer->ai_addrlen);
+		/* findexistingpeer checks port too */
+		for (pp = peer_list; NULL != pp; pp = pp->p_link) {
+ 			if (MDF_POOL & pp->cast_flags) continue;
+ 			if (FLAG_LOOKUP & pp->cfg.flags) continue;
+			if (SOCK_EQ(&addr, &pp->srcadr)) break;
+		}
+		if (NULL != pp) {
+			char errbuf[200];
+			socktoa_r(&addr, errbuf, sizeof(errbuf));
+			msyslog(LOG_INFO, "NTSc: Skipping %s", errbuf);
+			continue;  /* already in use */
+		}
+		break; 
+	}
 	return(answer);
 }
 
@@ -411,6 +481,10 @@ void set_hostname(SSL *ssl, const char *hostname) {
 	msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
 
 }
+
+
+// X509v3 Subject Alternative Name:
+//    DNS:*.time.nl, DNS:time.nl
 
 bool check_certificate(SSL *ssl, struct peer* peer) {
 	X509 *cert = SSL_get_peer_certificate(ssl);
@@ -516,6 +590,7 @@ bool check_alpn(SSL *ssl, struct peer* peer, const char *hostname) {
 	return true;
 }
 
+
 bool nts_make_keys(SSL *ssl, uint16_t aead, uint8_t *c2s, uint8_t *s2c, int keylen) {
 	const char *label = "EXPORTER-network-time-security";
 	unsigned char context[5];
@@ -546,13 +621,14 @@ bool nts_client_send_request(SSL *ssl, struct peer* peer) {
 	uint8_t buff[1000];
 	int     used, transferred;
 	bool    success;
+	const char *errtxt = NULL;
 
 	success = nts_client_send_request_core(buff, sizeof(buff), &used, peer);
 	if (!success) {
 		return false;
 	}
 
-	transferred = nts_ssl_write(ssl, buff, used);
+	transferred = nts_ssl_write(ssl, buff, used, &errtxt);
 	if (used != transferred)
 		return false;
 
@@ -596,9 +672,10 @@ bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct
 bool nts_client_process_response(SSL *ssl, struct peer* peer) {
 	uint8_t  buff[2048];  /* RFC 4. says SHOULD be 65K */
 	int transferred;
+	const char *errtxt = NULL;
 
-	transferred = nts_ssl_read(ssl, buff, sizeof(buff));
-	if (0 > transferred)
+	transferred = nts_ssl_read(ssl, buff, sizeof(buff), &errtxt);
+	if (0 >= transferred)
 		return false;
 	msyslog(LOG_ERR, "NTSc: read %d bytes", transferred);
 
@@ -626,8 +703,9 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 		char server[MAX_SERVER];
 
 		type = ke_next_record(&buf, &length);
-		if(buf.left < length){
-			msyslog(LOG_ERR, "NTSc: length cannot be more than buf.left: %d", length);
+		if (length > buf.left){
+			msyslog(LOG_ERR, "NTSc: Chunk too big: 0x%x, %d, %d", 
+				type, buf.left, length);
 			return false;
 		}
 		if (NTS_CRITICAL & type) {
@@ -739,6 +817,7 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 		} /* case */
 	}   /* while */
 
+//	FIXME: Need to check for EOM -- read more??
 	if (buf.left > 0)
 		return false;
 

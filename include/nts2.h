@@ -24,8 +24,8 @@ bool nts_load_ecdhcurves(SSL_CTX *ctx);
 bool nts_set_cipher_order(SSL_CTX *ctx);
 bool nts_load_versions(SSL_CTX *ctx);
 
-int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length);
-int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length);
+int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length, const char **errtxt);
+int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length, const char **errtxt);
 
 void nts_log_ssl_error(void);
 
