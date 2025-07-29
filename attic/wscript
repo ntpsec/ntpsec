@@ -13,6 +13,7 @@ def build(ctx):
     if not ctx.env.DISABLE_NTS:
         util.append('aes-siv-timing')
         util.append('aead-timing')
+        util.append('tls-tester')
 
     for name in util:
         ctx(
