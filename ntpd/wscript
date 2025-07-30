@@ -121,18 +121,12 @@ def build(ctx):
             )
             use_refclock += " refclock_%s" % file
 
+
     ntpd_source = [
-        "ntp_config.c",
-        "ntp_io.c",
-        "ntp_loopfilter.c",
-        "ntp_packetstamp.c",
-        "ntp_peer.c",
-        "ntp_proto.c",
         "ntp_sandbox.c",
-        "ntp_scanner.c",
-        "ntp_signd.c",
-        "ntp_timer.c",
-        "ntp_dns.c",
+        "../libntp/msyslog.c",
+        "../libntp/emalloc.c",
+        "../libntp/getopt.c",
         "ntpd.c",
     ]
 
@@ -144,6 +138,32 @@ def build(ctx):
         install_path='${SBINDIR}',
         source=ntpd_source,
         target="ntpd",
+        use="CAP  M",
+    )
+
+    ntpd_nonroot_source = [
+        "ntp_config.c",
+        "ntp_io.c",
+        "ntp_loopfilter.c",
+        "ntp_packetstamp.c",
+        "ntp_peer.c",
+        "ntp_proto.c",
+        "ntp_sandbox.c",
+        "ntp_scanner.c",
+        "ntp_signd.c",
+        "ntp_timer.c",
+        "ntp_dns.c",
+        "ntpd_nonroot.c",
+    ]
+
+    ctx(
+        features="c cprogram",
+        includes=[
+            ctx.bldnode.parent.abspath(), "../include",
+            "%s/host/ntpd/" % ctx.bldnode.parent.abspath(), "." ],
+        install_path='${SBINDIR}',
+        source=ntpd_nonroot_source,
+        target="ntpd_nonroot",
         use="libntpd_obj parser_obj ntp M parse RT CAP SECCOMP PTHREAD NTPD "
             "CRYPTO SSL DNS_SD %s SOCKET NSL SCF" % use_refclock,
     )
