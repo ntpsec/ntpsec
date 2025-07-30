@@ -289,45 +289,70 @@ bool nts_load_certificate(SSL_CTX *ctx) {
 	return true;
 }
 
-
-int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length, const char** errtxt) {
-  int bytes_read = SSL_read(ssl, buff, buff_length);
-  if (0 >= bytes_read) {
-    int code = SSL_get_error(ssl, bytes_read);
-    unsigned long err = ERR_peek_error();
-    if (SSL_ERROR_ZERO_RETURN == code) {
-      *errtxt = "SSL_read Connection reset1";
-      return 0;
-    }
-    if (SSL_ERROR_WANT_READ == code) {
-      *errtxt = "SSL_read Timeout";
-      return 0;
-    }
-#ifdef SSL_R_UNEXPECTED_EOF_WHILE_READING
-    if (SSL_ERROR_SSL == code &&
-        SSL_R_UNEXPECTED_EOF_WHILE_READING == ERR_GET_REASON(err)) {
-      *errtxt = "SSL_read Connection reset2";
-      return 0;
-    }
-#else
-    // Hack for OpenSSL 1.1.1w  11 Sep 2023
-    // Debian GNU/Linux 11 (bullseye)
-    if (SSL_ERROR_SYSCALL == code) {
-      *errtxt = "SSL_read Timeout";
-      return 0;
-    }
-#endif
-    // Strange error condition
-    msyslog(LOG_INFO, "NTS: SSL_read strange error: %d bytes, code %d, err %lx",
-      bytes_read, code, err);
-    *errtxt = ERR_reason_error_string(err);
-    if (NULL == *errtxt) {
-      *errtxt = "SSL_read unknown error text";
-    }
-    nts_log_ssl_error();
-    return -1;
+/* scan partial(?) buffer for end marker */
+static bool find_end_marker(uint8_t *buff, int bytes) {
+  while (NTS_KE_HDR_LNG<=bytes) {
+    uint16_t *buff16 = (uint16_t *)buff;
+    uint16_t type = ntohs(*buff16++) & ~NTS_CRITICAL;
+    uint16_t length = ntohs(*buff16++);
+    if (nts_end_of_message == type) return true;
+    buff += NTS_KE_HDR_LNG + length;
+    bytes -= NTS_KE_HDR_LNG + length;
   }
-  return bytes_read;
+  return false;
+}
+
+
+/* Ugh.  Some sites send in chunks so we have to keep reading
+ * until we find an end marker.  (or fill up the buffer, or error)
+ */
+int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length, const char** errtxt) {
+  int bytes_ready = 0;
+  uint8_t *finger = buff;
+  int bytes_left = buff_length;
+  while (0 < bytes_left) {
+    int bytes_read = SSL_read(ssl, finger, bytes_left);
+    if (0 >= bytes_read) {
+      int code = SSL_get_error(ssl, bytes_read);
+      unsigned long err = ERR_peek_error();
+      if (SSL_ERROR_ZERO_RETURN == code) {
+        *errtxt = "SSL_read Connection reset1";
+        return 0;
+      }
+      if (SSL_ERROR_WANT_READ == code) {
+        *errtxt = "SSL_read Timeout";
+        return 0;
+      }
+#ifdef SSL_R_UNEXPECTED_EOF_WHILE_READING
+      if (SSL_ERROR_SSL == code &&
+          SSL_R_UNEXPECTED_EOF_WHILE_READING == ERR_GET_REASON(err)) {
+        *errtxt = "SSL_read Connection reset2";
+        return 0;
+      }
+#else
+      // Hack for OpenSSL 1.1.1w  11 Sep 2023
+      // Debian GNU/Linux 11 (bullseye)
+      if (SSL_ERROR_SYSCALL == code) {
+        *errtxt = "SSL_read Timeout";
+        return 0;
+      }
+#endif
+      // Strange error condition
+      msyslog(LOG_INFO, "NTS: SSL_read strange error: %d bytes, code %d, err %lx",
+        bytes_read, code, err);
+      *errtxt = ERR_reason_error_string(err);
+      if (NULL == *errtxt) {
+        *errtxt = "SSL_read unknown error text";
+      }
+      nts_log_ssl_error();
+      return -1;
+    }
+    finger += bytes_read;
+    bytes_left -= bytes_read;
+    bytes_ready += bytes_read;
+    if (find_end_marker(buff, bytes_ready)) break;
+  }
+  return bytes_ready;
 }
 
 int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length, const char** errtxt) {
@@ -477,6 +502,5 @@ uint16_t next_bytes(BufCtl* buf, uint8_t *data, int length) {
 	buf->left -= length;
 	return length;
 }
-
 
 /* end */

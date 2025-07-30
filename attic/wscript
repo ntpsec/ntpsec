@@ -21,7 +21,7 @@ def build(ctx):
             features="c cprogram",
             includes=[ctx.bldnode.parent.abspath(), "../include", "../libaes_siv"],
             source=[name + ".c"],
-            use="ntp M CRYPTO RT PTHREAD aes_siv",
+            use="ntp M CRYPTO SSL RT PTHREAD aes_siv",
             install_path=None,
         )
 
