@@ -298,6 +298,7 @@ send_via_ntp_signd(
 
 	{
 		uint32_t op_reply = 0;
+		samba_reply.op = 0;	/* keep compiler happy */
 		memcpy(&samba_reply, reply, header_length > reply_len ? reply_len: header_length);
 		op_reply = ntohl(samba_reply.op);
 		if (reply_len < header_length) {
