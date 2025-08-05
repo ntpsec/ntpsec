@@ -2,7 +2,15 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 
-"""Run a suite of tests on the listed binaries."""
+"""Run a suite of tests on the listed binaries.
+
+| command | DESTDIR | value | tests |
+| === | === | === | === |
+| bin_test, build, check | n/a | False as TEST_BUILD | build/main |
+| install | no | True as TEST_INSTALL | $PREFIX/bin, $PREFIX/sbin |
+| install | yes | None as TEST_NO | nothing |
+| * | n/a | None as TEST_NO | nothing |
+"""
 from __future__ import print_function
 import os
 import os.path
@@ -17,6 +25,9 @@ NTPD = "main/ntpd"
 NTPFROB = "main/ntpfrob"
 NTPTIME = "main/ntptime"
 POPEN = waflib.Utils.subprocess.Popen
+TEST_BUILD = 0
+TEST_NO = 1
+TEST_INSTALL = 2
 
 test_logs = []
 
@@ -32,7 +43,7 @@ def bin_test_summary(_ctx):
         waflib.Logs.pprint(i[0], i[1])
 
 
-def run(cmd, expected, python=None):
+def run(cmd, expected):
     """Run an individual test."""
     prefix = "running: " + " ".join(cmd)
 
@@ -40,11 +51,7 @@ def run(cmd, expected, python=None):
         addLog("YELLOW", prefix + " SKIPPING (does not exist)")
         return None
 
-    if python:
-        cmd = [python[0]] + list(cmd)
-    p = POPEN(cmd, env={'PATH': os.environ['PATH'],
-                        'PYTHONPATH': '%s/main/tests/pylib' %
-                        waflib.Context.out_dir},
+    p = POPEN(cmd, env={"PATH": os.environ["PATH"]},
               universal_newlines=True,
               stdin=waflib.Utils.subprocess.PIPE,
               stdout=waflib.Utils.subprocess.PIPE,
@@ -65,11 +72,35 @@ def run(cmd, expected, python=None):
     return False
 
 
-def etl_cases(installed, version, params):
+def do_we_test(ctx):
+    """Evaluate if we should test and how."""
+    if ctx.cmd in ["build", "check", "bin_test"]:
+        return TEST_BUILD
+    if ctx.cmd == "install":
+        if bool(waflib.Options.options.destdir):
+            waflib.Logs.pprint(
+                "YELLOW", "bin_test disabled in DESTDIR installs."
+            )
+            return TEST_NO
+        return TEST_INSTALL
+    if "uninstall" == ctx.cmd:
+        return TEST_NO
+    # Probably add more cases here...
+    waflib.Logs.pprint(
+        "RED", "Please report that bin_test is broken for `./waf %s`!"
+        % ctx.cmd
+    )
+    sys.exit(1)
+
+
+def etl_cases(ctx, version, params):
     """Convert cmd_list_* to run() arguments."""
     ret = []
+    installed = do_we_test(ctx)
+    if installed is TEST_NO:
+        return []
     for dest_dir, bld_dir, name, flag in params:
-        if not installed:
+        if installed != TEST_INSTALL:
             prefix = waflib.Context.out_dir + os.sep + bld_dir
         else:
             prefix = waflib.Options.options.destdir + dest_dir
@@ -117,12 +148,11 @@ def cmd_bin_test(ctx):
     if ctx.env['PYTHON_CURSES']:
         cmd_list_python += cmd_list_python_curses
 
-    INSTALL = bool('install' == ctx.cmd)
-    for cmd in etl_cases(INSTALL, version, cmd_list):
+    for cmd in etl_cases(ctx, version, cmd_list):
         rets.append(run(cmd[0], cmd[1]))
     if 'none' != ctx.env['ntpc']:
-        for cmd in etl_cases(INSTALL, version, cmd_list_python):
-            rets.append(run(cmd[0], cmd[1], ctx.env['PYTHON']))
+        for cmd in etl_cases(ctx, version, cmd_list_python):
+            rets.append(run(cmd[0], cmd[1]))
 
     def test_s(number):
         """Return values for string formatting."""
@@ -130,10 +160,13 @@ def cmd_bin_test(ctx):
 
     skips = sum(int(None is i) for i in rets)
     fails = sum(int(False is i) for i in rets)
-    if fails:
-        bin_test_summary(ctx)
     if skips:
         waflib.Logs.pprint('YELLOW', "%d binary test%s skipped!"
                            % test_s(skips))
     if fails:
-        ctx.fatal("%d binary test%s failed!" % test_s(fails))
+        # on failure print number of failed tests and the summary
+        waflib.Logs.pprint(
+            "RED", "%d binary test%s failed!" % test_s(fails)
+        )
+        bin_test_summary(ctx)
+        sys.exit(1)
