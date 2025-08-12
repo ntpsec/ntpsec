@@ -95,7 +95,7 @@ freebsd-options-tester:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
-.deb_old_option_tester: &deb_old_option_tester
+.deb_oldold_option_tester: &deb_oldold_option_tester
   stage: test
   needs: []
   script:
@@ -112,9 +112,9 @@ debian-i386-options-tester:
   image: i386/debian:stable-slim
   <<: *deb_option_tester_py3_only
 
-debian-oldstable-options-tester:
-  image: debian:oldstable-slim
-  <<: *deb_old_option_tester
+debian-oldoldstable-options-tester:
+  image: debian:oldoldstable-slim
+  <<: *deb_oldold_option_tester
 
 debian-stable-options-tester:
   image: debian:stable-slim

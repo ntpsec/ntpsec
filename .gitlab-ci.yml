@@ -95,9 +95,9 @@ AsciiDoc-classic3-Debian-Old:
     - DEBIAN_FRONTEND="noninteractive" apt-get install -y python3-dev asciidoc-base
     - python3 ./waf configure --enable-warnings --enable-Werror --enable-doc --enable-manpage build --disable-nts
 
-AsciiDoc-classic2-Debian-Old:
+AsciiDoc-classic-Python2:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
+  image: $CI_REGISTRY/ntpsec/ntpsec/python2
   script:
     - apt-get update
     - DEBIAN_FRONTEND="noninteractive" apt-get install -y python2-dev asciidoc-base
