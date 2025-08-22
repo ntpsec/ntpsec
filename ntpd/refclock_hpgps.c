@@ -3,12 +3,13 @@
  */
 
 #include "config.h"
-#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
+#include "ntp_assert.h"
 #include "ntp_calendar.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "timespecops.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -45,11 +46,10 @@
  * HP Z3801A code from Jeff Mock added by Hal Murray, Sep 2005
  *
  *
- * The receiver should be operated with factory default settings.
  * Initial driver operation: expects the receiver to be already locked
  * to GPS, configured and able to output timecode format 2 messages.
  *
- * The driver uses the poll sequence :PTIME:TCODE? to get a response from
+ * The driver uses the poll sequence :PTIME:CODE? to get a response from
  * the receiver. The receiver responds with a timecode string of ASCII
  * printing characters, followed by a <cr><lf>, followed by a prompt string
  * issued by the receiver, in the following format:
@@ -71,9 +71,20 @@
  *  -0.955000 on an HP 9000 Model 712/80 HP-UX 9.05
  *  -0.953175 on an HP 9000 Model 370    HP-UX 9.10
  *
- * This receiver also provides a 1PPS signal, but I haven't figured out
- * how to deal with any of the CLK or PPS stuff yet. Stay tuned.
+ * This receiver also provides a 1PPS signal.
+ * Use the ATOM driver (22) to take advantage of it.
+ * That requires kernel support.
  *
+ * There should always be one request in the pipeline.
+ * Whenever a message is received, another one is asked for.
+ * Normally, the next time messages arrives a second later.
+ * The status page takes 2 seconds.  (even at 19200)
+ * The timer routine will recover if a message gets dropped
+ * due to an error or an unplugged cable or loss of power or ...
+ * If flag4 is set, each polling interval does a dance to get
+ * the status page.  The receive routine asks for status
+ * rather than time, and the status collection code asks for
+ * the time after it has collected the whole status message.
  */
 
 /*
@@ -81,6 +92,8 @@
  * Option flag4 can be set to request a receiver status screen summary, which
  * is recorded in the clockstats file.
  */
+
+#define HPDEBUG false
 
 /*
  * Interface definitions
@@ -93,29 +106,34 @@
 #define NAME		"HPGPS"		/* shortname */
 #define	DESCRIPTION	"HP GPS Time and Frequency Reference Receiver"
 
-#define SMAX            23*80+1 /* for :SYSTEM:PRINT? status screen response */
 
-#define MTZONE          2       /* number of fields in timezone reply */
+/* Size of buffer for status screen from :SYSTEM:STATUS?
+ * (This code used to use :SYSTEM:PRINT?
+ *  I can't find any doc for that.  Hal, 2025-Aug-19.)
+ * The Z3801A manual shows 22 lines.
+ * Newer versions of firmware have 23 lines of up to 79 characters.
+ * Not all lines were full.    Hal Murray, Nov 2023
+ */
+#define LMAX		24	/* lines in status screen, plus spare */
+#define SMAX            LMAX*80+1 /* characters */
+
 #define MTCODET2        12      /* number of fields in timecode format T2 */
 #define NTCODET2        21      /* number of chars to checksum in format T2 */
-
-/*
- * Tables to compute the day of year from yyyymmdd timecode.
- * Viva la leap.
- */
-static int day1tab[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-static int day2tab[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 /*
  * Unit control structure
  */
 struct hpgpsunit {
-	int	pollcnt;	/* poll message counter */
-	int     tzhour;         /* timezone offset, hours */
-	int     tzminute;       /* timezone offset, minutes */
-	int     linecnt;        /* set for expected multiple line responses */
+	int	idlesec;	/* seconds since last message */
+	bool	didpoll;	/* poll called recently */
+	unsigned int     cmndcnt;        /* collecting data */
+	int     linecnt;        /* collecting text for status screen */
 	char	*lastptr;	/* pointer to receiver response data */
+	int	wnro;
 	char    statscrn[SMAX]; /* receiver status screen buffer */
+/* Statisitics since last poll: */
+	int	timecnt;	/* Valid time code messages received */
+	int	errorcnt;	/* Errors in received messages */
 };
 
 /*
@@ -124,6 +142,9 @@ struct hpgpsunit {
 static	bool	hpgps_start	(int, struct peer *);
 static	void	hpgps_receive	(struct recvbuf *);
 static	void	hpgps_poll	(int, struct peer *);
+static	void	hpgps_timer	(int, struct peer *);
+static	void	hpgps_write(struct peer *peer, const char *msg);
+static	bool	hpgps_receive_T2(struct peer *const peer);
 
 /*
  * Transfer vector
@@ -135,18 +156,31 @@ struct	refclock refclock_hpgps = {
 	hpgps_poll,		/* transmit poll message */
 	NULL,			/* not used (old hpgps_control) */
 	NULL,			/* initialize driver */
-	NULL			/* timer - not used */
+	hpgps_timer		/* called once per second */
 };
 
+/* commands to get extra info */
+const char *commands[] = {
+  ":GPS:SAT:TRAC:COUNT?\r",       /* sats being tracked */
+  ":ROSC:HOLD:DUR?\r",            /* duration,state 1 if in holdover */
+  ":ROSC:HOLD:TUNC:PRED?\r",      /* 1 day holdover estimate */
+  ":DIAG:ROSC:EFC:ABS?\r",        /* DAC value */
+  ":DIAG:ROSC:EFC:REL?\r"         /* -100 to 100 */
+  };
+/* Get E-230 if data not available
+ * Test case is PTIME:LEAP:GPST? (hex time of next leap)
+ *   PTIME:LEAP:ACC?\n:SYST:ERR?
+ *     scpi > +18
+ *     scpi > +0,"No error"
+ *   :PTIME:LEAP:GPST?\n:SYST:ERR?
+ *     scpi > E-230> -230,"Data corrupt or stale"
+//":PTIME:TINT?\r*CLS\r",         /x error if no sats, no data */
+//"DIAG:LIF:COUN?\n",             /x uptime in units of 3 hours */
 
 /*
  * hpgps_start - open the devices and initialize data for processing
  */
-static bool
-hpgps_start(
-	int unit,
-	struct peer *peer
-	)
+bool hpgps_start(int unit, struct peer *peer)
 {
 	struct hpgpsunit *up;
 	struct refclockproc *pp;
@@ -155,11 +189,19 @@ hpgps_start(
 	unsigned int speed;
 	char device[20];
 
+	snprintf(device, sizeof(device), DEVICE, unit);
+	/* refclock_open flushes junk, but a quick restart may leave
+	 * a time-request in the pipeline.
+	 * waits are evil, but this doesn't get called during normal operations.
+	 */
+	sleep(2);
 	/*
 	 * Open serial port. Use CLK line discipline, if available.
 	 * Default is HP 58503A, mode arg selects HP Z3801A
 	 */
-	snprintf(device, sizeof(device), DEVICE, unit);
+	/* mode parameter to server config line shares ttl slot */
+	/* Need mode rather than flag because this was called
+	 * before following fudge line was even parsed. */
 	ldisc = LDISC_STD;
 	speed = SPEED232;
 	/* subtype parameter to server config line shares mode slot */
@@ -197,20 +239,20 @@ hpgps_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
-	up->tzhour = 0;
-	up->tzminute = 0;
 
 	*up->statscrn = '\0';
 	up->lastptr = up->statscrn;
-	up->pollcnt = 2;
+
+	up->didpoll = false;
+	up->idlesec = 0;
+	up->timecnt = 0;
+	up->errorcnt = 0;
 
 	/*
 	 * Get the identifier string, which is logged but otherwise ignored,
-	 * and get the local timezone information
 	 */
 	up->linecnt = 1;
-	if (write(pp->io.fd, "*IDN?\r:PTIME:TZONE?\r", 20) != 20)
-	    refclock_report(peer, CEVNT_FAULT);
+	hpgps_write(peer, "*IDN?\r");
 
 	return true;
 }
@@ -219,15 +261,158 @@ hpgps_start(
 /*
  * hpgps_receive - receive data from the serial interface
  */
-static void
-hpgps_receive(
-	struct recvbuf *rbufp
-	)
+void hpgps_receive(struct recvbuf *rbufp)
 {
-	struct hpgpsunit *up;
-	struct refclockproc *pp;
-	struct peer *peer;
-	l_fp trtmp;
+	struct peer		* const peer = rbufp->recv_peer;
+	struct refclockproc	* const pp   = peer->procptr;
+	struct hpgpsunit	* const up   = pp->unitptr;
+
+	l_fp rd_timestamp;
+
+	/*
+	 * read the receiver response
+	 */
+	*pp->a_lastcode = '\0';
+	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &rd_timestamp);
+
+	DPRINT(1, ("hpgps: lencode: %d timecode:%s\n",
+		   pp->lencode, pp->a_lastcode));
+
+if (HPDEBUG) {
+  printf("HP in:%3d %s\n", pp->lencode, pp->a_lastcode);
+}
+	/*
+	 * If there's no characters in the reply, we can quit now
+	 */
+	if (pp->lencode == 0)
+	    return;
+
+	/* Strip off leading prompt to cleanup log files. */
+	while (1) {
+		if (strstr(pp->a_lastcode, "scpi > ") == pp->a_lastcode) {
+			pp->lencode -= 7;
+			memmove(pp->a_lastcode, pp->a_lastcode+7, pp->lencode+1);
+			continue;
+		}
+		if (pp->a_lastcode[0] == 'E' &&
+		    pp->a_lastcode[1] == '-' &&
+		    pp->a_lastcode[5] == '>' &&
+		    pp->a_lastcode[6] == ' ') {
+			/* "E-nnn> " Error code */
+			msyslog(LOG_ERR, "HPGPS(%d) error: %s",
+				pp->refclkunit, pp->a_lastcode);
+			DPRINT(0, ("hpgps: error: %s\n", pp->a_lastcode));
+			hpgps_write(peer, "*CLS\r\r");
+			pp->lencode -= 7;
+			memmove(pp->a_lastcode, pp->a_lastcode+7, pp->lencode+1);
+			continue;
+		}
+		break;
+	}
+
+	if (up->cmndcnt > 0) {
+		/* some values are 2 part: +1.17000E+002,0
+		 * split them here to avoid postprocessing before gnuplot
+		 */ 
+		char *comma = strchr(pp->a_lastcode, ',');
+		if (NULL != comma) {
+		  *comma = ' ';
+		}
+		*up->lastptr++ = ' ';
+		memcpy(up->lastptr, pp->a_lastcode, (size_t)pp->lencode);
+		up->lastptr += pp->lencode;
+		if (up->cmndcnt < COUNTOF(commands)) {
+		  hpgps_write(peer, commands[up->cmndcnt++]);
+		  return;
+		}
+		*up->lastptr++ = 0;
+if (HPDEBUG) {
+  printf("HPlog: %s\n", up->statscrn);
+}
+		record_clock_stats(peer, up->statscrn);
+		up->cmndcnt = 0;
+		if ((pp->sloppyclockflag & CLK_FLAG4) ) {
+		  up->linecnt = LMAX;
+		  hpgps_write(peer, ":SYSTEM:STATUS?\r");
+		} else {
+		  hpgps_write(peer, ":PTIME:TCODE?\r");
+		}
+		return;
+	}
+
+	/*
+	 * If linecnt is greater than zero, we are getting information only,
+	 * such as the receiver identification string or the receiver status
+	 * screen, so put the receiver response at the end of the status
+	 * screen buffer. When we have the last line, write the buffer to
+	 * the clockstats file and return without further processing.
+	 *
+	 * If linecnt is zero, we are expecting a timecode.
+	 */
+
+
+	if (up->linecnt > 0) {
+		up->linecnt--;
+		/* Silently drop whole line if it doesn't fit. */
+		if ((int)(pp->lencode + 2) <= (SMAX - (up->lastptr - up->statscrn))) {
+			if ( (up->lastptr != up->statscrn) || (up->linecnt > 0) )
+				/* ID string stays on same line */
+				*up->lastptr++ = '\n';
+			memcpy(up->lastptr, pp->a_lastcode, (size_t)pp->lencode);
+			up->lastptr += pp->lencode;
+		}
+		/* Status screen is 22 or 23 lines */
+		if ( (up->linecnt == 0) ||
+		     (strstr(pp->a_lastcode, "Self Test:") == pp->a_lastcode) ) {
+			up->linecnt = 0;
+			record_clock_stats(peer, up->statscrn);
+			hpgps_write(peer, ":PTIME:TCODE?\r");
+		}
+		return;
+	}
+
+	pp->lastrec = rd_timestamp;
+
+	up->idlesec = 0;
+
+	if (hpgps_receive_T2(peer)) return;
+
+	if (!up->didpoll) {
+		/* error ?? */
+		return;
+	}
+
+	REQUIRE(up->didpoll);
+	up->didpoll = false;
+	up->lastptr = up->statscrn;
+	*up->lastptr = '\0';
+	/* Do FLAG3 first.  End of FLAG3 processing starts FLAG4 */
+	if (pp->sloppyclockflag & CLK_FLAG3) {
+		up->lastptr += snprintf(up->statscrn, sizeof(up->statscrn),
+		   "%s  %d %d ",  pp->a_lastcode, up->timecnt, up->errorcnt);
+		up->timecnt = up->errorcnt = 0;
+		up->cmndcnt = 0;
+		hpgps_write(peer, commands[up->cmndcnt++]);
+	} else if (pp->sloppyclockflag & CLK_FLAG4) {
+		up->linecnt = LMAX;
+		hpgps_write(peer, ":SYSTEM:STATUS?\r");
+	} else {
+		mprintf_clock_stats(peer,
+		   "%s  %d %d",  pp->a_lastcode, up->timecnt, up->errorcnt);
+		up->timecnt = up->errorcnt = 0;
+		hpgps_write(peer, ":PTIME:TCODE?\r");
+	}
+}
+
+/* return true if all OK
+ * false is error or didpoll
+ */
+bool hpgps_receive_T2(struct peer *const peer)
+{
+	struct refclockproc	* const pp   = peer->procptr;
+	struct hpgpsunit	* const up   = pp->unitptr;
+
+	l_fp rd_reftime;
 	char tcodechar1;        /* identifies timecode format */
 	char tcodechar2;        /* identifies timecode format */
 	char timequal;          /* time figure of merit: 0-9 */
@@ -237,103 +422,32 @@ hpgps_receive(
 	char syncchar;          /* time info is invalid: 0 = no, 1 = yes */
 	short expectedsm;       /* expected timecode byte checksum */
 	short tcodechksm;       /* computed timecode byte checksum */
-	int i,m,n;
-	int month, day, lastday;
+	int m, n;
+	struct tm tm;		/* temp storage for parsed data */
+	struct timespec date;	/* time stamp derived from serial port */
 	char *tcp;              /* timecode pointer (skips over the prompt) */
-	char prompt[BMAX];      /* prompt in response from receiver */
 
-	/*
-	 * Initialize pointers and read the receiver response
-	 */
-	peer = rbufp->recv_peer;
-	pp = peer->procptr;
-	up = pp->unitptr;
-	*pp->a_lastcode = '\0';
-	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &trtmp);
-
-	DPRINT(1, ("hpgps: lencode: %d timecode:%s\n",
-		   pp->lencode, pp->a_lastcode));
-
-	/*
-	 * If there's no characters in the reply, we can quit now
-	 */
-	if (pp->lencode == 0)
-	    return;
-
-	/*
-	 * If linecnt is greater than zero, we are getting information only,
-	 * such as the receiver identification string or the receiver status
-	 * screen, so put the receiver response at the end of the status
-	 * screen buffer. When we have the last line, write the buffer to
-	 * the clockstats file and return without further processing.
+	/* We get down to business:
+	 * Check for a timecode reply and decode it.
+	 * If we don't recognize the reply, or don't get the proper
+	 * number of decoded fields, or if the timecode checksum is bad,
+	 * then we declare bad format and exit.
 	 *
-	 * If linecnt is zero, we are expecting either the timezone
-	 * or a timecode. At this point, also write the response
-	 * to the clockstats file, and go on to process the prompt (if any),
-	 * timezone, or timecode and timestamp.
-	 */
-
-
-	if (up->linecnt-- > 0) {
-		if ((int)(pp->lencode + 2) <= (SMAX - (up->lastptr - up->statscrn))) {
-			*up->lastptr++ = '\n';
-			memcpy(up->lastptr, pp->a_lastcode, (size_t)pp->lencode);
-			up->lastptr += pp->lencode;
-		}
-		if (up->linecnt == 0) {
-		    record_clock_stats(peer, up->statscrn);
-		}
-
-		return;
-	}
-
-	record_clock_stats(peer, pp->a_lastcode);
-	pp->lastrec = trtmp;
-
-	up->lastptr = up->statscrn;
-	*up->lastptr = '\0';
-	up->pollcnt = 2;
-
-	/*
-	 * We get down to business: get a prompt if one is there, issue
-	 * a clear status command if it contains an error indication.
-	 * Next, check for either the timezone reply or the timecode reply
-	 * and decode it.  If we don't recognize the reply, or don't get the
-	 * proper number of decoded fields, or get an out of range timezone,
-	 * or if the timecode checksum is bad, then we declare bad format
-	 * and exit.
-	 *
-	 * Timezone format (including nominal prompt):
-	 * scpi > -H,-M<cr><lf>
-	 *
-	 * Timecode format (including nominal prompt):
-	 * scpi > T2yyyymmddhhmmssMFLRVcc<cr><lf>
+	 * Timecode format (after removing prompt):
+	 * T2yyyymmddhhmmssTFLRVcc<cr><lf>
 	 *
 	 */
 
-	strlcpy(prompt, pp->a_lastcode, sizeof(prompt));
-	tcp = strrchr(pp->a_lastcode,'>');
-	if (tcp == NULL) {
-	    tcp = pp->a_lastcode;
-	} else {
-	    tcp++;
+	tcp = pp->a_lastcode;
+	/* Not expected to happen. Beware of filling up log files. */
+	if (*tcp == ' ') {
+	    msyslog(LOG_INFO, "HPGPS(%d) Leading space: '%s'",
+		pp->refclkunit, pp->a_lastcode);
 	}
-	prompt[tcp - pp->a_lastcode] = '\0';
-	while ((*tcp == ' ') || (*tcp == '\t')) {
-	    tcp++;
-	}
+	while ((*tcp == ' ') || (*tcp == '\t')) tcp++;
 
 	/*
-	 * deal with an error indication in the prompt here
-	 */
-	if (strrchr(prompt,'E') > strrchr(prompt,'s')){
-	        DPRINT(1, ("hpgps: error indicated in prompt: %s\n", prompt));
-		if (write(pp->io.fd, "*CLS\r\r", 6) != 6)
-		    refclock_report(peer, CEVNT_FAULT);
-	}
-
-	/*
-	 * make sure we got a timezone or timecode format and
+	 * make sure we got a timecode format and
 	 * then process accordingly
 	 */
 	m = sscanf(tcp,"%c%c", &tcodechar1, &tcodechar2);
@@ -341,63 +455,32 @@ hpgps_receive(
 	if (m != 2){
 	        DPRINT(1, ("hpgps: no format indicator\n"));
 		refclock_report(peer, CEVNT_BADREPLY);
-		return;
+		up->errorcnt++;
+		return(false);
 	}
 
-	switch (tcodechar1) {
-
-	    case '+':
-	    case '-':
-		m = sscanf(tcp,"%d,%d", &up->tzhour, &up->tzminute);
-		if (m != MTZONE) {
-		        DPRINT(1, ("hpgps: only %d fields recognized in timezone\n", m));
-			refclock_report(peer, CEVNT_BADREPLY);
-			return;
-		}
-		if ((up->tzhour < -12) || (up->tzhour > 13) ||
-		    (up->tzminute < -59) || (up->tzminute > 59)){
-		        DPRINT(1, ("hpgps: timezone %d, %d out of range\n",
-				   up->tzhour, up->tzminute));
-			refclock_report(peer, CEVNT_BADREPLY);
-			return;
-		}
-		return;
-
-	    case 'T':
-		break;
-
-	    default:
-	        DPRINT(1, ("hpgps: unrecognized reply format %c%c\n",
+	if ('T' != tcodechar1 || '2' != tcodechar2) {
+		DPRINT(1, ("hpgps: unrecognized reply format %c%c\n",
 			   tcodechar1, tcodechar2));
 		refclock_report(peer, CEVNT_BADREPLY);
-		return;
-	} /* end of tcodechar1 switch */
+		up->errorcnt++;
+		return(false);
+	}
 
 
-	switch (tcodechar2) {
+	m = sscanf(tcp,"%*c%*c%4d%2d%2d%2d%2d%2d%c%c%c%c%c%2hx",
+		&tm.tm_year, &tm.tm_mon, &tm.tm_mday,
+		&tm.tm_hour, &tm.tm_min, &tm.tm_sec,
+		&timequal, &freqqual, &leapchar, &servchar, &syncchar,
+		(short unsigned int*)&expectedsm);
 
-	    case '2':
-		m = sscanf(tcp,"%*c%*c%4d%2d%2d%2d%2d%2d%c%c%c%c%c%2hx",
-			   &pp->year, &month, &day, &pp->hour, &pp->minute,
-                           &pp->second,
-			   &timequal, &freqqual, &leapchar, &servchar,
-                           &syncchar,
-			   (short unsigned int*)&expectedsm);
-		n = NTCODET2;
-
-		if (m != MTCODET2){
-		        DPRINT(1, ("hpgps: only %d fields recognized in timecode\n", m));
-			refclock_report(peer, CEVNT_BADREPLY);
-			return;
-		}
-		break;
-
-	    default:
-	        DPRINT(1, ("hpgps: unrecognized timecode format %c%c\n",
-			   tcodechar1, tcodechar2));
+	if (m != MTCODET2){
+	        DPRINT(1, ("hpgps: only %d fields recognized in timecode\n", m));
 		refclock_report(peer, CEVNT_BADREPLY);
-		return;
-	} /* end of tcodechar2 format switch */
+		up->errorcnt++;
+		return(false);
+	}
+
 
 	/*
 	 * Compute and verify the checksum.
@@ -405,6 +488,7 @@ hpgps_receive(
 	 * before the expected checksum.  Bail out if incorrect.
 	 */
 	tcodechksm = 0;
+	n = NTCODET2;
 	while (n-- > 0) {
 		tcodechksm += *tcp++;
 	}
@@ -414,81 +498,20 @@ hpgps_receive(
 	        DPRINT(1, ("hpgps: checksum %2hX doesn't match %2hX expected\n",
 			   tcodechksm, expectedsm));
 		refclock_report(peer, CEVNT_BADREPLY);
-		return;
+		up->errorcnt++;
+		return(false);
 	}
+
+	if (timequal > '4') {
+		DPRINT(0, ("hpgps: TFOM %c too big\n", timequal));
+		refclock_report(peer, CEVNT_BADREPLY);
+		up->errorcnt++;
+		return(false);
+	}
+
 
 	/*
-	 * Compute the day of year from the yyyymmdd format.
-	 */
-	if (month < 1 || month > 12 || day < 1) {
-		refclock_report(peer, CEVNT_BADTIME);
-		return;
-	}
-
-	if ( ! is_leapyear(pp->year) ) {			/* Y2KFixes */
-		/* not a leap year */
-		if (day > day1tab[month - 1]) {
-			refclock_report(peer, CEVNT_BADTIME);
-			return;
-		}
-		for (i = 0; i < month - 1; i++) {
-			day += day1tab[i];
-		}
-		lastday = 365;
-	} else {
-		/* a leap year */
-		if (day > day2tab[month - 1]) {
-			refclock_report(peer, CEVNT_BADTIME);
-			return;
-		}
-		for (i = 0; i < month - 1; i++) {
-			day += day2tab[i];
-		}
-		lastday = 366;
-	}
-
-	/*
-	 * Deal with the timezone offset here. The receiver timecode is in
-	 * local time = UTC + :PTIME:TZONE, so SUBTRACT the timezone values.
-	 * For example, Pacific Standard Time is -8 hours , 0 minutes.
-	 * Deal with the underflows and overflows.
-	 */
-	pp->minute -= up->tzminute;
-	pp->hour -= up->tzhour;
-
-	if (pp->minute < 0) {
-		pp->minute += 60;
-		pp->hour--;
-	}
-	if (pp->minute > 59) {
-		pp->minute -= 60;
-		pp->hour++;
-	}
-	if (pp->hour < 0)  {
-		pp->hour += 24;
-		day--;
-		if (day < 1) {
-			pp->year--;
-			if ( is_leapyear(pp->year) )		/* Y2KFixes */
-			    day = 366;
-			else
-			    day = 365;
-		}
-	}
-
-	if (pp->hour > 23) {
-		pp->hour -= 24;
-		day++;
-		if (day > lastday) {
-			pp->year++;
-			day = 1;
-		}
-	}
-
-	pp->yday = day;
-
-	/*
-	 * Decode the MFLRV indicators.
+	 * Decode the TFLRV indicators.
 	 * NEED TO FIGURE OUT how to deal with the request for service,
 	 * time quality, and frequency quality indicators some day.
 	 */
@@ -508,12 +531,12 @@ hpgps_receive(
 		     * but that seems too likely to introduce other bugs.
 		     */
 		    case '+':
-			if ((month==6) || (month==12))
+			if ((tm.tm_mon==6) || (tm.tm_mon==12))
 			    pp->leap = LEAP_ADDSECOND;
 			break;
 
 		    case '-':
-			if ((month==6) || (month==12))
+			if ((tm.tm_mon==6) || (tm.tm_mon==12))
 			    pp->leap = LEAP_DELSECOND;
 			break;
 
@@ -521,7 +544,8 @@ hpgps_receive(
 			DPRINT(1, ("hpgps: unrecognized leap indicator: %c\n",
 				   leapchar));
 			refclock_report(peer, CEVNT_BADTIME);
-			return;
+			up->errorcnt++;
+			return(false);
 		} /* end of leapchar switch */
 	}
 
@@ -533,55 +557,85 @@ hpgps_receive(
 	 * time, which may cause a paranoid protocol module to chuck out
 	 * the data.
 	 */
-	if (!refclock_process(pp)) {
-		refclock_report(peer, CEVNT_BADTIME);
-		return;
-	}
-	pp->lastref = pp->lastrec;
-	refclock_receive(peer);
+	tm.tm_year -= 1900;
+	tm.tm_mon -= 1;
+	date.tv_nsec = 0;
+	date.tv_sec = timegm(&tm);	/* No error checking */
 
-	/*
-	 * If CLK_FLAG4 is set, ask for the status screen response.
-	 */
-	if (pp->sloppyclockflag & CLK_FLAG4){
-		up->linecnt = 22;
-		if (write(pp->io.fd, ":SYSTEM:PRINT?\r", 15) != 15)
-		    refclock_report(peer, CEVNT_FAULT);
+	/* Z3801A broke 2025-Aug-17 => 2006-Jam-01 */
+	fix_WNRO(&date, &up->wnro, peer);
+
+	rd_reftime = tspec_stamp_to_lfp(date);
+	refclock_process_offset(pp, rd_reftime, pp->lastrec, pp->fudgetime1);
+	up->timecnt++;
+
+	if(up->didpoll) {
+		return(false);
 	}
+
+	hpgps_write(peer, ":PTIME:TCODE?\r");
+	return(true);
 }
 
 
 /*
  * hpgps_poll - called by the transmit procedure
  */
-static void
-hpgps_poll(
-	int unit,
-	struct peer *peer
-	)
+void hpgps_poll(int unit, struct peer *peer)
 {
-	struct hpgpsunit *up;
+	UNUSED_ARG(unit);
 	struct refclockproc *pp;
+	struct hpgpsunit *up;
+
+	pp = peer->procptr;
+	up = (struct hpgpsunit *)pp->unitptr;
+
+	pp->lastref = pp->lastrec;
+	refclock_receive(peer);
+
+	up->didpoll = true;
+
+	pp->polls++;
+}
+ 
+/*
+ * hpgps_timer - called once per second
+ */
+static void hpgps_timer(int unit, struct peer *peer)
+{
+	struct refclockproc *pp;
+	struct hpgpsunit *up;
 
 	UNUSED_ARG(unit);
 
-	/*
-	 * Time to poll the clock. The HP 58503A responds to a
-	 * ":PTIME:TCODE?" by returning a timecode in the format specified
-	 * above. If nothing is heard from the clock for two polls,
-	 * declare a timeout and keep going.
-	 */
 	pp = peer->procptr;
 	up = pp->unitptr;
-	if (up->pollcnt == 0) {
-		refclock_report(peer, CEVNT_TIMEOUT);
-	} else {
-		up->pollcnt--;
+
+	if (up->idlesec++ == 5)
+	    refclock_report(peer, CEVNT_TIMEOUT);
+	if (up->idlesec >= 5) {
+		/* FIXME: logging (happens on some commands) */
+		/* Timeout.  Poke it again.
+		 * This recovers from the cable being unplugged for a while.
+		 */
+		hpgps_write(peer, ":PTIME:TCODE?\r");
+		up->cmndcnt = 0;
+		up->linecnt = 0;
 	}
-	if (write(pp->io.fd, ":PTIME:TCODE?\r", 14) != 14) {
+}
+
+
+static void hpgps_write(struct peer *peer, const char *msg) {
+	struct refclockproc *pp = peer->procptr;
+	int len = strlen(msg);
+if (HPDEBUG) {
+  static int counter = 0;
+  char copy[64];  /* msg ends with \r */
+  strlcpy(copy, msg, sizeof(copy));
+  *strstr(copy, "\r") = 0;
+  printf("HPout: %d %s\n", counter++, copy);
+}
+	if (write(pp->io.fd, msg, len) != len)
 		refclock_report(peer, CEVNT_FAULT);
-	}
-	else
-	    pp->polls++;
 }
 

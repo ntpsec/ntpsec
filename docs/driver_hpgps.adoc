@@ -11,12 +11,10 @@ Serial Port: /dev/hpgps__u__; 9600 bps 8N1, 19200 bps 7N2 for the HP Z3801A
 
 == Warning
 
-As of September 2017 we have reports that the internal clock on a
-Z3801A was observed to roll over to 1998 (see
-link:rollover.html[Rollover issues in time sources]). Users should
-audit for rollover before deploying any of these devices. One or more "g"
-suffixes on your 'time1' option may be useful as a workaround if
-your device does not support setting the era date.
+Old gear, like the Z3801A has GPS WNRO problems (see
+link:rollover.html[Rollover issues in time sources]).
+The driver should adjust the time forward by N*1024 weeks
+to get a sane time.
 
 == Description
 
@@ -34,10 +32,17 @@ off in the thousands.
 They use HP SmartClock (TM) to implement an Enhanced GPS receiver. The
 receiver accuracy when locked to GPS in normal operation is better
 than 1 µs. The accuracy when operating in holdover is typically
-better than 10 µs per day. The receiver should be operated with
-factory default settings. Initial driver operation: expects the
-receiver to be already locked to GPS, configured and able to output
-timecode format 2 messages.
+better than 10 µs per day.
+
+The driver expects the receiver to be running in UTC mode
+and T2 mode.  You can set that up using:
+
+-------------------------------------
+  :ptime:tcode:format F2
+  :diag:gps:utc 1
+-------------------------------------
+
+The latter isn't documented and needs a reboot to take effect.
 
 The driver uses the poll sequence +:PTIME:TCODE?+ to get a response from
 the receiver. The receiver responds with a timecode string of ASCII
@@ -103,9 +108,9 @@ your documentation for details.
 +flag2 {0 | 1}+::
    Not used by this driver.
 +flag3 {0 | 1}+::
-   Not used by this driver.
+   Adds extra stats to the clockstats line
 +flag4 {0 | 1}+::
-   Not used by this driver.
+   Adds a status page to clockstats.
 +subtype+::
    Setting mode 1 configures for the HP Z3801A.
 +mode+::
@@ -116,6 +121,38 @@ your documentation for details.
   Not used by this driver.
 +baud+ 'number'::
   Overrides the default baud rate.
+
+== Monitor Data   
+
+The last T2 sentence that is accepted or rejected is written to the
+clockstats file and available with +ntpq -c clockvar+. If +flag3+ is set,
+several more internal variables are logged.
+
+----------------------------------------------------------------------------
+60908 28302.174 HPGPS(0) T220060105075143300003B  64 0  +3 +1.07000E+002 0 +1.5E-006 0 +660669 +2.60128E+001
+----------------------------------------------------------------------------
+
+.Clockstats
+[cols="10%,20%,70%",options="header"]
+|=============================================================================
+|Column|Sample          |Meaning
+|1     |60908           |MJD
+|2     |28302.174       |Time of day in seconds
+|3     |HPGPS(0)        |Driver type and unit.
+|4     |T2...           |T2 sentence from unit
+|5     |64              |Number of sentences accepted and used for timekeeping
+|6     |0               |Number of sentences rejected
+|||Below only if flag3 is on
+|7     |+3              | result from :GPS:SAT:TRAC:COUNT?
+|8     |+1.07000E+002   | result from :ROSC:HOLD:DUR? (duration of this or last holdover)
+|9     |0               | 1 if in holdover
+|10    |+1.5E-006       | result from :ROSC:HOLD:TUNC:PRED?
+|11    |0               | ???
+|12    |+660669         | result from DIAG:ROSC:EFC:ABS? (DAC value)
+|13    |+2.60128E+001   | result from :DIAG:ROSC:EFC:REL? (-100 to 100)
+|=============================================================================
+
+
 
 == Configuration Example
 

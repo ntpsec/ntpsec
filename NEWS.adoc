@@ -12,6 +12,11 @@ on user-visible changes.
 
 ## Repository Head
 
+  Major update to HPGPS driver
+    Fix gps WNRO glitch in Z3801A
+    "scpi >" eliminated from clockstats
+    several internal variables added to clockstats
+
 ## 2025-04-18: 1.2.4
 
 * waf has been upgraded to version 2.1.4
