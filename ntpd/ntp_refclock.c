@@ -12,6 +12,7 @@
 #include "lib_strbuf.h"
 #include "ntp_calendar.h"
 #include "timespecops.h"
+#include "PIVOT.h"
 
 #include <stdio.h>
 
@@ -1087,4 +1088,36 @@ refclock_catcher(
 	return PPS_OK;
 }
 #endif /* HAVE_PPSAPI */
+
+/* Early GPS has a 10 bit week number field.
+ * That's a bit less than 20 years.
+ * GPS started in 1980.  We have now wrapped twice: Aug 1999 and Apr 2019.
+ * https://en.wikipedia.org/wiki/GPS_week_number_rollover
+ *
+ * Some firmware fixes the date to be at least the firmware build date.
+ * That gives valid time for 20 years from the build date.
+ * It also means that old GPS units can break at any time,
+ *   not just on 1024 week boundaries.
+ *
+ * This code wraps based on our build date.
+ * But using a build date would break repeatable builds.
+ * So we use a pivot date that gets updated at release time.
+ * So our code should work for 1024 weeks from the release date.
+ *
+ * Modern GPS satellites have added 3 more bits.
+ * Old firmware doesn't know about them.
+ */
+
+void fix_WNRO (struct timespec *dt, int *wnro, const struct peer *peer) {
+  int i;
+  for (i=0; dt->tv_sec < RELEASE_DATE; i++) {
+    dt->tv_sec += 1024*7*86400;
+  }
+  if (*wnro != i) {
+    *wnro = i;
+    msyslog(LOG_INFO, "REFCLOCK: %s date advanced by %d weeks, WNRO", \
+      refclock_name(peer), *wnro*1024);
+  }
+};
+
 #endif /* REFCLOCK */

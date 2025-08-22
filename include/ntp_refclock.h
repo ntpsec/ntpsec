@@ -195,6 +195,10 @@ extern	size_t	refclock_gtraw	(struct recvbuf *, char *, size_t, l_fp *);
 extern	bool	indicate_refclock_packet(struct refclockio *,
 					 struct recvbuf *);
 
+extern void     fix_WNRO        (struct timespec *dt, int *wnro,
+			const struct peer *peer);
+
+
 extern struct refclock refclock_none;
 
 #ifdef CLOCK_ARBITER
