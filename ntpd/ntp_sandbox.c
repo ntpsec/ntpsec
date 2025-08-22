@@ -406,7 +406,10 @@ int scmp_sc[] = {
  * rather than generate a trap.
  */
 	SCMP_SYS(clone),	/* threads */
+#ifdef __NR_clone3
+	/* Doesn't exist on 4.19.66, Raspbian 9 (stretch) */
 	SCMP_SYS(clone3),
+#endif
 	SCMP_SYS(kill),		/* generate signal */
 	SCMP_SYS(madvise),
 	SCMP_SYS(mprotect),
