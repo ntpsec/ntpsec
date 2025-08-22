@@ -86,10 +86,10 @@ time make -j4         |& tee make.log
   # ./apps/openssl without the wrapper will use the installed libraries
 The above check is broken on Fedora
   (I think Fedora needs some old/weak crypto that default OpenSSL
-   no longer provides.  I haven't gone donw this rabbit hole.)
+   no longer provides.  I haven't gone down this rabbit hole.)
 It works on Debian, Ubuntu and FreeBSD.
 
-time make test        |& tee test.log
+time make test -j4    |& tee test.log
 time make build_docs  |& tee docs.log
 sudo make install     |& tee install.log
 
