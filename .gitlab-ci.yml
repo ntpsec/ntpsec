@@ -412,8 +412,6 @@ macos-basic:
     - DESTDIR=build/prison python ./waf install
     - DESTDIR=./prison python ./waf install
     - DESTDIR=../prison python ./waf install
-    - sudo python ./waf install
-    - sudo python ./waf uninstall
     - rm -rvf build/prison ./prison ../prison
   tags:
     - saas-macos-medium-m1
