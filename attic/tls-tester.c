@@ -43,7 +43,8 @@ struct BufCtl_t {
 typedef struct BufCtl_t BufCtl;
 
 void append_record16(BufCtl* buf, uint16_t type, uint16_t data);
-void append_record(BufCtl* buf, uint16_t type);
+void append_header(BufCtl* buf, uint16_t type, uint16_t length);
+void append_uint16(BufCtl* buf, uint16_t data);
 
 
 static void do_args (int argc, char *argv[]) {
@@ -147,12 +148,17 @@ static void print_buf(uint8_t *buff, int bytes) {
     bytes -=4;
     buff += length;
     bytes -= length;
-    if (2==length) {
-      uint16_t data = ntohs(*buff16++);
-      printf("  type=0x%04x, lng=%d, data=0x%0x\n", type, length, data);
+    printf("  type=0x%04x, lng=%d", type, length);
+    if (20<length) {
+      printf("\n");
       continue;
     }
-    printf("  type=0x%04x, lng=%d\n", type, length);
+    while (0<length) {
+      uint16_t data = ntohs(*buff16++);
+      length-=2;
+      printf(", data=0x%0x(%d)", data, data);
+    }
+    printf("\n");
   }
 }
 
@@ -254,7 +260,7 @@ int main (int argc, char *argv[]) {
   buf.left = sizeof(buff);
   append_record16(&buf, 0x8001, 0);  // next protocol
   append_record16(&buf, 4, 15);      // algorithm_negotiation
-  append_record(&buf, 0x8000);       // end_of_message
+  append_header(&buf, 0x8000, 0);    // end_of_message
   bytes = sizeof(buff)-buf.left;
   printf("Sending %d bytes\n", bytes);
   print_buf(buff, bytes);
@@ -280,19 +286,22 @@ int main (int argc, char *argv[]) {
 
 /* no error checking, length excludes header */
 void append_record16(BufCtl* buf, uint16_t type, uint16_t data) {
-        uint16_t * ptr = (uint16_t *)buf->next;
-        *ptr++ = htons(type);
-        *ptr++ = htons(2);
-        *ptr++ = htons(data);
-        buf->next += 6;
-        buf->left -= 6;
+	append_header(buf, type, 2);
+	append_uint16(buf, data);
 }
 
-void append_record(BufCtl* buf, uint16_t type) {
-        uint16_t * ptr = (uint16_t *)buf->next;
+void append_header(BufCtl* buf, uint16_t type, uint16_t length) {
+        uint16_t *ptr = (uint16_t *)buf->next;
         *ptr++ = htons(type);
-        *ptr++ = htons(0);
+        *ptr++ = htons(length);
         buf->next += 4;
         buf->left -= 4;
+}
+
+void append_uint16(BufCtl* buf, uint16_t data) {
+        uint16_t *ptr = (uint16_t *)buf->next;
+        *ptr++ = htons(data);
+        buf->next += 2;
+        buf->left -= 2;
 }
 
