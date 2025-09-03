@@ -559,6 +559,7 @@ bool hpgps_receive_T2(struct peer *const peer)
 	 */
 	tm.tm_year -= 1900;
 	tm.tm_mon -= 1;
+	tm.tm_isdst = 0;	/* Coverity CID 584869, UNINIT */
 	date.tv_nsec = 0;
 	date.tv_sec = timegm(&tm);	/* No error checking */
 
