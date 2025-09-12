@@ -1324,7 +1324,7 @@ usage: config_from_file <configuration filename>
         for entry in entries:
             self.say(self.formatter.summary(entry) + "\n")
 
-    def do_noflake(self):
+    def do_noflake(self, _line):
         """Disables the dropping of control packets by ntpq for testing."""
         self.session.flakey = False
 
