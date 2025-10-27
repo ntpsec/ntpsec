@@ -482,6 +482,7 @@ int scmp_sc[] = {
 	SCMP_SYS(clock_getres_time64),
 #endif  // __i386__
 #if defined(HAVE_DNS_SD_H)
+	SCMP_SYS(readlink),
 	#if defined(__aarch64__) || defined(__amd64__)
 		SCMP_SYS(readlinkat),
 		SCMP_SYS(pipe2),
@@ -489,12 +490,12 @@ int scmp_sc[] = {
 		SCMP_SYS(getresgid),
 	#endif // __amd64__ or __aarch64__
 	#if defined(__i386__)
-		SCMP_SYS(readlink),
 		SCMP_SYS(pipe2),
 		SCMP_SYS(getresuid32),
 		SCMP_SYS(getresgid32),
 	#endif // __i386__
 #endif // HAVE_DNS_SD_H
+	SCMP_SYS(clock_nanosleep),
 };
 	{
 		for (unsigned int i = 0; i < COUNTOF(scmp_sc); i++) {
