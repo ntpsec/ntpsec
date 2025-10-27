@@ -98,19 +98,19 @@ typedef unsigned long int json_uint;
  * header stuff we need
  */
 
-#include <netdb.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
 #include <ctype.h>
+#include <fcntl.h>
 #include <math.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <netinet/tcp.h>
+#include <netdb.h>
+#include <string.h>
+#include <time.h>         // for strptime()
+#include <unistd.h>
 
 #include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <netinet/tcp.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
