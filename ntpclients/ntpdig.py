@@ -90,6 +90,9 @@ def queryhost(server, concurrent, timeout=5, port=123, bindaddr=None):
     except socket.gaierror as e:
         log("lookup of %s failed, errno %d = %s" % (server, e.args[0], e.args[1]))
         return []
+    except UnicodeError as e:
+        log("lookup of %s failed, %s" % (server, e.args[0]))
+        return []
     if bindaddr:
         try:
             bindsock = socket.getaddrinfo(bindaddr,None,af,
