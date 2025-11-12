@@ -296,6 +296,9 @@ stats_config(
 	 * Specify statistics directory.
 	 */
 	case STATS_STATSDIR:
+		if ((NULL == value) || ('\0' == *value)) {
+			break;
+		}
 
 		/* - 1 since value may be missing the DIR_SEP. */
 		if (strlen(value) >= sizeof(statsdir) - 1) {
@@ -303,23 +306,17 @@ stats_config(
 			    "LOG: statsdir too long (>%d, sigh)",
 			    (int)sizeof(statsdir) - 2);
 		} else {
-			bool add_dir_sep;
 			size_t value_l;
 
-			/* Add a DIR_SEP unless we already have one. */
 			value_l = strlen(value);
-			if (0 == value_l)
-				add_dir_sep = false;
-			else
-				add_dir_sep = (DIR_SEP !=
-				    value[value_l - 1]);
+			strlcpy(statsdir, value, sizeof(statsdir) - 1);
 
-			if (add_dir_sep)
-				snprintf(statsdir, sizeof(statsdir),
-				    "%s%c", value, DIR_SEP);
-			else
-				snprintf(statsdir, sizeof(statsdir),
-				    "%s", value);
+			/* Add a DIR_SEP unless we already have one. */
+			if (DIR_SEP != value[value_l - 1]) {
+				statsdir[value_l + 1] = '\0';
+				statsdir[value_l] = DIR_SEP;
+			}
+
 			filegen_statsdir();
 		}
 		break;

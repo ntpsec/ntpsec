@@ -1288,8 +1288,7 @@ config_monitor(
 	int filegen_flag;
 
 	/* Set the statistics directory */
-	if (ptree->stats_dir)
-		stats_config(STATS_STATSDIR, ptree->stats_dir);
+	stats_config(STATS_STATSDIR, ptree->stats_dir);
 
 	/* NOTE:
 	 * Calling filegen_get is brain dead. Doing a string

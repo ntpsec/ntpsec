@@ -323,8 +323,7 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 's':
-		if (ntp_optarg != NULL)
-			strlcpy(statsdir, ntp_optarg, sizeof(statsdir));
+		/* defer */
 		break;
 	    case 't':
 		/* defer */
@@ -703,7 +702,7 @@ main(
                 /* handled elsewhere */
                 break;
 	    case 's':
-		stats_config(STATS_STATSDIR, statsdir);
+		stats_config(STATS_STATSDIR, ntp_optarg);
 		break;
 	    case 't':
 		if (ntp_optarg != NULL)
@@ -873,7 +872,7 @@ main(
 #endif
 
 	if (access(statsdir, W_OK) != 0) {
-	    msyslog(LOG_ERR, "statistics directory %s does not exist or is unwriteable, error %s", statsdir, strerror(errno));
+	    msyslog(LOG_ERR, "statistics directory '%s' does not exist or is unwriteable, error %s", statsdir, strerror(errno));
 	}
 
 	mainloop();
