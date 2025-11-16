@@ -447,8 +447,10 @@ bool lex_push_file(
                               rcmpstring);
 			for (int i = 0; i < basecount; i++) {
 				char subpath[PATH_MAX];
-				strlcpy(subpath, fullpath, PATH_MAX);
-				if (strlen(subpath) < PATH_MAX - 1) {
+				size_t pathlen = strlcpy(subpath, fullpath, PATH_MAX);
+				if ((pathlen < PATH_MAX - 1) &&
+					(subpath[pathlen -1] != DIR_SEP)
+				) {
 					char *ep = subpath + strlen(subpath);
 					*ep++ = DIR_SEP;
 					*ep = '\0';
@@ -457,6 +459,9 @@ bool lex_push_file(
 				/* This should barf safely if the complete
 				 * filename was too long to fit in the buffer.
 				 */
+				msyslog(LOG_NOTICE,
+					"CONFIG: opening <%s> from dir <%s>",
+					subpath, fullpath);
 				lex_push_file(subpath);
 			}
 			for (int i = 0; i < basecount; i++) {
