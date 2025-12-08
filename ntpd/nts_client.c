@@ -686,6 +686,7 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 	int idx;
 	struct BufCtl_t buf;
 
+	peer->nts_state.cookielen = 0;
 	peer->nts_state.aead = NO_AEAD;
 	peer->nts_state.keylen = 0;
 	peer->nts_state.writeIdx = 0;
