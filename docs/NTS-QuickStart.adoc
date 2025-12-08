@@ -234,10 +234,12 @@ appropriate servers.  The number should be 8. Lower numbers indicate dropped
 packets.  (7 could be a packet in flight.)
 
 The RFC calls for the server to rotate the private key used to
-encrypt cookies every 24 hours.  The server also saves the previous
-key so old cookies will work for at least 24 hours.  24 hours and 8 cookies
-will work for a polling interval of up to 3 hours.  That's much longer
-than the default +maxpoll+ of 10 (1024 seconds).
+encrypt cookies every 24 hours.  The server saves the previous
+10 keys so old cookies will work for well over a week.
+
+The client doesn't save cookies to disk.  It gets a new set of
+cookies using NTS-KE each time it is rebooted (or ntpd is restarted).
+
 
 === Check ntp variables
 
