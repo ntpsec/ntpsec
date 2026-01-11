@@ -977,6 +977,9 @@ transmit(
 			hpoll++;
 			/* ephemeral: no FLAG_CONFIG nor FLAG_PREEMPT */
 			if (!(peer->cfg.flags & (FLAG_CONFIG | FLAG_PREEMPT))) {
+// I don't think this happens.  Hal, 2026-Jan-11
+				msyslog(LOG_INFO, "Drop ephemeral %s",
+					socktoa(&peer->srcadr));
 				report_event(PEVNT_RESTART, peer, "timeout");
 				peer_clear(peer, "TIME", false);
 				unpeer(peer);
@@ -985,6 +988,8 @@ transmit(
 			if ((peer->cfg.flags & FLAG_PREEMPT) &&
 			    (peer_associations > sys_maxclock) &&
 			    score_all(peer)) {
+				msyslog(LOG_INFO, "Drop extra pool server %s",
+					socktoa(&peer->srcadr));
 				report_event(PEVNT_RESTART, peer, "timeout");
 				peer_clear(peer, "TIME", false);
 				unpeer(peer);
