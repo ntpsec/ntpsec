@@ -478,6 +478,7 @@ void set_hostname(SSL *ssl, const char *hostname) {
  */
 	SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
 	SSL_set1_host(ssl, host);
+	SSL_set_tlsext_host_name(ssl, host);
 	msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
 
 }
