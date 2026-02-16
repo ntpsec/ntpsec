@@ -106,7 +106,13 @@ your documentation for details.
 +flag1 {0 | 1}+::
    Not used by this driver.
 +flag2 {0 | 1}+::
-   Not used by this driver.
+   Listen only mode, for use with a line splitter so 2 clients
+   can listen to the same device.  Unlike many GPS devices, the
+   HP devices do not have a mode that automatically sends the
+   time each second.  The driver has to ask each time.  This
+   mode assumes another dirver is doing the asking and ignores
+   everything but T2 replies so it won't get confused if that
+   other driver is using flag3 or flag4.
 +flag3 {0 | 1}+::
    Adds extra stats to the clockstats line
 +flag4 {0 | 1}+::

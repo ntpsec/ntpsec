@@ -375,6 +375,12 @@ if (HPDEBUG) {
 
 	up->idlesec = 0;
 
+	if ((pp->sloppyclockflag & CLK_FLAG2) ) {
+		/* Watch only mode.  Ignore everything except T2. */
+		char *tcp = pp->a_lastcode;
+		if ((*tcp != 'T') || (*(tcp+1) != '2')) return;
+	}
+
 	if (hpgps_receive_T2(peer)) return;
 
 	if (!up->didpoll) {
