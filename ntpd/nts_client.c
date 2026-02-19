@@ -460,15 +460,19 @@ bool connect_TCP_socket(int sockfd, struct addrinfo *addr) {
 void set_hostname(SSL *ssl, const char *hostname) {
 	char host[256], *tmp;
 
-	/* chop off trailing :port */
+	/* chop off [] and trailing :port */
 	strlcpy(host, hostname, sizeof(host));
-	tmp = strchr(host, ']');
-	if (NULL == tmp) {
-		tmp = host;			/* not IPv6 [...] format */
-	}
-	tmp = strchr(tmp, ':');
-	if (NULL != tmp) {
-		*tmp = 0;
+	if ('[' == host[0]) {
+	  /* IPv6 literal, [...] format */
+	  strlcpy(host, hostname+1, sizeof(host));
+	  tmp = strchr(host, ']');
+	  if (NULL != tmp) *tmp = 0;
+	} else {
+	  /* not IPv6 [...] format */
+	  tmp = strchr(host, ':');
+	  if (NULL != tmp) {
+	    *tmp = 0;
+	  }
 	}
 
 /* https://wiki.openssl.org/index.php/Hostname_validation
