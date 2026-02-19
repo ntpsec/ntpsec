@@ -2,7 +2,7 @@ NTS needs TLS 1.3 or newer.
 That was first supported in OpenSSL 1.1.1
   (1.1.1a is broken)
 Some OSes/Distros don't support a new enough version of OpenSSL
-This file contains notes on how to download, build, and install 3.4.1
+This file contains notes on how to download, build, and install 3.6.1
 
 It should be close for other 3.x.y versions so you can test newer
 versions than whatever your distro provides.
@@ -15,7 +15,7 @@ It also has several newer versions available as packages.
 You can just install one and ignore the rest of this note.
 waf will find the pkg version and use it.
   sudo pkg update
-  sudo pkg search openssl | grep openssl3
+  pkg search openssl | grep openssl3
     openssl31-3.1.7_1      TLSv1.3 capable SSL and crypto library
     openssl31-quictls-3.1.7_1      QUIC capable fork of OpenSSL
     openssl32-3.2.4        TLSv1.3 capable SSL and crypto library
@@ -43,11 +43,11 @@ But check for the latest versions first.
 cd xxx
 mkdir OpenSSL
 cd OpenSSL
-for OpenSSL 3.4.1
+for OpenSSL 3.6.1
   # https://www.openssl.org/source/
-  wget https://github.com/openssl/openssl/releases/download/openssl-3.4.1/openssl-3.4.1.tar.gz
-  tar -xzf openssl-3.4.1.tar.gz
-  cd openssl-3.4.1
+  wget https://github.com/openssl/openssl/releases/download/openssl-3.6.1/openssl-3.6.1.tar.gz
+  tar -xzf openssl-3.6.1.tar.gz
+  cd openssl-3.6.1
 
 # Check NOTES.PERL
 # Fedora needs
@@ -86,7 +86,8 @@ time make -j4         |& tee make.log
   # ./apps/openssl without the wrapper will use the installed libraries
 The above check is broken on Fedora
   (I think Fedora needs some old/weak crypto that default OpenSSL
-   no longer provides.  I haven't gone down this rabbit hole.)
+   no longer provides.  I haven't gone down this rabbit hole.
+   Worked on 3.6.1, Fedora 43, 2026-Feb-01)
 It works on Debian, Ubuntu and FreeBSD.
 
 time make test -j4    |& tee test.log
