@@ -107,7 +107,13 @@ typedef unsigned long int json_uint;
 // _XOPEN_SOURCE needed for strptime()
 // For OpenBSD, the value must be at least 500
 // For FreeBSD, the value must be at least 700 for ldexpl() in ntp_fp.h
-#define _XOPEN_SOURCE 700
+#ifdef _XOPEN_SOURCE
+  #if _XOPEN_SOURCE < 700
+    #error "_XOPEN_SOURCE too small"
+  #endif
+#else
+  #define _XOPEN_SOURCE 700
+#endif
 #include <time.h>         // for strptime()
 
 #include <unistd.h>
