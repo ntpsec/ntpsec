@@ -629,11 +629,13 @@ create_peer_node(
 			break;
 
 		case T_Aead:
+#ifndef DISABLE_NTS
 		    if (NO_AEAD == nts_string_to_aead(option->value.s)) {
 		      msyslog(LOG_ERR,
 			"CONFIG: Invalid AEAD parameter: %s", option->value.s);
 			break;
 		    }
+#endif
 		    my_node->ctl.nts_cfg.aead = option->value.s;
 		    break;
 
