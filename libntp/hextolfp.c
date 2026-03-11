@@ -19,7 +19,7 @@ hextolfp(
 	const char *cpstart;
 	unsigned long dec_i;
 	unsigned long dec_f;
-	char *ind = NULL;
+	const char *ind = NULL;
 	static const char *digits = "0123456789abcdefABCDEF";
 
 	dec_i = dec_f = 0;

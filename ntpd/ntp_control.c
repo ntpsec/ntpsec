@@ -1839,7 +1839,7 @@ ssize_t CI_VARLIST(
     bool *first
     ) {
 	char *start = buffer_lap;
-	char *string_split;
+	const char *string_split;
 	size_t string_length;
 	const struct ctl_var *row;
 	if (NULL == table) {
