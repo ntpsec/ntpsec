@@ -2935,6 +2935,7 @@ oncore_msg_Cj_id(
 {
 	char *cp2, Model[21];
 	const char *cp, *cp1;
+	char *cpx;
 
 	UNUSED_ARG(buf);
 	UNUSED_ARG(len);
@@ -2942,14 +2943,14 @@ oncore_msg_Cj_id(
 	/* Write Receiver ID message to clockstats file */
 
 	instance->Cj[294] = '\0';
-	for (cp= (char *)instance->Cj; cp< (char *) &instance->Cj[294]; ) {
-		char *cpw = strchr(cp, '\r');
+	for (cpx= (char *)instance->Cj; cpx< (char *) &instance->Cj[294]; ) {
+		char *cpw = strchr(cpx, '\r');
 		if (!cpw)
 			cpw = (char *)&instance->Cj[294];
 		*cpw = '\0';
-		oncore_log(instance, LOG_NOTICE, cp);
+		oncore_log(instance, LOG_NOTICE, cpx);
 		*cpw = '\r';
-		cp = cpw+2;
+		cpx = cpw+2;
 	}
 
 	/* next, the Firmware Version and Revision numbers */
