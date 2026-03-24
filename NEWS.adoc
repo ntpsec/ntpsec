@@ -12,6 +12,10 @@ on user-visible changes.
 
 ## Repository Head
 
+  maxclock now skips the POOL slots when counting servers.
+  This is relevant if you use "tos maxclock nn" in your config file.
+  (It also skips servers with noselect on the config line.)
+
   Major update to HPGPS driver
     Fix gps WNRO glitch in Z3801A
     "scpi >" eliminated from clockstats

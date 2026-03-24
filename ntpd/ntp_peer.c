@@ -55,13 +55,14 @@ static associd_t initial_association_ID; /* association ID */
 /*
  * Miscellaneous statistic counters which may be queried.
  */
+int	peer_active;	/* active clients: skip POOL, noselect */
+
 static unsigned long	peer_timereset;		/* time stat counters zeroed */
 static unsigned long	findpeer_calls;		/* calls to findpeer */
 static unsigned long	assocpeer_calls;	/* calls to findpeerbyassoc */
 static unsigned long	peer_allocations;	/* allocations from free list */
 static unsigned long	peer_demobilizations;	/* structs freed to free list */
 static int		total_peer_structs;	/* peer structs */
-int			peer_associations;	/* mobilized associations */
 static int		peer_preempt;		/* preemptible associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
@@ -423,7 +424,9 @@ unpeer(
 	unrestrict_source(peer);
 	set_peerdstadr(peer, NULL);
 	peer_demobilizations++;
-	peer_associations--;
+	if (!(FLAG_NOSELECT & peer->cfg.flags)
+	    && !(MDF_POOL & peer->cast_flags))
+		peer_active--;
 	if (FLAG_PREEMPT & peer->cfg.flags)
 		peer_preempt--;
 #ifdef REFCLOCK
@@ -605,7 +608,9 @@ newpeer(
 	}
 	UNLINK_HEAD_SLIST(peer, peer_free, p_link);
 	peer_free_count--;
-	peer_associations++;
+	if (!(FLAG_NOSELECT & peer->cfg.flags)
+	    && !(MDF_POOL & peer->cast_flags))
+		peer_active++;
 	if (FLAG_PREEMPT & ctl->flags)
 		peer_preempt++;
 

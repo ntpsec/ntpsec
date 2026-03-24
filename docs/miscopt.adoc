@@ -46,11 +46,10 @@ include::includes/misc-options.adoc[]
     discovery schemes. The default is 10, which should typically be changed.
     This should be an odd number (to most effectively outvote
     link:ntpspeak.html[falsetickers]) typically two or three more than
-    +minclock+, plus the number of +pool+ entries.  The pool entries
-    must be added as +maxclock+, but not +minclock+, also counts the +pool+
-    entries themselves.  For example, +tos maxclock 11+ with four +pool+ lines
-    would keep 7 associations.  See the link:discover.html[Automatic Server
-    Discovery] page for further details.
+    +minclock+. [The slots created by pool config lines are no longer
+    counted.  Neither are noselect slots.)
+    See the link:discover.html[Automatic Server Discovery] page for
+    further details.
   +maxdist+ 'maxdistance';;
     Specify the synchronization distance threshold used by the clock
     selection algorithm. The default is 1.5 s. This determines both the

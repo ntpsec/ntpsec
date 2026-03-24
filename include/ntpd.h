@@ -395,7 +395,7 @@ extern struct peer *peer_list;		/* peer structures list */
 /*
  * Miscellaneous statistic counters which may be queried.
  */
-extern int	peer_associations;	/* mobilized associations */
+extern int peer_active;	/* Active clients, skip POOL slot and noselect */
 
 /* ntp_proto.c */
 /*

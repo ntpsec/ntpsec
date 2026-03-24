@@ -893,8 +893,8 @@ transmit(
 	 */
 	if (peer->cast_flags & MDF_POOL) {
 		peer->outdate = current_time;
-		if ((peer_associations <= 2 * sys_maxclock) &&
-		    (peer_associations < sys_maxclock ||
+		if ((peer_active <= 2 * sys_maxclock) &&
+		    (peer_active < sys_maxclock ||
 		     sys_survivors < sys_minclock))
 			if (!dns_probe(peer)) {
 			    /* DNS thread busy, try again soon */
@@ -986,7 +986,7 @@ transmit(
 				return;
 			}
 			if ((peer->cfg.flags & FLAG_PREEMPT) &&
-			    (peer_associations > sys_maxclock) &&
+			    (peer_active > sys_maxclock) &&
 			    score_all(peer)) {
 				msyslog(LOG_INFO, "Drop extra pool server %s",
 					socktoa(&peer->srcadr));
@@ -1334,7 +1334,7 @@ peer_clear(
 	 */
 	peer->nextdate = peer->update = peer->outdate = current_time;
 	if (initializing1) {
-		peer->nextdate += (unsigned long)peer_associations;
+		peer->nextdate += (unsigned long)peer_active;
 	} else {
 	    /*
 	     * Randomizing the next poll interval used to be done with
