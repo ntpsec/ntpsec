@@ -7,6 +7,10 @@
  * https://tools.ietf.org/html/rfc8915
  *
  */
+
+#define OPENSSL_SUPPRESS_DEPRECATED 1
+// SSL_set1_host is deprecated in 4.0
+
 #include "config.h"
 
 #include <ctype.h>
@@ -481,7 +485,8 @@ void set_hostname(SSL *ssl, const char *hostname) {
  * prohibited in an RFC
  */
 	SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
-	SSL_set1_host(ssl, host);
+/* FIXME FIXME FIXME */
+	SSL_set1_host(ssl, host);  /* DEPRECATED in OpenSSL 4.0 */
 	SSL_set_tlsext_host_name(ssl, host);
 	msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
 
@@ -493,7 +498,7 @@ void set_hostname(SSL *ssl, const char *hostname) {
 
 bool check_certificate(SSL *ssl, struct peer* peer) {
 	X509 *cert = SSL_get_peer_certificate(ssl);
-	X509_NAME *certname;
+	const X509_NAME *certname;
 	GENERAL_NAMES *gens;
 	char name[200];
 	int certok;
