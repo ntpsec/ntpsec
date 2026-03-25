@@ -2516,6 +2516,15 @@ dns_take_pool(
 	pctl.peerkey = 0;
 	peer = newpeer(rmtadr, NULL, lcladr,
 		       MODE_CLIENT, &pctl, MDF_UCAST, false);
+	if (pool->cfg.flags & FLAG_NTS) {
+	  /* pool is in NTS mode
+	     NTS info is in pool struct
+	     copy to new peer, clean out pool struct */
+	  peer->cfg.flags |= FLAG_NTS;
+	  memcpy(&peer->nts_state, &pool->nts_state, sizeof(peer->nts_state));
+	  ZERO(pool->nts_state);
+	  pool->nts_state.count = -1;
+	}
 	peer_xmit(peer);
 	if (peer->cfg.flags & FLAG_IBURST)
 	  peer->retry = NTP_RETRY;
@@ -2553,6 +2562,11 @@ void dns_take_status(struct peer* peer, DNS_Status status) {
 			else
 				/* pool: maybe need more */
 				hpoll = 8;
+			break;
+		case DNS_NTS_pool:
+			txt = "NTS-pool";
+			/* pool+NTS: only got one, maybe need more */
+			hpoll = 1;
 			break;
 		case DNS_temp:
 			/* DNS not working yet.  ??

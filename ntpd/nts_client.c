@@ -211,8 +211,13 @@ bool nts_check(struct peer *peer) {
 		msyslog(LOG_INFO, "NTSc: nts_check %s, %d", errbuf, addrOK);
 	}
 	if (addrOK) {
-		dns_take_server(peer, &sockaddr);
-		dns_take_status(peer, DNS_good);
+		if (peer->cast_flags & MDF_POOL) {
+			dns_take_pool(peer, &sockaddr);
+			dns_take_status(peer, DNS_NTS_pool);
+		} else {
+			dns_take_server(peer, &sockaddr);
+			dns_take_status(peer, DNS_good);
+		}
 	} else
 		dns_take_status(peer, DNS_error);
 	return addrOK;

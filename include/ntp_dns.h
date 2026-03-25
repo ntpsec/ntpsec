@@ -6,7 +6,7 @@
 
 #include "ntp_net.h"
 
-typedef enum {DNS_good, DNS_temp, DNS_error} DNS_Status;
+typedef enum {DNS_good, DNS_NTS_pool, DNS_temp, DNS_error} DNS_Status;
 
 /* start DNS query (unless busy) */
 extern bool dns_probe(struct peer*);
