@@ -12,6 +12,11 @@ on user-visible changes.
 
 ## Repository Head
 
+  Link Time Optimization is now enabled on Linux and FreeBSD
+  (if --disable-debug-gdb is set during configuration).
+  It is disabled on NetBSD because it breaks horribly.
+  Other systems may need similar treatement.
+
   pool <serv> nts now works
 
   maxclock now skips the POOL slots when counting servers.

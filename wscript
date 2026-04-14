@@ -283,6 +283,12 @@ def configure(ctx):
     if ret:
         ctx.env.LDFLAGS += ["-lssp_nonshared"]
 
+# Info on warnings:
+#   gcc: man gcc
+# clang: https://clang.llvm.org/docs/UsersManual.html
+#        https://clang.llvm.org/docs/DiagnosticsReference.html
+# Looks interesting, but it breaks WAF checking
+#       ('w_everything', "-Weverything"),  # clang
     cc_test_flags = [
         ('PIC', '-fPIC'),
         ('PIE', '-pie -fPIE'),
@@ -328,9 +334,11 @@ def configure(ctx):
         ctx.define("USEBACKTRACE", "1", quote=False)
     else:
         # not gdb debugging
-        cc_test_flags += [
-            ('LTO', '-flto'),                   # link time optimization
-            ]
+        # Breaks horribly on NetBSD, Hal, 2026-Apr-13
+        if not ctx.env.DEST_OS == "netbsd":
+            cc_test_flags += [
+                ('LTO', '-flto=auto'),          # link time optimization
+                ]
         ld_hardening_flags += [
             ('stripall', "-Wl,--strip-all"),    # Strip binaries
             ]
@@ -387,7 +395,7 @@ def configure(ctx):
 
     # gotta be tricky to test for -Wsuggest-attribute=const
     FRAGMENT = '''
-int tmp;
+static int tmp;
 int main(int argc, char **argv) {
         (void)argc; (void)argv;
         tmp = argc;
@@ -398,18 +406,21 @@ int main(int argc, char **argv) {
     # check if C compiler supports some flags
     old_run_build_cls = ctx.run_build_cls
     ctx.run_build_cls = 'oc'
+    # Can't just add hits to CFLAGS now -- breaks some checking
+    # So collect a list to add later.
+    # should be fixible.  Hal, 2026-Apr-13
+    cc_flag_hits = []
     for (name, ccflag) in cc_test_flags:
-        ctx.check(cflags=ccflag,
+        if ctx.check(cflags=ccflag,
                   define_name='HAS_' + name,
                   fragment=FRAGMENT,
                   mandatory=False,
                   msg='Checking if C compiler supports ' + ccflag,
-                  run_build_cls='oc')
+                  run_build_cls='oc'):
+             if "PIE"==name: continue  # special
+             cc_flag_hits = cc_flag_hits + [ccflag]
 
     ctx.run_build_cls = old_run_build_cls
-
-    if ctx.env.HAS_PIC:
-        ctx.env.CFLAGS = ["-fPIC"] + ctx.env.CFLAGS
 
     if ctx.env.HAS_PIE:
         ctx.env.LINKFLAGS_NTPD += [
@@ -420,57 +431,7 @@ int main(int argc, char **argv) {
             ('relro', "-Wl,-z,relro"),  # hardening, marks some read only,
             ]
 
-    if ctx.env.HAS_unused:
-        ctx.env.CFLAGS = ['-Qunused-arguments'] + ctx.env.CFLAGS
-
-    # XXX: -flto currently breaks link of ntpd
-    if ctx.env.HAS_LTO and False:
-        ctx.env.CFLAGS = ["-flto"] + ctx.env.CFLAGS
-
-    # debug warnings that are not available with all compilers
-    if ctx.env.HAS_w_implicit_fallthru:
-        ctx.env.CFLAGS = ['-Wimplicit-fallthrough=3'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_suggest_attribute_const:
-        ctx.env.CFLAGS = ['-Wsuggest-attribute=const'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_suggest_attribute_noreturn:
-        ctx.env.CFLAGS = ['-Wsuggest-attribute=noreturn'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_suggest_attribute_pure:
-        ctx.env.CFLAGS = ['-Wsuggest-attribute=pure'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_format_security:
-        ctx.env.CFLAGS = ['-Wformat-security'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_format_signedness:
-        ctx.env.CFLAGS = ['-Wformat-signedness'] + ctx.env.CFLAGS
-    # should be before other -Wformat-* in CFLAGS
-    if ctx.env.HAS_w_format:
-        ctx.env.CFLAGS = ['-Wformat'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_float_equal:
-        ctx.env.CFLAGS = ['-Wfloat-equal'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_init_self:
-        ctx.env.CFLAGS = ['-Winit-self'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_write_strings:
-        ctx.env.CFLAGS = ['-Wwrite-strings'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_pointer_arith:
-        ctx.env.CFLAGS = ['-Wpointer-arith'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_invalid_pch:
-        ctx.env.CFLAGS = ['-Winvalid-pch'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_implicit_function_declaration:
-        ctx.env.CFLAGS = ['-Wimplicit-function-declaration'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_disabled_optimization:
-        ctx.env.CFLAGS = ['-Wdisabled-optimization'] + ctx.env.CFLAGS
-    # if ctx.env.HAS_w_cast_align:
-    #     ctx.env.CFLAGS = ['-Wcast-align'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_missing_declarations:
-        ctx.env.CFLAGS = ['-Wmissing-declarations'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_cast_qual:
-        ctx.env.CFLAGS = ['-Wcast-qual'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_packed:
-        ctx.env.CFLAGS = ['-Wpacked'] + ctx.env.CFLAGS
-    if ctx.env.HAS_w_shadow:
-        ctx.env.CFLAGS = ['-Wshadow'] + ctx.env.CFLAGS
-    # if ctx.env.HAS_w_sign_conversion:
-    #     ctx.env.CFLAGS = ['-Wsign-conversion'] + ctx.env.CFLAGS
-    if ctx.env.HAS_f_stack_protector_all:
-        ctx.env.CFLAGS = ['-fstack-protector-all'] + ctx.env.CFLAGS
+    ctx.env.CFLAGS = cc_flag_hits + ctx.env.CFLAGS
 
     # old gcc takes -z,relro, but then barfs if -fPIE available and used.
     # ("relro", "-Wl,-z,relro"), # marks some sections read only
@@ -924,6 +885,7 @@ int main(int argc, char **argv) {
     msg("Build Options")
     msg_setting("CC", " ".join(ctx.env.CC))
     msg_setting("CFLAGS", " ".join(ctx.env.CFLAGS))
+    # print("CFLAGS:", sorted(ctx.env.CFLAGS))
     msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
     msg_setting("LINKFLAGS_NTPD", " ".join(ctx.env.LINKFLAGS_NTPD))
     msg_setting("PREFIX", ctx.env.PREFIX)
