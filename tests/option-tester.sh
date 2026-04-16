@@ -67,7 +67,8 @@ doit ()
   DIR="test-${1}"
   [ ! -d "${DIR:?}" ] && mkdir "${DIR:?}"
   rm -rf "${DIR:?}"/*
-  "${PYTHON}" ./waf configure ${DISABLE_NTS} --out="${DIR}" ${2} 2>&1 | tee    "${DIR:?}/test.log"
+  echo "Config:" ${2} 2>&1 | tee    "${DIR:?}/test.log"
+  "${PYTHON}" ./waf configure ${DISABLE_NTS} --out="${DIR}" ${2} 2>&1 | tee -a "${DIR:?}/test.log"
   if [ "$?" != 0 ]
   then
     fail "configure"
@@ -91,7 +92,7 @@ doit ()
 
 # no --disable-manpage on default and all
 doit default "--disable-debug-gdb"
-doit minimal "--disable-droproot --disable-mdns-registration --disable-doc --disable-manpage --disable-debug-gdb --enable-pylib=none"
+doit minimal "--disable-droproot --disable-mdns-registration --disable-doc --disable-manpage --disable-debug-gdb --disable-nts --enable-pylib=none"
 
 # This also tests refclocks without DEBUG
 doit classic "--enable-classic-mode --refclock=all --disable-doc --disable-manpage --enable-pylib=ffi --disable-debug-gdb"
