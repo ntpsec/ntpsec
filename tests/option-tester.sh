@@ -68,6 +68,7 @@ doit ()
   [ ! -d "${DIR:?}" ] && mkdir "${DIR:?}"
   rm -rf "${DIR:?}"/*
   echo "Config:" ${2} 2>&1 | tee    "${DIR:?}/test.log"
+  echo  2>&1               | tee -a "${DIR:?}/test.log"
   "${PYTHON}" ./waf configure ${DISABLE_NTS} --out="${DIR}" ${2} 2>&1 | tee -a "${DIR:?}/test.log"
   if [ "$?" != 0 ]
   then
