@@ -12,6 +12,9 @@ on user-visible changes.
 
 ## Repository Head
 
+  ntskelog has been added to the stats file collection
+  NTSKE logging will go here to reduce clutter in the main log file.
+
   Link Time Optimization is now enabled on Linux and FreeBSD
   (if --disable-debug-gdb is set during configuration).
   It is disabled on NetBSD because it breaks horribly.

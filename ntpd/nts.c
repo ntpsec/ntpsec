@@ -382,6 +382,11 @@ int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length, const char** errtxt)
 }
 
 /* Each thread has it's own queue of errors */
+void nts_get_ssl_error(char *errbuf, int errlng) {
+  int err = ERR_get_error();
+  ERR_error_string_n(err, errbuf, errlng);
+}
+
 void nts_log_ssl_error(void) {
 	char buff[256];
 	int err = ERR_get_error();

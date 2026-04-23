@@ -92,6 +92,38 @@ time constant.
 +
 These counters are also available via _ntpq_'s _nts_ command.
 
+  +ntskelog+;;
+    Enables recording of NTS-KE statistics for each connection attempt.
+    For each connection, a line of the following form is appended to
+    the file generation set named _ntskelog_:
++
+|===
+|61151 21317.793  OK 0.007 0.796 0.084 [2600:1700:a460:4b60::38:67]:54914 TLSv1.3:TLS_AES_256_GCM_SHA384(256)
+|===
++
+[options="header"]
+|===
+|Item         |Units     |Description
+|+61151+      |MJD       |date
+|+21317.793+  |s         |time past midnight
+|+OK+         |          |Tag to indicate progress:
+
+* TLS: Error setting up TLS connection
+*  KE: Error processing the KE request
+*  OK: Worked
+|+0.007+      |s         |Wall clock time
+|+0.796+      |ms        |CPU time in user mode
+|+0.084+      |ms        |CPU time in system mode
+|+[2600:1700:a460:4b60::38:67]:54914+
+              |          |IP Address:port
+|<rest>       |          |Depends on the Tag:
+
+* TLS: a description of the error
+*  KE: a description of the error
+*  OK: the crypto used on the TLS connection
+|===
+
+
   +ntskestats+;;
     Enables recording of NTS-KE statistics counters on a periodic basis.
     Each hour a line of the following form is appended to the file

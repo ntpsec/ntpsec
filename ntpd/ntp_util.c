@@ -66,6 +66,7 @@ static FILEGEN sysstats;
 static FILEGEN usestats;
 static FILEGEN ntsstats;
 static FILEGEN ntskestats;
+static FILEGEN ntskelog;
 
 /*
  * This controls whether stats are written to the fileset. Provided
@@ -120,6 +121,7 @@ uninit_util(void)
 	filegen_unregister("usestats");
 	filegen_unregister("ntsstats");
 	filegen_unregister("ntpkestats");
+	filegen_unregister("ntpkelog");
 }
 #endif /* DEBUG */
 
@@ -140,6 +142,7 @@ init_util(void)
 	filegen_register(statsdir, "usestats",	  &usestats);
 	filegen_register(statsdir, "ntsstats",	  &ntsstats);
 	filegen_register(statsdir, "ntskestats",  &ntskestats);
+	filegen_register(statsdir, "ntskelog",    &ntskelog);
 
 	/*
 	 * register with libntp ntp_set_tod() to call us back
@@ -805,6 +808,86 @@ void record_ntske_stats(void) {
 #endif
 }
 
+/* Times are in seconds -- convert to ms here. */
+/* If OK, NULL==errbuf */
+void record_ntske_log(
+  NTSKE_Status tag, const char* from, const char* msg,
+  double wall, double usr, double sys,
+  const char* errbuf
+) {
+#ifndef DISABLE_NTS
+  struct timespec now;
+  const char *tag_txt;
+
+  if (!stats_control) return;  /* also disables logging to syslog */
+
+  switch (tag) {
+    case NTSKE_OK:
+      tag_txt = "OK";
+      ntske_cnt.serves_good++;
+      ntske_cnt.serves_good_wall += wall;
+      ntske_cnt.serves_good_cpu += usr+sys;
+      break;
+    case NTSKE_Failed:
+      tag_txt = "KE";
+      ntske_cnt.serves_bad++;
+      ntske_cnt.serves_bad_wall += wall;
+      ntske_cnt.serves_bad_cpu += usr+sys;
+      break;
+    case NTSKE_SSL_Failed:
+      tag_txt = "TLS";
+      ntske_cnt.serves_nossl++;
+      ntske_cnt.serves_nossl_wall += wall;
+      ntske_cnt.serves_nossl_cpu += usr+sys;
+      break;
+    default:
+      tag_txt = "???";  // FIXME want compiler warning.
+      break;
+  }
+
+  clock_gettime(CLOCK_REALTIME, &now);
+  filegen_setup(&ntskelog, now.tv_sec);
+  if (ntskelog.fp != NULL) {
+    /* need to collect everything into one write so it's atomic */
+    char buffer[1000];
+    int used;
+    unsigned long day, sec, msec;
+
+    used = snprintf(buffer, sizeof(buffer),
+      "%3s %.3f %.3f %.3f %s %s", tag_txt, wall, usr*1000, sys*1000, from, msg);
+    // FIXME check overflow
+    if (errbuf) {
+      used += snprintf(buffer+used, sizeof(buffer)-used, ", %s", errbuf);
+    }
+    /* can't call timespec_to_MJDtime -- not main thread */
+    day = (unsigned long)now.tv_sec / SECSPERDAY + MJD_1970;
+    sec = (unsigned long)now.tv_sec % SECSPERDAY;
+    msec = (unsigned long)now.tv_nsec / NS_PER_MS;
+    fprintf(ntskelog.fp, "%lu %lu.%03lu %s\n", day, sec, msec, buffer);
+    fflush(ntskelog.fp);
+  } else {
+    /* special ntske log file not setup -- add to main log file */
+    if (NULL == errbuf) {
+      msyslog(LOG_INFO,
+        "NTSs: NTS-KE from %s, OK, Using %s, took %.3f sec, CPU: %.3f+%.3f ms",
+         from, msg, wall, usr*1000, sys*1000);
+    } else {
+      msyslog(LOG_INFO,
+        "NTSs: NTS-KE from %s, Failed, Using %s, took %.3f sec, CPU: %.3f+%.3f ms, %s",
+        from, msg, wall, usr*1000, sys*1000, errbuf);
+    }
+  }
+#else
+  UNUSED_ARG(tag);
+  UNUSED_ARG(from);
+  UNUSED_ARG(msg);
+  UNUSED_ARG(wall);
+  UNUSED_ARG(usr);
+  UNUSED_ARG(sys);
+  UNUSED_ARG(errbuf);
+#endif
+}
+
 /*
  * record_proto_stats - write system statistics to file
  *
@@ -942,3 +1025,4 @@ ntpd_time_stepped(void) {
 		mon_start();
 	}
 }
+

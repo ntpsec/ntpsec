@@ -28,6 +28,7 @@ int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length, const char **errtxt);
 int nts_ssl_write(SSL *ssl, uint8_t *buff, int buff_length, const char **errtxt);
 
 void nts_log_ssl_error(void);
+void nts_get_ssl_error(char *errbuf, int errlng);
 
 int nts_get_key_length(uint16_t aead);
 int nts_translate_version(const char *arg);

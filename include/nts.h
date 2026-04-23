@@ -50,7 +50,8 @@ struct BufCtl_t {
 typedef struct BufCtl_t BufCtl;
 
 /* Here for test routines */
-bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead);
+bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
+  char *errbuf, int errlng, const char **errtxt);
 
 /***********************************************************/
 
@@ -267,15 +268,17 @@ struct nts_counters {
   uint64_t cookie_decode_error;
 };
 struct ntske_counters {
-  uint64_t serves_good;
-  l_fp     serves_good_wall;
-  l_fp     serves_good_cpu;
+  /* Server */
   uint64_t serves_nossl;
   l_fp     serves_nossl_wall;
   l_fp     serves_nossl_cpu;
   uint64_t serves_bad;
   l_fp     serves_bad_wall;
   l_fp     serves_bad_cpu;
+  uint64_t serves_good;
+  l_fp     serves_good_wall;
+  l_fp     serves_good_cpu;
+  /* Client */
   uint64_t probes_good;
   uint64_t probes_bad;
 };

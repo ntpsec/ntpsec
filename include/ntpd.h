@@ -260,6 +260,15 @@ extern void record_ref_stats(
     double  std_dev_all     /* std deviation of everything */
     );
 
+
+typedef enum {NTSKE_OK, NTSKE_Failed, NTSKE_SSL_Failed} NTSKE_Status;
+extern void record_ntske_log(
+  NTSKE_Status tag, const char* from, const char* msg,
+  double wall, double usr, double sys,
+  const char* errbuf
+);
+
+
 extern	void	check_leap_file	(bool is_daily_check, time_t systime);
 
 /* NTS */

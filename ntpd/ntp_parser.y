@@ -168,6 +168,7 @@
 %token	<Integer>	T_Nts
 %token	<Integer>	T_Ntsstats
 %token	<Integer>	T_Ntskestats
+%token	<Integer>	T_Ntskelog
 %token	<Integer>	T_Orphan
 %token	<Integer>	T_Orphanwait
 %token	<Integer>	T_Panic
@@ -664,6 +665,7 @@ stat
 	|	T_Usestats
 	|	T_Ntsstats
 	|	T_Ntskestats
+	|	T_Ntskelog
 	;
 
 filegen_option_list
