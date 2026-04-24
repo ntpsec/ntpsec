@@ -308,8 +308,6 @@ void* nts_ke_listener(void* arg) {
 			sys = tspec_intv_to_lfp(sub_tspec(finish_s, start_s));
 			start_u = finish_u;
 			start_s = finish_s;
-			ntske_cnt.serves_nossl_cpu += usr;
-			ntske_cnt.serves_nossl_cpu += sys;
 #endif
 			nts_ke_accept_fail(addrbuf,
 			  lfptox(wall), lfptox(usr), lfptox(sys), code);
