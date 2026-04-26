@@ -608,9 +608,6 @@ newpeer(
 	}
 	UNLINK_HEAD_SLIST(peer, peer_free, p_link);
 	peer_free_count--;
-	if (!(FLAG_NOSELECT & peer->cfg.flags)
-	    && !(MDF_POOL & peer->cast_flags))
-		peer_active++;
 	if (FLAG_PREEMPT & ctl->flags)
 		peer_preempt++;
 
@@ -635,6 +632,9 @@ newpeer(
 	peer->nts_state.count = -1;
 
 	peer->cast_flags = cast_flags;
+	if (!(FLAG_NOSELECT & peer->cfg.flags)
+	    && !(MDF_POOL & peer->cast_flags))
+		peer_active++;
 	set_peerdstadr(peer,
 		       select_peerinterface(peer, srcadr, dstadr));
 
