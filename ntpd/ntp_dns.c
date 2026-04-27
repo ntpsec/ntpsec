@@ -104,7 +104,8 @@ void dns_check(void)
 	rc = pthread_join(worker, NULL);
 	if (0 != rc) {
 		msyslog(LOG_ERR, "DNS: dns_check: join failed %s", strerror(rc));
-		return;  /* leaves active set */
+		active = NULL;
+		return;
 	}
 
 #ifndef DISABLE_NTS
@@ -202,4 +203,3 @@ static void* dns_lookup(void* arg)
 	 */
 	return (void *)NULL;
 }
-
