@@ -209,20 +209,43 @@ TEST(nts_client, nts_client_process_response_core) {
 	/* run */
 	success = nts_client_process_response_core(buf7, sizeof(buf7), &peer);
 	TEST_ASSERT_EQUAL(false, success);
-	/* ===== Test: nts_new_cookie, have max cookies ===== */
-	/* data */
-	uint8_t buf8[] = {
-		0x80, nts_new_cookie, 0, 4, 0, 8, 10, 20, 30, 40, 50, 60, 70, 80,
-		0x80, nts_end_of_message, 0, 0
-	};
-	peer.nts_state.writeIdx = 0;
-	peer.nts_state.count = NTS_MAX_COOKIES;
+	/* ===== Test: nts_new_cookie, extra cookies are ignored ===== */
+	uint8_t buf8[6 + 6 + (NTS_MAX_COOKIES + 1) * 8 + 4];
+	int used8 = 0;
+	buf8[used8++] = 0x80;
+	buf8[used8++] = nts_next_protocol_negotiation;
+	buf8[used8++] = 0;
+	buf8[used8++] = 2;
+	buf8[used8++] = 0;
+	buf8[used8++] = nts_protocol_NTP;
+	buf8[used8++] = 0x80;
+	buf8[used8++] = nts_algorithm_negotiation;
+	buf8[used8++] = 0;
+	buf8[used8++] = 2;
+	buf8[used8++] = 0;
+	buf8[used8++] = AEAD_AES_SIV_CMAC_256;
+	for (int i = 0; i < NTS_MAX_COOKIES + 1; i++) {
+		buf8[used8++] = 0x80;
+		buf8[used8++] = nts_new_cookie;
+		buf8[used8++] = 0;
+		buf8[used8++] = 4;
+		buf8[used8++] = 0;
+		buf8[used8++] = (uint8_t)i;
+		buf8[used8++] = 10;
+		buf8[used8++] = 20;
+	}
+	buf8[used8++] = 0x80;
+	buf8[used8++] = nts_end_of_message;
+	buf8[used8++] = 0;
+	buf8[used8++] = 0;
 	/* run */
-	success = nts_client_process_response_core(buf8, sizeof(buf8), &peer);
+	success = nts_client_process_response_core(buf8, used8, &peer);
 	/* check */
-	TEST_ASSERT_EQUAL(false, success);
-//$	TEST_ASSERT_EQUAL(0, peer.nts_state.writeIdx);
-	TEST_ASSERT_NOT_EQUAL(10, peer.nts_state.cookies[0][0]);
+	TEST_ASSERT_EQUAL(true, success);
+	TEST_ASSERT_EQUAL_INT32(NTS_MAX_COOKIES, peer.nts_state.count);
+	TEST_ASSERT_EQUAL_INT32(0, peer.nts_state.writeIdx);
+	TEST_ASSERT_EQUAL_INT8(NTS_MAX_COOKIES - 1,
+		peer.nts_state.cookies[NTS_MAX_COOKIES - 1][1]);
 	/* ===== Test: nts_end_of_message, wrong length ===== */
 	/* data */
 	uint8_t buf9[] = {

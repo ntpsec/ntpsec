@@ -785,6 +785,8 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 			idx = peer->nts_state.writeIdx;
 			if (NTS_MAX_COOKIES <= peer->nts_state.count) {
 				msyslog(LOG_ERR, "NTSc: Extra cookie ignored.");
+				buf.next += length;
+				buf.left -= length;
 				break;
 			}
 			next_bytes(&buf, (uint8_t*)&peer->nts_state.cookies[idx], length);
