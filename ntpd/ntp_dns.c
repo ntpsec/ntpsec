@@ -80,6 +80,7 @@ bool dns_probe(struct peer* pp)
 	  msyslog(LOG_ERR, "DNS: dns_probe: error from pthread_create: %s, %s",
 	      hostname, strerror(rc));
           pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
+          active = NULL;
 	  return true;  /* don't try again */
 	}
         pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
