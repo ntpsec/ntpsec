@@ -427,39 +427,42 @@ bool connect_TCP_socket(int sockfd, struct addrinfo *addr) {
 		return false;
 	}
 	err = connect(sockfd, addr->ai_addr, addr->ai_addrlen);
-	/* The normal case is -1 and errno == EINPROGRESS
+	/* The usual nonblocking case is -1 and errno == EINPROGRESS.
+	 * A fast local connection can also succeed immediately.
 	 * Getting connected should be possible if the scheduler
 	 * avoids us for long enough.
 	 * Other errors may be possible.  No route?
 	 * I haven't seen that yet.  HGM, 2020 Jan 19
 	 */
-	if (-1 != err || EINPROGRESS != errno) {
+	if (-1 == err && EINPROGRESS != errno) {
 		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
 		msyslog(LOG_INFO, "NTSc: connect_TCP_socket: connect failed: %s", errbuf);
 		return false;
 	}
 
-	FD_ZERO(&fdset);
-	FD_SET(sockfd, &fdset);
-	timeout.tv_sec = NTS_KE_TIMEOUT;
-	timeout.tv_usec = 0;
+	if (-1 == err) {
+		FD_ZERO(&fdset);
+		FD_SET(sockfd, &fdset);
+		timeout.tv_sec = NTS_KE_TIMEOUT;
+		timeout.tv_usec = 0;
 
-	if (0 == select(sockfd + 1, NULL, &fdset, NULL, &timeout)) {
-		msyslog(LOG_INFO, "NTSc: connect_TCP_socket: timeout");
-		return false;
-	}
+		if (0 == select(sockfd + 1, NULL, &fdset, NULL, &timeout)) {
+			msyslog(LOG_INFO, "NTSc: connect_TCP_socket: timeout");
+			return false;
+		}
 
-	/* It's ready, either connected or error. */
-	if (-1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &so_error, &so_len)) {
-		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-		msyslog(LOG_INFO, "NTSc: connect_TCP_socket: getsockopt failed: %s", errbuf);
-		return false;
-	}
+		/* It's ready, either connected or error. */
+		if (-1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &so_error, &so_len)) {
+			ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+			msyslog(LOG_INFO, "NTSc: connect_TCP_socket: getsockopt failed: %s", errbuf);
+			return false;
+		}
 
-	if (0 != so_error) {
-		ntp_strerror_r(so_error, errbuf, sizeof(errbuf));
-		msyslog(LOG_INFO, "NTSc: connect_TCP_socket: connect failed: %s", errbuf);
-		return false;
+		if (0 != so_error) {
+			ntp_strerror_r(so_error, errbuf, sizeof(errbuf));
+			msyslog(LOG_INFO, "NTSc: connect_TCP_socket: connect failed: %s", errbuf);
+			return false;
+		}
 	}
 
 	err = fcntl(sockfd, F_SETFL, 0); /* turn off O_NONBLOCK */
