@@ -139,6 +139,13 @@ bool nts_probe(struct peer * peer) {
 		ssl = SSL_new(ctx);
 		SSL_CTX_free(ctx);
 	}
+	if (NULL == ssl) {
+		msyslog(LOG_ERR, "NTSc: SSL_new failed");
+		nts_log_ssl_error();
+		close(server);
+		ntske_cnt.probes_bad++;
+		return false;
+	}
 	set_hostname(ssl, hostname);
 	SSL_set_fd(ssl, server);
 
