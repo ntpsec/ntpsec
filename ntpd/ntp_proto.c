@@ -2512,18 +2512,22 @@ dns_take_pool(
 	pctl.minpoll = pool->cfg.minpoll;
 	pctl.maxpoll = pool->cfg.maxpoll;
 	pctl.flags = FLAG_PREEMPT | (FLAG_IBURST & pool->cfg.flags);
+	if (pool->cfg.flags & FLAG_NTS) {
+		pctl.flags |= pool->cfg.flags &
+			(FLAG_NTS | FLAG_NTS_ASK | FLAG_NTS_REQ | FLAG_NTS_NOVAL);
+		pctl.nts_cfg = pool->cfg.nts_cfg;
+	}
 	pctl.mode = 0;
 	pctl.peerkey = 0;
 	peer = newpeer(rmtadr, NULL, lcladr,
 		       MODE_CLIENT, &pctl, MDF_UCAST, false);
 	if (pool->cfg.flags & FLAG_NTS) {
-	  /* pool is in NTS mode
-	     NTS info is in pool struct
-	     copy to new peer, clean out pool struct */
-	  peer->cfg.flags |= FLAG_NTS;
-	  memcpy(&peer->nts_state, &pool->nts_state, sizeof(peer->nts_state));
-	  ZERO(pool->nts_state);
-	  pool->nts_state.count = -1;
+		/* Keep the NTS-KE name for later cookie renewal. */
+		if (NULL != pool->hostname)
+			peer->hostname = estrdup(pool->hostname);
+		memcpy(&peer->nts_state, &pool->nts_state, sizeof(peer->nts_state));
+		ZERO(pool->nts_state);
+		pool->nts_state.count = -1;
 	}
 	peer_xmit(peer);
 	if (peer->cfg.flags & FLAG_IBURST)
@@ -2921,4 +2925,3 @@ void maybe_log_junk(const char *tag, struct recvbuf *rbufp) {
     msyslog(LOG_INFO,
 	"%s: %s", tag, buf);
 }
-
