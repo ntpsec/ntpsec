@@ -8,9 +8,6 @@
  *
  */
 
-#define OPENSSL_SUPPRESS_DEPRECATED 1
-// SSL_set1_host is deprecated in 4.0
-
 #include "config.h"
 
 #include <ctype.h>
@@ -35,6 +32,7 @@
 #include "nts.h"
 #include "nts2.h"
 #include "ntp_dns.h"
+#include "ntp_io.h"
 #include "ntp_stdlib.h"
 #include "timespecops.h"
 
@@ -500,9 +498,20 @@ void set_hostname(SSL *ssl, const char *hostname) {
  * prohibited in an RFC
  */
 	SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
-/* FIXME FIXME FIXME */
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L
+{
+	sockaddr_u addr;
+	if (is_ip_address(host, AF_UNSPEC, &addr))
+	  SSL_set1_ipaddr(ssl, host);
+	else {
+	  SSL_set1_dnsname(ssl, host);
+	  SSL_set_tlsext_host_name(ssl, host);
+	}
+}
+#else
 	SSL_set1_host(ssl, host);  /* DEPRECATED in OpenSSL 4.0 */
 	SSL_set_tlsext_host_name(ssl, host);
+#endif
 	msyslog(LOG_DEBUG, "NTSc: set cert host: %s", host);
 
 }

@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+bool is_ip_address(const char *, unsigned short, sockaddr_u *);
 void dns_take_pool(struct peer *a, sockaddr_u *b);
 void dns_take_server(struct peer *a, sockaddr_u *b);
 void dns_take_status(struct peer *a, DNS_Status b);
@@ -300,6 +301,13 @@ void setup_SIGSYS_trap(void) {
         return;         /* dummy to keep linker happy */
 }
 #endif
+
+bool is_ip_address(const char *host, unsigned short af, sockaddr_u *addr) {
+	UNUSED_ARG(host);
+	UNUSED_ARG(af);
+	UNUSED_ARG(addr);
+	return false;
+}
 
 void dns_take_pool(struct peer *a, sockaddr_u *b) {
 	UNUSED_ARG(a);
