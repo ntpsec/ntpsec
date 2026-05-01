@@ -381,20 +381,16 @@ void nts_ke_accept_fail(char* hostname,
 	    msg = ERR_reason_error_string(err);
 	    err = 0;
 	  } else {
-	      ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-	      snprintf(buff, sizeof(buff), "code %d, errno=>%d, %s, %lx=>%s",
-		code, errno, errbuf, err, ERR_reason_error_string(err));
-	      err = 0;
-	      msg = buff;
+	    // Maybe we need to handle other codes
+	    ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+	    snprintf(buff, sizeof(buff), "code %d, errno=>%d, %s, %lx=>%s",
+	      code, errno, errbuf, err, ERR_reason_error_string(err));
+	    err = 0;
+	    msg = buff;
 	  }
 	}
 	record_ntske_log(NTSKE_SSL_Failed, hostname, msg,
 		wall, usr, sys, errmsg);
-	if (err)
-	    // FIXME This goes to log file, not ntskelog
-	    // This only happens for multi error errors
-	    // I think that is very rare.
-	    nts_log_ssl_error();
 }
 
 
@@ -629,10 +625,16 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
 			}
 			return true;
 		    default:
-			snprintf(errbuf, errlng,
+			if (critical) {
+			  // This only logs the first one from a connection
+			  snprintf(errbuf, errlng,
 				"Received strange type: T=%d, C=%d, L=%d",
 				type, critical, length);
-			return false;
+			  // There is an error code for this
+			  return false;
+			}
+			// It might be interesting to log non-critical
+			// but that needs rate limiting
 			buf->next += length;
 			buf->left -= length;
 			break;
