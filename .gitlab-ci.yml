@@ -5,7 +5,10 @@ pages:
     - echo /tmp/docbot-local/lib/python3.12/site-packages > /usr/lib/python3.12/site-packages/ntpsec.pth
     - mkdir -p public/latest
     - python3 ./waf configure --prefix=/tmp/docbot-local --htmldir=`pwd`/public/latest/ --enable-doc --disable-manpage build install
-    - tar -C /tmp/docbot-local/share/doc/ntpsec/ -cf - .|tar -C public/latest/ -xf -
+    # tar to work around waf ignoring GNU dirs
+    - \[ -d "/tmp/docbot-local/share/doc/ntpsec/" \]
+      && tar -C /tmp/docbot-local/share/doc/ntpsec/ -cf - .
+      |tar -C public/latest/ -xf -
     - cp www/favicon.ico public
     - cp docs/top.html.in public/index.html
     - cp docs/top-asciidoc.css public/asciidoc.css
