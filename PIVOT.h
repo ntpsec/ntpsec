@@ -4,6 +4,7 @@
 
 /* We would like to use the build date.
  * But that breaks repeatable builds.
+ * https://reproducible-builds.org/specs/source-date-epoch/
 
  * Update this before each release.
  * Some tests may need to be updated.
