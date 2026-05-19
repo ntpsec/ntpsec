@@ -1,7 +1,8 @@
 #! /bin/sh
 
-# Copyright (C) 2014 Timothe Litt litt at acm dot org
+# Copyright Timothe Litt litt at acm dot org
 # Modified 20180105 Sanjeev Gupta ghane0@gmail.com
+# Copyright the NTPsec project contributors
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
@@ -375,73 +376,74 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
         if [ -n "$VERBOSE" ]; then
             log "info" "Attempting download from $LEAPSRC, try $TRY.."
         fi
-        if wget -T 10 $PROTO $PREFER -o ${TMPFILE}.log $LEAPSRC -O $TMPFILE ; then
+        if wget -T 10 $PROTO $PREFER -o "${TMPFILE}.log" "$LEAPSRC" -O "${TMPFILE}" ; then
             log "info" "Download of $LEAPSRC succeeded"
             if [ -n "$VERBOSE" ]; then
-                cat ${TMPFILE}.log
+                cat "${TMPFILE}.log"
             fi
 
-            if ! verifySHA1 $TMPFILE "$VERBOSE" ; then
-                # There is no point in retrying, as the file on the server is almost
-                # certainly corrupt.
+            if ! verifySHA1 "${TMPFILE}" "${VERBOSE}" ; then
+                # There is no point in retrying, as the file on the server
+                # is almost certainly corrupt.
 
-                log "warning" "Downloaded file $TMPFILE rejected -- saved for diagnosis"
-                cat ${TMPFILE}.log
-                rm -f ${TMPFILE}.log
+                log "warning" "Downloaded file ${TMPFILE} rejected -- saved for diagnosis"
+                cat "${TMPFILE}.log"
+                rm -f "${TMPFILE}.log"
                 exit 1
             fi
-            rm -f ${TMPFILE}.log
+            rm -f "${TMPFILE}.log"
 
             # Set correct permissions on temporary file
 
-            REFFILE="$LEAPFILE"
-            if [ ! -f $LEAPFILE ]; then
-                log "notice" "$LEAPFILE was missing, creating new copy - check permissions"
-                touch $LEAPFILE
+            REFFILE="${LEAPFILE}"
+            if [ ! -f "${LEAPFILE}" ]; then
+                log "notice" "${LEAPFILE} was missing, creating new copy - check permissions"
+                touch "${LEAPFILE}"
                 # Can't copy permissions from old file,
                 # copy from NTPCONF instead
-                REFFILE="$NTPCONF"
+                REFFILE="${NTPCONF}"
             fi
-            chmod --reference=$REFFILE $TMPFILE > /dev/null 2>&1
+            chmod --reference="${REFFILE}" "${TMPFILE}" > /dev/null 2>&1
             if  [ $? -ne 0 ] ; then
                 # the above chmod fails on macOS and BSD, just force it
-                chmod 644 $TMPFILE
+                chmod 644 "${TMPFILE}"
             fi
-            chown --reference=$REFFILE $TMPFILE > /dev/null 2>&1
+            chown --reference="${REFFILE}" "${TMPFILE}" > /dev/null 2>&1
             if  [ $? -ne 0 ] ; then
                 # the above chown fails on macOS and BSD, just force it
-                chown root:wheel $TMPFILE
+                # don;t use wheel, many systems do not have wheel.
+                chown root:nobody "${TMPFILE}"
             fi
             ( command -v selinuxenabled && selinuxenabled && command -v chcon ) >/dev/null 2>&1
             if  [ $? -eq 0 ] ; then
-                chcon --reference $REFFILE $TMPFILE
+                chcon --reference "${REFFILE}" "${TMPFILE}"
             fi
 
             # Replace current file with validated new one
 
-            if mv -f $TMPFILE $LEAPFILE ; then
-                log "notice" "Installed new $LEAPFILE from $LEAPSRC"
+            if mv -f "${TMPFILE}" "${LEAPFILE}" ; then
+                log "notice" "Installed new ${LEAPFILE} from ${LEAPSRC}"
             else
-                log "error" "Install $TMPFILE => $LEAPFILE failed -- saved for diagnosis"
+                log "error" "Install ${TMPFILE} => ${LEAPFILE} failed -- saved for diagnosis"
                 exit 1
             fi
 
             # Restart NTP (or whatever else is specified)
 
-            if [ -n "$RESTART" ]; then
-                if [ -n "$VERBOSE" ]; then
-                    log "info" "Attempting restart action: $RESTART"
+            if [ -n "${RESTART}" ]; then
+                if [ -n "${VERBOSE}" ]; then
+                    log "info" "Attempting restart action: ${RESTART}"
                 fi
-                R="$( 2>&1 $RESTART )"
+                R="$( 2>&1 ${RESTART} )"
                 if [ $? -eq 0 ]; then
                     log "notice" "Restart action succeeded"
-                    if [ -n "$VERBOSE" -a -n "$R" ]; then
-                        log "info" "$R"
+                    if [ -n "${VERBOSE}" -a -n "${R}" ]; then
+                        log "info" "${R}"
                     fi
                 else
                     log "error" "Restart action failed"
-                    if [ -n "$R" ]; then
-                        log "error" "$R"
+                    if [ -n "${R}" ]; then
+                        log "error" "${R}"
                     fi
                     exit 2
                 fi
@@ -451,27 +453,27 @@ if [ -n "$FORCE" ] || ! verifySHA1 $LEAPFILE "$VERBOSE" || [ $EXPIRES -lt `date 
 
         # Failed to download.  See about trying again
 
-        rm -f $TMPFILE
-        if [ $TRY -ge $MAXTRIES ]; then
+        rm -f "${TMPFILE}"
+        if [ ${TRY} -ge ${MAXTRIES} ]; then
             break;
         fi
-        if [ -n "$VERBOSE" ]; then
+        if [ -n "${VERBOSE}" ]; then
             cat ${TMPFILE}.log
-            log "info" "Waiting $INTERVAL minutes before retrying..."
+            log "info" "Waiting ${INTERVAL} minutes before retrying..."
         fi
         sleep $(( $INTERVAL * 60))
     done
 
     # Failed and out of retries
 
-    log "warning" "Download from $LEAPSRC failed after $TRY attempts"
-    if [ -f ${TMPFILE}.log ]; then
-        cat ${TMPFILE}.log
-        rm -f ${TMPFILE}.log $TMPFILE
+    log "warning" "Download from ${LEAPSRC} failed after ${TRY} attempts"
+    if [ -f "${TMPFILE}.log" ]; then
+        cat "${TMPFILE}.log"
+        rm -f "${TMPFILE}.log" "${TMPFILE}"
     fi
     exit 1
 fi
-log "info" "Not time to replace $LEAPFILE"
+log "info" "Not time to replace ${LEAPFILE}"
 
 exit 0
 
