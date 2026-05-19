@@ -345,7 +345,7 @@ if ! [ -f "$NTPCONF" ]; then
 fi
 
 # Parse ntp.conf for leapfile directive
-LEAPFILE="`grep -x 'leapfile *.*' $NTPCONF | grep -o ' [^ ]*.*'`"
+LEAPFILE="`sed -n 's/ *$//;s/^[ \t]*leapfile[ \t]*"*\([^"]*\)"*/\1/p' $NTPCONF`"
 if [ -z "$LEAPFILE" ]; then
     log "warning" "$NTPCONF does not specify a leapfile"
 fi
