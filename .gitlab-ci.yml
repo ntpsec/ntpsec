@@ -388,7 +388,8 @@ gentoo-refclocks:
 coverity-scan:
   image: $CI_REGISTRY/ntpsec/ntpsec/coverity
   script:
-    - curl -o /tmp/cov-analysis-linux64.tgz --form project=ntpsec --form token="${COVERITY_TOKEN}" https://scan.coverity.com/download/linux64
+    - curl -o /tmp/cov-analysis-linux64.tgz --form project=ntpsec --form token="${COVERITY_TOKEN}" https://scan.coverity.com/download/linux64 -D -
+    - file /tmp/cov-analysis-linux64.tgz | grep "gzip compressed data" || exit 255
     - tar zxf /tmp/cov-analysis-linux64.tgz
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int python3 ./waf build
@@ -398,6 +399,9 @@ coverity-scan:
     - gitlab-org
   rules:
     - if: $COVERITY_TOKEN
+  allow_failure:
+    exit_codes:
+      - 255
 
 macos-basic:
   <<: *job_definition
