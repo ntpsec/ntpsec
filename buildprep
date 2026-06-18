@@ -232,7 +232,7 @@ daemon () {
 	yum|dnf)
 	    $do $installer group install development-tools 	# Build environment
 	    $install python3 python3-devel 		# build
-	    $install python-unversioned-command-3 	# python => python3
+	    $install python-unversioned-command 	# python => python3
 	    $install bison openssl-devel 		# build
 	    $install libcap-devel libseccomp-devel	# build
 	    $install pps-tools-devel			# build
