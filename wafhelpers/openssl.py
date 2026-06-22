@@ -29,9 +29,9 @@ def check_libssl_tls13(ctx):
 SNIP_OPENSSL_VERSION_CHECK = """
 #include <openssl/opensslv.h>
 
-/* LibreSSL reports OPENSSL_VERSION_NUMBER as 0x2000000fL but is still a
- * supported platform, so exempt it from the OpenSSL 3.0 floor. */
-#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER < 0x30000000L
+/* OpenSSL 3.0+ required for native AES-SIV support used by NTS.
+ * LibreSSL does not provide AES-SIV and is not supported. */
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 #error OpenSSL must be version 3.0.0 or newer
 #endif
 
@@ -42,11 +42,11 @@ int main(void) {
 
 
 def check_openssl_version(ctx):
-    """Require OpenSSL >= 3.0 (LibreSSL exempt) for ./waf configure."""
+    """Require OpenSSL >= 3.0 for ./waf configure."""
     ctx.check_cc(
       fragment=SNIP_OPENSSL_VERSION_CHECK,
       use="SSL CRYPTO",
-      msg="Checking for OpenSSL >= 3.0 (or LibreSSL)",
+      msg="Checking for OpenSSL >= 3.0",
     )
 
 
