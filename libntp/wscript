@@ -11,6 +11,7 @@ from waflib.Logs import pprint
 def build(ctx):
 
     libntp_source = [
+        "aes_siv_evp.c",
         "authkeys.c",
         "authreadkeys.c",
         "clocktime.c",

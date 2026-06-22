@@ -1,4 +1,0 @@
-Upstream Source: https://github.com/dfoxfranke/libaes_siv
-Description: An RFC5297-compliant C implementation of AES-SIV
-Synchronised on: 2021-02-11
-Synchronised at: 9681279cfaa6e6399bb7ca3afbbc27fc2e19df4b

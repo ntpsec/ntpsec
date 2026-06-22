@@ -67,10 +67,10 @@ def build(ctx):
 
     ctx(
         features="c",
-        includes=[ctx.bldnode.parent.abspath(), "../include", "../libaes_siv"],
+        includes=[ctx.bldnode.parent.abspath(), "../include"],
         source=libntpd_source,
         target="libntpd_obj",
-        use="CRYPTO aes_siv",
+        use="CRYPTO",
     )
 
     ctx(

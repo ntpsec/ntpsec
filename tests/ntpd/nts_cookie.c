@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "aes_siv.h"
+#include "aes_siv_evp.h"
 
 extern AES_SIV_CTX* cookie_ctx;
 extern uint8_t K[NTS_MAX_KEYLEN], K2[NTS_MAX_KEYLEN];
