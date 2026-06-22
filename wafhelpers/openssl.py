@@ -26,11 +26,13 @@ def check_libssl_tls13(ctx):
     )
 
 
-SNIP_OPENSSL_BAD_VERSION_CHECK = """
+SNIP_OPENSSL_VERSION_CHECK = """
 #include <openssl/opensslv.h>
 
-#if OPENSSL_VERSION_NUMBER == 0x1010101fL
-#error OpenSSL version must not be 1.1.1a
+/* LibreSSL reports OPENSSL_VERSION_NUMBER as 0x2000000fL but is still a
+ * supported platform, so exempt it from the OpenSSL 3.0 floor. */
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER < 0x30000000L
+#error OpenSSL must be version 3.0.0 or newer
 #endif
 
 int main(void) {
@@ -39,12 +41,12 @@ int main(void) {
 """
 
 
-def check_openssl_bad_version(ctx):
-    """Report if OpenSSL has a good version to ./waf configure."""
+def check_openssl_version(ctx):
+    """Require OpenSSL >= 3.0 (LibreSSL exempt) for ./waf configure."""
     ctx.check_cc(
-      fragment=SNIP_OPENSSL_BAD_VERSION_CHECK,
+      fragment=SNIP_OPENSSL_VERSION_CHECK,
       use="SSL CRYPTO",
-      msg="Checking for OpenSSL != 1.1.1a",
+      msg="Checking for OpenSSL >= 3.0 (or LibreSSL)",
     )
 
 
