@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "aes_siv.h"
+#include "aes_siv_evp.h"
 
 /*  base_pkt is the size of a bare NTP packet, used for constructing
  * dummy packets to feed into the tests */

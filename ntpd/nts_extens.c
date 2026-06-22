@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <aes_siv.h>
+#include "aes_siv_evp.h"
 
 #include "ntp_stdlib.h"
 #include "ntp.h"

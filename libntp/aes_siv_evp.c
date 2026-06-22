@@ -163,8 +163,10 @@ int AES_SIV_Encrypt(AES_SIV_CTX *ctx, unsigned char *out, size_t *out_len,
 	tag_out = out;
 	ct_out = out + SIV_TAG_LEN;
 
-	/* Encrypt the plaintext */
-	if (EVP_EncryptUpdate(ctx->cipher_ctx, ct_out, &len, plaintext, (int)plaintext_len) != 1) {
+	/* Encrypt the plaintext (use empty buffer if NULL to satisfy OpenSSL) */
+	unsigned char empty = 0;
+	const unsigned char *pt = (plaintext != NULL) ? plaintext : &empty;
+	if (EVP_EncryptUpdate(ctx->cipher_ctx, ct_out, &len, pt, (int)plaintext_len) != 1) {
 		goto cleanup;
 	}
 
@@ -264,13 +266,16 @@ int AES_SIV_Decrypt(AES_SIV_CTX *ctx, unsigned char *out, size_t *out_len,
 		}
 	}
 
-	/* Decrypt the ciphertext */
-	if (EVP_DecryptUpdate(ctx->cipher_ctx, out, &len, ct_in, (int)plaintext_len) != 1) {
+	/* Decrypt the ciphertext (use empty buffers if NULL to satisfy OpenSSL) */
+	unsigned char empty = 0;
+	unsigned char *out_ptr = (out != NULL) ? out : &empty;
+	const unsigned char *ct_ptr = (plaintext_len > 0) ? ct_in : &empty;
+	if (EVP_DecryptUpdate(ctx->cipher_ctx, out_ptr, &len, ct_ptr, (int)plaintext_len) != 1) {
 		goto cleanup;
 	}
 
 	/* Finalize and verify authentication tag */
-	if (EVP_DecryptFinal_ex(ctx->cipher_ctx, out + len, &len) != 1) {
+	if (EVP_DecryptFinal_ex(ctx->cipher_ctx, out_ptr + len, &len) != 1) {
 		/* Authentication failed - clear output */
 		if (out != NULL && plaintext_len > 0) {
 			OPENSSL_cleanse(out, plaintext_len);

@@ -1050,8 +1050,6 @@ def build(ctx):
         # required by the generic and Trimble refclocks
         ctx.recurse("libparse")
     ctx.recurse("libntp")
-    if not ctx.env.DISABLE_NTS:
-        ctx.recurse("libaes_siv")
     ctx.recurse("ntpd")
     ctx.recurse("ntpfrob")
     ctx.recurse("ntptime")
