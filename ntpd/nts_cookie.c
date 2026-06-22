@@ -10,9 +10,9 @@
  * It uses AEAD_AES_SIV_CMAC_256/384/512 from RFC 5297
  * The selection is done by the key length.
  *
- * We use the implementation in libaes_siv by Daniel Franke (Akamai)
- * There is a similar implementation in OpenSSL (or soon will be)
- * It has a slightly different API.  See libaes_siv/README.md
+ * We use the AES-SIV implementation in OpenSSL 3.0+ via an EVP wrapper
+ * that provides a libaes_siv-compatible API.
+ * See aes_siv_evp.c for the wrapper implementation.
  *
  */
 
@@ -28,7 +28,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#include <aes_siv.h>
+#include "aes_siv_evp.h"
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
