@@ -36,7 +36,6 @@
 #include <openssl/objects.h>
 #include <openssl/ssl.h>
 
-#include "hack-ancient-openssl.h"
 
 #define UNUSED_ARG(arg)         ((void)(arg))
 

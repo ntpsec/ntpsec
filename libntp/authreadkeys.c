@@ -24,7 +24,6 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 
-#include "hack-ancient-openssl.h"
 
 #if OPENSSL_VERSION_NUMBER < 0x20000000L || defined(LIBRESSL_VERSION_NUMBER)
 #include <openssl/cmac.h>

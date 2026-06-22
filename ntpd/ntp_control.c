@@ -14,7 +14,6 @@
 #include <stdbool.h>
 
 #include <openssl/evp.h>	/* provides OpenSSL digest API */
-#include "hack-ancient-openssl.h"
 
 #include "ntpd.h"
 #include "ntp_io.h"
