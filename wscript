@@ -629,13 +629,7 @@ int main(int argc, char **argv) {
     required_functions = (
         # MacOS doesn't have timer_create ??
         ('timer_create', ["signal.h", "time.h"], "RT", False),
-        ## Very old versions of OpenSSL don't have cmac.h
-        ## We used to test for CMAC_CTX_new here to generate a sane error
-        ## Now that gets a Deprecated warning with OpenSSL 3
-        ## ('CMAC_CTX_new', ["openssl/cmac.h"], "CRYPTO", True),
-        # Next should be above, but it needs a library
-        # EVP_PKEY_new_CMAC_key added in OpenSSL 1.1.1
-        ('EVP_PKEY_new_CMAC_key', ["openssl/cmac.h"], "CRYPTO", False))
+    )
     for ft in required_functions:
         probe_function(ctx, function=ft[0],
                        prerequisites=ft[1], use=ft[2],
