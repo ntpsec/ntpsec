@@ -853,10 +853,10 @@ int main(int argc, char **argv) {
 
     if not ctx.env.DISABLE_NTS:
         from wafhelpers.openssl import check_libssl_tls13
-        from wafhelpers.openssl import check_openssl_bad_version
+        from wafhelpers.openssl import check_openssl_version
         from wafhelpers.openssl import dump_openssl_version
         check_libssl_tls13(ctx)
-        check_openssl_bad_version(ctx)
+        check_openssl_version(ctx)
         dump_openssl_version(ctx)
 
     # before write_config()
