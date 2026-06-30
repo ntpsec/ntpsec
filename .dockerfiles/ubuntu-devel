@@ -1,0 +1,16 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
+FROM ubuntu:devel
+
+RUN apt-get update
+RUN apt-get install -y \
+	bison \
+	gcc \
+	libbsd-dev \
+	libcap-dev \
+	libssl-dev \
+	netbase \
+	pps-tools \
+	python3-dev

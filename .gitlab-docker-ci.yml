@@ -83,6 +83,10 @@ build-ubuntu-latest:
 build-ubuntu-rolling:
   <<: *build_definition
 
+build-ubuntu-devel:
+  allow_failure: true
+  <<: *build_definition
+
 build-cross-armhf:
   allow_failure: true
   <<: *build_definition
