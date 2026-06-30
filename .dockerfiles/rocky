@@ -1,0 +1,17 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
+FROM rockylinux:9
+
+RUN dnf -y install dnf-plugins-core
+RUN dnf config-manager --set-enabled crb
+RUN dnf -y install epel-release
+RUN dnf -y install \
+	bison \
+	gcc \
+	libbsd-devel \
+	libcap-devel \
+	openssl-devel \
+	python3-devel \
+	pps-tools-devel

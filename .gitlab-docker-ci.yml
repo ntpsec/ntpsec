@@ -37,6 +37,9 @@ build-alpine-seccomp:
 build-centos-latest:
   <<: *build_definition
 
+build-rocky:
+  <<: *build_definition
+
 build-clang:
   <<: *build_definition
 
