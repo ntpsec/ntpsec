@@ -1,5 +1,5 @@
 make-tarball:
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable
+  image: $CI_REGISTRY_IMAGE/debian-stable
   stage: test
   script:
     - apt-get update

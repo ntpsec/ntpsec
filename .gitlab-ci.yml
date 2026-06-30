@@ -1,6 +1,6 @@
 pages:
   stage: build
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine-pages
+  image: $CI_REGISTRY_IMAGE/alpine-pages
   script:
     - echo /tmp/docbot-local/lib/python3.14/site-packages > /usr/lib/python3.14/site-packages/ntpsec.pth
     - mkdir -p public/latest
@@ -36,7 +36,7 @@ include:
 
 prisoner-0:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - DESTDIR=prison python3 ./waf install uninstall
@@ -45,7 +45,7 @@ prisoner-0:
 
 alpine-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - echo /usr/local/lib/python3.14/site-packages > /usr/lib/python3.14/site-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -54,14 +54,14 @@ alpine-basic:
 
 alpine-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
 
 alpine-edge-basic:
   allow_failure: true
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine-edge
+  image: $CI_REGISTRY_IMAGE/alpine-edge
   script:
     - echo /usr/local/lib/python3.14/site-packages > /usr/lib/python3.14/site-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -71,7 +71,7 @@ alpine-edge-basic:
 alpine-edge-refclocks:
   allow_failure: true
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine-edge
+  image: $CI_REGISTRY_IMAGE/alpine-edge
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
 
@@ -90,7 +90,7 @@ alpine-edge-refclocks:
 
 AsciiDoc-py3-Alpine:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - apk update && apk add python3-dev asciidoc
     - python3 ./waf configure --enable-warnings --enable-Werror --enable-doc --enable-manpage build
@@ -104,7 +104,7 @@ AsciiDoc-no:
 
 AsciiDoc-classic3-Debian-Old:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
+  image: $CI_REGISTRY_IMAGE/debian-oldstable
   script:
     - apt-get update
     - DEBIAN_FRONTEND="noninteractive" apt-get install -y python3-dev asciidoc-base
@@ -112,7 +112,7 @@ AsciiDoc-classic3-Debian-Old:
 
 AsciiDoc-classic-Python2:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/python2
+  image: $CI_REGISTRY_IMAGE/python2
   script:
     - apt-get update
     - DEBIAN_FRONTEND="noninteractive" apt-get install -y python2-dev asciidoc-base
@@ -120,7 +120,7 @@ AsciiDoc-classic-Python2:
 
 debian-oldstable-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
+  image: $CI_REGISTRY_IMAGE/debian-oldstable
   script:
     - echo /usr/local/lib/python3.11/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --disable-nts build --pyshebang "/usr/bin/env python3"
@@ -129,13 +129,13 @@ debian-oldstable-basic:
 
 debian-oldstable-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-oldstable
+  image: $CI_REGISTRY_IMAGE/debian-oldstable
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --disable-nts --refclock=all build --pyshebang "/usr/bin/env python3"
 
 debian-stable-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable
+  image: $CI_REGISTRY_IMAGE/debian-stable
   script:
     - echo /usr/local/lib/python3.13/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -144,13 +144,13 @@ debian-stable-basic:
 
 debian-stable-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable
+  image: $CI_REGISTRY_IMAGE/debian-stable
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 debian-testing-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-testing
+  image: $CI_REGISTRY_IMAGE/debian-testing
   script:
     - echo /usr/local/lib/python3.13/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -159,14 +159,14 @@ debian-testing-basic:
 
 debian-testing-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-testing
+  image: $CI_REGISTRY_IMAGE/debian-testing
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 debian-unstable-basic:
   allow_failure: true
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-unstable
+  image: $CI_REGISTRY_IMAGE/debian-unstable
   script:
     - echo /usr/local/lib/python3.13/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -176,13 +176,13 @@ debian-unstable-basic:
 debian-unstable-refclocks:
   allow_failure: true
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-unstable
+  image: $CI_REGISTRY_IMAGE/debian-unstable
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 ubuntu-latest-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-latest
+  image: $CI_REGISTRY_IMAGE/ubuntu-latest
   script:
     - echo /usr/local/lib/python3.12/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -191,14 +191,14 @@ ubuntu-latest-basic:
 
 ubuntu-latest-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-latest
+  image: $CI_REGISTRY_IMAGE/ubuntu-latest
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 ubuntu-devel-basic:
   <<: *job_definition
   allow_failure: true
-  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
+  image: $CI_REGISTRY_IMAGE/ubuntu-devel
   script:
     - PYVER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
     - echo /usr/local/lib/python${PYVER}/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
@@ -209,13 +209,13 @@ ubuntu-devel-basic:
 ubuntu-devel-refclocks:
   <<: *job_definition
   allow_failure: true
-  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
+  image: $CI_REGISTRY_IMAGE/ubuntu-devel
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 ubuntu-rolling-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-rolling
+  image: $CI_REGISTRY_IMAGE/ubuntu-rolling
   script:
     - echo /usr/local/lib/python3.13/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -224,7 +224,7 @@ ubuntu-rolling-basic:
 
 ubuntu-rolling-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-rolling
+  image: $CI_REGISTRY_IMAGE/ubuntu-rolling
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
@@ -252,7 +252,7 @@ freebsd-refclocks:
 
 centos-latest-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/centos-latest
+  image: $CI_REGISTRY_IMAGE/centos-latest
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
@@ -260,13 +260,13 @@ centos-latest-basic:
 
 centos-latest-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/centos-latest
+  image: $CI_REGISTRY_IMAGE/centos-latest
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 fedora-latest-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
+  image: $CI_REGISTRY_IMAGE/fedora-latest
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
@@ -274,13 +274,13 @@ fedora-latest-basic:
 
 fedora-latest-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/fedora-latest
+  image: $CI_REGISTRY_IMAGE/fedora-latest
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
 
 python3:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/python3
+  image: $CI_REGISTRY_IMAGE/python3
   script:
     - python ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
 
@@ -294,7 +294,7 @@ python-coverage:
 
 clang-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/clang
+  image: $CI_REGISTRY_IMAGE/clang
   script:
     - echo /usr/local/lib/python3.13/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --check-c-compiler=clang build --pyshebang "/usr/bin/env python3"
@@ -303,13 +303,13 @@ clang-basic:
 
 clang-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/clang
+  image: $CI_REGISTRY_IMAGE/clang
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --check-c-compiler=clang --refclock=all build --pyshebang "/usr/bin/env python3"
 
 openSUSE-leap-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-leap
+  image: $CI_REGISTRY_IMAGE/opensuse-leap
   script:
     - python3 ./waf configure --enable-warnings --disable-doc --disable-manpage --disable-nts build  --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
@@ -317,38 +317,38 @@ openSUSE-leap-basic:
 
 openSUSE-leap-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/opensuse-leap
+  image: $CI_REGISTRY_IMAGE/opensuse-leap
   script:
     - python3 ./waf configure --enable-warnings --disable-doc --disable-manpage --disable-nts --refclock=all build --pyshebang "/usr/bin/env python3"
 
 # debian-stable-basic-32bit:
 #   <<: *job_definition
-#   image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-i386
+#   image: $CI_REGISTRY_IMAGE/debian-stable-i386
 #   script:
 #     - python ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build
 
 # debian-stable-refclocks-32bit:
 #   <<: *job_definition
-#   image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-i386
+#   image: $CI_REGISTRY_IMAGE/debian-stable-i386
 #   script:
 #     - python ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
 
 debian-stable-mDNS-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-mdns
+  image: $CI_REGISTRY_IMAGE/debian-stable-mdns
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
 
 debian-stable-mDNS-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/debian-stable-mdns
+  image: $CI_REGISTRY_IMAGE/debian-stable-mdns
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 cross-armhf-build:
   allow_failure: true
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/cross-armhf
+  image: $CI_REGISTRY_IMAGE/cross-armhf
   script:
     - pyver=$(python3 -c 'import sys;print(f"{sys.version_info.major}.{sys.version_info.minor}")')
     - PYTHON_VERSION=${pyver} PYTAG=cpython3 pyext_PATTERN="%s.so"
@@ -373,7 +373,7 @@ cross-armhf-build:
 
 gentoo-basic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/gentoo
+  image: $CI_REGISTRY_IMAGE/gentoo
   script:
     - echo /usr/local/lib/python3.13/site-packages/ > /usr/lib/python3.13/site-packages/ntpsec.pth
     - python ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build
@@ -382,12 +382,12 @@ gentoo-basic:
 
 gentoo-refclocks:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/gentoo
+  image: $CI_REGISTRY_IMAGE/gentoo
   script:
     - python ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
 
 coverity-scan:
-  image: $CI_REGISTRY/ntpsec/ntpsec/coverity
+  image: $CI_REGISTRY_IMAGE/coverity
   script:
     - curl -o /tmp/cov-analysis-linux64.tgz --form project=ntpsec --form token="${COVERITY_TOKEN}" https://scan.coverity.com/download/linux64 -D -
     - file /tmp/cov-analysis-linux64.tgz | grep "gzip compressed data" || exit 255
@@ -430,60 +430,60 @@ macos-refclocks:
 
 feature-attic:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --enable-attic build
 
 feature-classic-mode:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-classic-mode build
 
 feature-seccomp:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine-seccomp
+  image: $CI_REGISTRY_IMAGE/alpine-seccomp
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-seccomp build
 
 feature-debug:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-debug build
 
 feature-disable-debug-gdb:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --disable-debug-gdb build
 
 feature-debug-timing:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-debug-timing build
 
 feature-disable-droproot:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --disable-droproot build
 
 feature-early-droproot:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-early-droproot build
 
 feature-leap-smear:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-leap-smear build
 
 feature-mssntp:
   <<: *job_definition
-  image: $CI_REGISTRY/ntpsec/ntpsec/alpine
+  image: $CI_REGISTRY_IMAGE/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-mssntp build
