@@ -200,7 +200,8 @@ ubuntu-devel-basic:
   allow_failure: true
   image: $CI_REGISTRY/ntpsec/ntpsec/ubuntu-devel
   script:
-    - echo /usr/local/lib/python3.9/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
+    - PYVER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+    - echo /usr/local/lib/python${PYVER}/site-packages/ > /usr/lib/python3/dist-packages/ntpsec.pth
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
     - python3 ./waf uninstall
