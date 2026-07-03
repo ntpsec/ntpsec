@@ -10,28 +10,31 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-## Repository Head
+== Repository Head
 
-  ntskelog has been added to the stats file collection
-  NTSKE logging will go here to reduce clutter in the main log file.
+Note: Python 2 and OpenSSL 1.1.0 support will be removed in the next release.
 
-  Link Time Optimization is now enabled on Linux and FreeBSD
-  (if --disable-debug-gdb is set during configuration).
-  It is disabled on NetBSD because it breaks horribly.
-  Other systems may need similar treatement.
+* A new `ntskelog` statistic file has been added to the stats file collection. NTS-KE transactions are now routed here to reduce clutter in the main system log.
+* Link-Time Optimization (LTO) is now enabled by default on Linux and FreeBSD when `--disable-debug-gdb` is configured. It remains disabled on NetBSD due to upstream toolchain breakages.
+* The `pool` configuration command now natively supports the `nts` security flag (`pool <server> nts`).
+* The server counting logic for `maxclock` (`tos maxclock`) has been corrected to skip dynamic `POOL` slots as well as any remote servers configured with the `noselect` flag.
+* The HPGPS reference clock driver received a major update, featuring a new configuration option for listen mode, a fix for the Z3801A GPS Week Number Rollover (WNRO) glitch, the removal of the raw `scpi >` string from `clockstats`, and the addition of several new internal tracking variables to `clockstats`.
 
-  pool <serv> nts now works
+=== Administrative and Scripting Changes:
 
-  maxclock now skips the POOL slots when counting servers.
-  This is relevant if you use "tos maxclock nn" in your config file.
-  (It also skips servers with noselect on the config line.)
+* The `ntpleapfetch` tool has been hardened with parameter quoting to prevent potential shell execution vulnerabilities.
+* The statistics directory argument (`-s PATH`) has been fixed and its default behavior adjusted.
+* `ntpd` now explicitly logs a syslog entry when searching for supplemental configuration files inside `/etc/ntpsec/ntp.d`.
+* `ntpd` now logs an explicit message when extra pool servers are actively dropped.
 
-  Major update to HPGPS driver
-    Fix gps WNRO glitch in Z3801A
-    "scpi >" eliminated from clockstats
-    several internal variables added to clockstats
+=== Bug Fixes and Protocol Refinements:
 
-## 2025-04-18: 1.2.4
+* Fixed a critical issue where NTPsec failed to declare itself out of sync under specific error and drift conditions.
+* Fixed a state machine bug (NTPsec/ntpsec#848) where the `STA_UNSYNC` flag was prematurely cleared at system startup.
+* Fixed an interactive interface crash in `ntpmon` triggered by hitting the minus (`-`) key.
+* Added native `.webp` image encoding support to the `ntpviz` graphing tool.
+
+== 2025-04-18: 1.2.4
 
 * waf has been upgraded to version 2.1.4
   NB: on Debian, waf now installs Python programs (ntpq, ntpmon, ...)
@@ -97,7 +100,7 @@ on user-visible changes.
 
 * Add and revise exponential timing decay and MS-SNTP testing tools.
 
-## 2023-12-30: 1.2.3
+== 2023-12-30: 1.2.3
 
 * Change mode6 alignment to four, which may
   break some compatibility with classic NTP.
@@ -148,12 +151,12 @@ on user-visible changes.
 
 * ntpdig shows packet delay in JSON output.
 
-## 2023-08-02: 1.2.2a
+== 2023-08-02: 1.2.2a
 
 Fix a crash in ntpd if NTS is disabled and an NTS-enabled client request (mode
 3) is received. (CVE-2023-4012)
 
-## 2022-12-28: 1.2.2
+== 2022-12-28: 1.2.2
 
 * Restore/cleanup NTPv1 support
 
