@@ -1111,7 +1111,7 @@ class PeerSummary:
             ptype = 'b'
         elif hmode == ntp.magic.MODE_BROADCASTx:
             # broadcast or multicast server
-            if srcadr.startswith("224."):       # IANA multicast address prefix
+            if srcadr and srcadr.startswith("224."):  # IANA multicast address prefix
                 ptype = 'M'
             else:
                 ptype = 'B'
@@ -1120,7 +1120,7 @@ class PeerSummary:
                 ptype = 'l'     # local refclock
             elif dstadr_refid == "POOL":
                 ptype = 'p'     # pool
-            elif srcadr.startswith("224."):
+            elif srcadr and srcadr.startswith("224."):
                 ptype = 'a'     # manycastclient (compatibility with Classic)
             elif ntscookies > -1:
                 # FIXME: Will foo up if there are ever more than 9 cookies
