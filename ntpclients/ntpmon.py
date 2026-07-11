@@ -218,18 +218,17 @@ if __name__ == '__main__':
     ntp.util.stdversioncheck(bin_ver)
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "dD:hl:nsSuV",
+                                             "dD:hl:nuV",
                                              ["debug", "help", "logfile=",
                                               "numeric", "units",
-                                              "set-debug-level=", "version",
-                                              "srcname", "srcnumber"])
+                                              "set-debug-level=", "version"])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
         raise SystemExit(1)
     progname = sys.argv[0]
 
-    showhostnames = 1
+    showhostnames = True
     wideremote = False
     showall = True
     showpeers = True
@@ -252,11 +251,7 @@ if __name__ == '__main__':
         elif switch in ("-l", "--logfile"):
             logname = val
         elif switch in ("-n", "--numeric"):
-            showhostnames = 0
-        elif switch in ("-s", "--srcname"):
-            showhostnames = 3
-        elif switch in ("-S", "--srcnumber"):
-            showhostnames = 2
+            showhostnames = False
         elif switch in ("-u", "--units"):
             showunits = True
         elif switch in ("-V", "--version"):
@@ -433,14 +428,8 @@ if __name__ == '__main__':
                         showpeers = not showpeers
                         detailmode = False  # detail + hide peers == crash
                     elif key == 'n':
-                        if peer_report.showhostnames == 2:
-                            peer_report.showhostnames = 0
-                        elif peer_report.showhostnames == 0:
-                            peer_report.showhostnames = 1
-                        elif peer_report.showhostnames == 1:
-                            peer_report.showhostnames = 3
-                        else:
-                            peer_report.showhostnames = 2
+                        peer_report.showhostnames = \
+                            not peer_report.showhostnames
                         mru_report.showhostnames = \
                             peer_report.showhostnames
                     elif key == 'o':
