@@ -1338,9 +1338,12 @@ ctl_putadr(
 		struct in_addr in4;
 		in4.s_addr = addr32;
 		cq = inet_ntoa(in4);
-	} else
+	} else {
 		cq = socktoa(addr);
-	ctl_putunqstr(tag, cq, strlen(cq));
+	}
+	if (('\0' != *cq) && ('(' != *cq)) {
+		ctl_putunqstr(tag, cq, strlen(cq));
+	}
 }
 
 
