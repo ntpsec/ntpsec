@@ -46,7 +46,6 @@ socktoa_r(
 		switch(AF(sock)) {
 
 		case AF_INET:
-		case AF_UNSPEC:
 			inet_ntop(AF_INET, PSOCK_ADDR4(sock), buf, buflen);
 			break;
 
