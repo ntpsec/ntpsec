@@ -16,6 +16,11 @@
  * Check /proc/cpuinfo flags for "aes" to see if you have it.
  */
 
+/* Pre 2026-Jul-05, There was some initialization kludgery.
+ * It broke sha512.  I don't know why/how.
+ * This may not work on older versions of OpenSSL.
+ */
+
 /* This may not be high enough.
  * 0x10000003  1.0.0b fails
  * 0x1000105fL 1.0.1e works.
@@ -40,43 +45,26 @@
 
 #define UNUSED_ARG(arg)         ((void)(arg))
 
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+
 /* Get timing for old slower way too.  Pre Feb 2018 */
 #define DoSLOW 1
 
 int NUM = 1000000;
 
-bool do_all = false;
-
 #define PACKET_LENGTH 48
-/* Nothing magic about these key lengths.
- * ntpkeygen just happens to label things this way.
- * Most distros support these 4 and no others.
- */
-#define MD5_KEY_LENGTH 16
-#define SHA1_KEY_LENGTH 20
 #define MAX_KEY_LENGTH 64
 
 EVP_MD_CTX *ctx;
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
-SSL_CTX *ssl;
-#endif
 
 
 static void ssl_init(void)
 {
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
-        OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS|OPENSSL_INIT_LOAD_CRYPTO_STRINGS|OPENSSL_INIT_ADD_ALL_CIPHERS|OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
-	ssl = SSL_CTX_new(TLS_client_method());
-	if (NULL == ssl) {
-		printf("SSL_CTX_new() failed.\n");
-		exit(1);
-	}
-#else
-	ERR_load_crypto_strings();
-	OpenSSL_add_all_digests();
-	OpenSSL_add_all_ciphers();
-#endif
 	ctx = EVP_MD_CTX_new();
+        if (NULL == ctx) {
+                printf("EVP_MD_CTX_new() failed.\n");
+                exit(1);
+        }
 }
 
 static unsigned int SSL_Digest(
@@ -102,15 +90,16 @@ static unsigned int SSL_DigestSlow(
   uint8_t *pkt,           /* packet pointer */
   int     pktlength       /* packet length */
 ) {
-	EVP_MD_CTX *ctxx;
+	EVP_MD_CTX *ctxx = EVP_MD_CTX_new();
+	EVP_MD *digest = EVP_MD_fetch(NULL, name, NULL);
 	unsigned char answer[EVP_MAX_MD_SIZE];
 	unsigned int len;
-	ctxx = EVP_MD_CTX_new();
-	EVP_DigestInit(ctxx, EVP_get_digestbyname(name));
+	EVP_DigestInit(ctxx, digest);
 	EVP_DigestUpdate(ctxx, key, keylength);
 	EVP_DigestUpdate(ctxx, pkt, pktlength);
 	EVP_DigestFinal(ctxx, answer, &len);
 	EVP_MD_CTX_free(ctxx);
+	EVP_MD_free(digest);
 	return len;
 }
 
@@ -122,7 +111,8 @@ static void DoDigest(
   int     pktlength       /* packet length */
 )
 {
-	const EVP_MD *digest = EVP_get_digestbyname(name);
+//	const EVP_MD *digest = EVP_get_digestbyname(name);
+	EVP_MD *digest = EVP_MD_fetch(NULL, name, NULL);
 	struct timespec start, stop;
 	double fast, slow;
 	unsigned int digestlength = 0;
@@ -132,17 +122,6 @@ static void DoDigest(
 		return;
 	}
 
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
-	/* Required for OpenSSL 3.0.0
-	 * This skips SHA224 and SHA512 which work,
-	 * but RIPEMD160 gets Segmentation fault without this.
-	 */
-	if (0 == SSL_CTX_set_cipher_list(ssl, name)) {
-		printf("%10s no cipher_list\n", name);
-		return;
-	}
-#endif
-
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < NUM; i++) {
 		digestlength = SSL_Digest(digest, key, keylength, pkt, pktlength);
@@ -151,6 +130,7 @@ static void DoDigest(
 	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
 	printf("%10s  %2d %2d %2u %6.0f  %6.3f",
 	       name, keylength, pktlength, digestlength, fast/NUM,  fast/1E9);
+	EVP_MD_free(digest);
 
 #ifdef DoSLOW
 	clock_gettime(CLOCK_MONOTONIC, &start);
@@ -171,9 +151,8 @@ int main(int argc, char *argv[])
 	uint8_t key[MAX_KEY_LENGTH];
 	uint8_t packet[PACKET_LENGTH];
 
+	UNUSED_ARG(argc);
 	UNUSED_ARG(argv);
-
-	if (argc>1) do_all = true;
 
 	setlinebuf(stdout);
 
@@ -185,22 +164,47 @@ int main(int argc, char *argv[])
 	printf("# KL=key length, PL=packet length, DL=digest length\n");
 	printf("# Digest    KL PL DL  ns/op sec/run     slow   %% diff\n");
 
-	DoDigest("MD5",    key, MD5_KEY_LENGTH, packet, PACKET_LENGTH);
-	DoDigest("SHA1",   key, MD5_KEY_LENGTH, packet, PACKET_LENGTH);
-	DoDigest("SHA1",   key, SHA1_KEY_LENGTH, packet, PACKET_LENGTH);
+/* Note: the "key" is not a crypto key.
+ * It gets prepended to the message when computing the digest.
+ * Any length is valid.  16 is just a reasonable key size.
+ * 15 and 17 are to see if word alignment has significant speed effects.
+ */
 
-if (do_all) {
-	DoDigest("MD5",    key, MD5_KEY_LENGTH, packet, PACKET_LENGTH);
-	DoDigest("MD5",    key, MD5_KEY_LENGTH-1, packet, PACKET_LENGTH);
-	DoDigest("MD5",    key, SHA1_KEY_LENGTH, packet, PACKET_LENGTH);
-	DoDigest("SHA1",   key, MD5_KEY_LENGTH, packet, PACKET_LENGTH);
-	DoDigest("SHA1",   key, SHA1_KEY_LENGTH, packet, PACKET_LENGTH);
-	DoDigest("SHA1",   key, SHA1_KEY_LENGTH-1, packet, PACKET_LENGTH);
+	DoDigest("MD5",    key, 16, packet, PACKET_LENGTH);
+	DoDigest("MD5",    key, 16, packet, PACKET_LENGTH);
+	DoDigest("MD5",    key, 15, packet, PACKET_LENGTH);
+	DoDigest("MD5",    key, 17, packet, PACKET_LENGTH);
+
+	DoDigest("SHA1",   key, 16, packet, PACKET_LENGTH);
+	DoDigest("SHA1",   key, 15, packet, PACKET_LENGTH);
+	DoDigest("SHA1",   key, 17, packet, PACKET_LENGTH);
+
 	DoDigest("SHA256", key, 16, packet, PACKET_LENGTH);
-	DoDigest("SHA256", key, 20, packet, PACKET_LENGTH);
+	DoDigest("SHA256", key, 15, packet, PACKET_LENGTH);
+	DoDigest("SHA256", key, 17, packet, PACKET_LENGTH);
+
+	DoDigest("SHA3-256", key, 16, packet, PACKET_LENGTH);
+
 	DoDigest("SHA384", key, 16, packet, PACKET_LENGTH);
-	DoDigest("SHA384", key, 20, packet, PACKET_LENGTH);
-}
+	DoDigest("SHA384", key, 15, packet, PACKET_LENGTH);
+	DoDigest("SHA384", key, 17, packet, PACKET_LENGTH);
+
+	DoDigest("SHA512", key, 16, packet, PACKET_LENGTH);
+	DoDigest("SHA512", key, 15, packet, PACKET_LENGTH);
+	DoDigest("SHA512", key, 17, packet, PACKET_LENGTH);
+
+	DoDigest("SHAKE128", key, 16, packet, PACKET_LENGTH);
+	DoDigest("SHAKE256", key, 16, packet, PACKET_LENGTH);
 
 	return 0;
 }
+#else
+int main(int argc, char *argv[])
+{
+	UNUSED_ARG(argc);
+	UNUSED_ARG(argv);
+	printf("This program doesn't work on really old versions of OpenSSL\n");
+	return 1;
+}
+#endif  // OPENSSL_VERSION_NUMBER
+

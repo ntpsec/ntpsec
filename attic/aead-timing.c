@@ -491,6 +491,7 @@ int main(int argc, char *argv[])
 {
 	UNUSED_ARG(argc);
 	UNUSED_ARG(argv);
+	printf("This program doesn't work on really old versions of OpenSSL\n");
 	return 1;
 }
 #endif  // OPENSSL_VERSION_NUMBER

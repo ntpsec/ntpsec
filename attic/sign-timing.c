@@ -219,13 +219,13 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-
-#else /* #if OPENSSL_VERSION_NUMBER */
+#else
 int main(int argc, char *argv[])
 {
 	UNUSED_ARG(argc);
 	UNUSED_ARG(argv);
-	return(0);
+	printf("This program doesn't work on really old versions of OpenSSL\n");
+	return 1;
 }
-#endif
+#endif  // OPENSSL_VERSION_NUMBER
 
