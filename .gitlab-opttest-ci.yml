@@ -41,6 +41,12 @@ centos-options-tester:
   before_script:
     - dnf -y --enablerepo=crb install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libseccomp-devel pkgconf-pkg-config bash
 
+rocky-options-tester:
+  <<: *option_tester_py3_only
+  image: rockylinux:9
+  before_script:
+    - dnf -y --enablerepo=crb install bison gcc openssl-devel libcap-devel python3-devel pps-tools-devel libseccomp-devel pkgconf-pkg-config bash
+
 fedora-latest-options-tester:
   image: fedora:latest
   before_script:
