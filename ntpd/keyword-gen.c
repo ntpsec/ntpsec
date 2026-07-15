@@ -283,7 +283,7 @@ generate_preamble(void)
 "#include \"ntp_scanner.h\"\n"
 "#include \"ntp_parser.tab.h\"\n"
 "\n";
-	printf(preamble);
+	puts(preamble);
 }
 
 
