@@ -210,6 +210,12 @@ zyfer_receive(
 		else
 			return;
 	} else {
+		if (rbufp->recv_length >= (size_t)(BMAX - pp->lencode)) {
+			pp->lencode = 0;
+			refclock_report(peer, CEVNT_BADREPLY);
+			return;
+		}
+
 		memcpy(pp->a_lastcode + pp->lencode, p, rbufp->recv_length);
 		pp->lencode += (int)rbufp->recv_length;
 		pp->a_lastcode[pp->lencode] = '\0';
