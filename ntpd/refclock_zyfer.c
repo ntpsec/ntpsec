@@ -210,7 +210,8 @@ zyfer_receive(
 		else
 			return;
 	} else {
-		if (rbufp->recv_length >= (size_t)(BMAX - pp->lencode)) {
+                size_t avail = sizeof(p->a_lastcode) - (1 + pp->lencode);
+		if (rbufp->recv_length >= avail) {
 			pp->lencode = 0;
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
