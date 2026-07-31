@@ -1,6 +1,6 @@
-#define RELEASE_DATE 1745050673
+#define RELEASE_DATE 1785466481
 
-/* Sat Apr 19 08:17:53 AM UTC 2025 */
+/* Fri Jul 31 02:54:41 UTC 2026 */
 
 /* We would like to use the build date.
  * But that breaks repeatable builds.

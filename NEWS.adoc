@@ -20,12 +20,39 @@ Note: Python 2 and OpenSSL 1.1.0 support will be removed in the next release.
 * The server counting logic for `maxclock` (`tos maxclock`) has been corrected to skip dynamic `POOL` slots as well as any remote servers configured with the `noselect` flag.
 * The HPGPS reference clock driver received a major update, featuring a new configuration option for listen mode, a fix for the Z3801A GPS Week Number Rollover (WNRO) glitch, the removal of the raw `scpi >` string from `clockstats`, and the addition of several new internal tracking variables to `clockstats`.
 
+=== Security Fixes:
+
+* Fixed a buffer overflow in the Zyfer reference clock driver that could occur when processing continuation chunks (CVE-2026-18321).
+* Fixed a NULL-pointer dereference crash in the NTS-KE client when `SSL_new()` fails.
+* `ntpd` now uses a cryptographically strong RNG instead of the weak libc `random()` for association IDs, poll-time dispersal, and mode6 response padding.
+* Fixed an off-by-one boundary error in `ntp_RAND_bytes()` that could cause an out-of-bounds read.
+* Fixed an out-of-bounds read in NTS client extension parsing caused by unchecked nonce/ciphertext lengths.
+* Fixed NTS pool peers losing their NTS-KE hostname and NTS configuration on cookie renewal, which caused certificate validation to run against the peer's bare IP address instead of its configured hostname.
+
 === Administrative and Scripting Changes:
 
 * The `ntpleapfetch` tool has been hardened with parameter quoting to prevent potential shell execution vulnerabilities.
 * The statistics directory argument (`-s PATH`) has been fixed and its default behavior adjusted.
 * `ntpd` now explicitly logs a syslog entry when searching for supplemental configuration files inside `/etc/ntpsec/ntp.d`.
 * `ntpd` now logs an explicit message when extra pool servers are actively dropped.
+* `ntpleapfetch` now correctly parses the `leapfile` directive with quoted paths and tab/space-delimited values (NTPsec/ntpsec#883).
+* waf has been upgraded to 2.1.9, fixing a bug where `libntpc.so` was installed to the default library path instead of the location given via `--libdir` (NTPsec/ntpsec#870).
+* Added missing i386 time64 and mDNS/DNS-SD syscalls to the seccomp sandbox allow-list, fixing potential sandbox kills on i386 and mDNS-enabled builds.
+* Added missing `clock_nanosleep`, `readlink`, and `readlinkat` syscalls to the AMD64 seccomp sandbox allow-list, fixing SIGSYS crashes.
+
+=== NTS and NTS-KE Fixes:
+
+* NTS-KE requests and responses split across multiple TCP/TLS reads are now correctly reassembled instead of failing on the first partial chunk (NTPsec/ntpsec#858).
+* Fixed the NTS client failing to reset cookie length when switching to a new cookie length from a key-exchange response (NTPsec/ntpsec#877).
+* The NTS-KE client now sets the TLS SNI field during the handshake, improving compatibility with name-based TLS proxies and load balancers.
+* Fixed NTS-KE hostname parsing to strip brackets from IPv6 literal addresses before certificate hostname validation.
+* Fixed an NTS-KE response containing more cookies than the client can store being misparsed and the entire response rejected, instead of just discarding the extras.
+* Fixed an NTS-KE connection that completes synchronously (rather than asynchronously) being wrongly treated as a connection failure.
+* NTS-KE certificate hostname/IP validation now uses the non-deprecated OpenSSL 4.0 APIs (`SSL_set1_ipaddr`/`SSL_set1_dnsname`).
+* The NTS-KE client no longer rejects a server response solely for an unrecognized non-critical record type.
+* `ntpd` now validates the `aead` parameter in both per-server and global NTS configuration and logs an error instead of silently accepting an invalid value (NTPsec/ntpsec#880).
+* NTS-KE client logging has been improved to emit one detailed message per connection attempt; the client now parses bracketed IPv6 literal addresses, applies a send timeout in addition to the existing receive timeout, and skips already-tried addresses from multi-homed NTS-KE servers.
+* Fixed a bug where a failed DNS-lookup thread creation or join could leave a peer's DNS/NTS resolution permanently stuck, blocking further lookups.
 
 === Bug Fixes and Protocol Refinements:
 
@@ -33,6 +60,21 @@ Note: Python 2 and OpenSSL 1.1.0 support will be removed in the next release.
 * Fixed a state machine bug (NTPsec/ntpsec#848) where the `STA_UNSYNC` flag was prematurely cleared at system startup.
 * Fixed an interactive interface crash in `ntpmon` triggered by hitting the minus (`-`) key.
 * Added native `.webp` image encoding support to the `ntpviz` graphing tool.
+* Fixed `ntpd` silently ignoring mode 1 (symmetric active) requests, e.g. from Windows clients; they are now answered like ordinary client requests.
+* Fixed a regression where `ntpd` failed to clear peer state on interface change, delaying resynchronization after network changes.
+* Fixed NTP extension-field parsing to stop treating unrecognized non-critical fields as fatal; they are now ignored instead of causing packet rejection.
+* `socktoa()` no longer formats `AF_UNSPEC` addresses as IPv4, correcting address display in `ntpq` and `ntpmon`.
+* mode6 control protocol responses now omit peer addresses that are empty or otherwise unprintable instead of emitting malformed data.
+* Fixed `ntpdig` to build a fresh request packet (timestamp/MAC) for each destination address tried, instead of resending the same packet.
+* Fixed `ntpdig` crashing with an unhandled `UnicodeError` when a configured server name with non-ASCII characters fails DNS resolution.
+* Fixed a crash in `ntpq`'s interactive `noflake` command (NTPsec/ntpsec#863).
+* Fixed a crash (`NameError`) in `ntpq` under Python 2 caused by referencing the Python-3-only `BrokenPipeError`.
+* Fixed a crash in `ntpq` and `ntpmon` when a peer's source address is empty, e.g. NXDOMAIN or a POOL association.
+* `sys_var_list` is no longer marked as a default variable, so it is excluded from `ntpq`'s default `rv` (readvar) output.
+
+=== Removed:
+
+* Removed the undocumented `-s`/`--srcname` and `-S`/`--srcnumber` display options, and the `hostname`/`hostnum` arguments to ntpq's `hostnames` command, from `ntpq` and `ntpmon`. This shipped in 1.2.4 but was never documented in NEWS and has now been fully reverted.
 
 == 2025-04-18: 1.2.4
 
