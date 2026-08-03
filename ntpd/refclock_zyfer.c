@@ -204,14 +204,17 @@ zyfer_receive(
 		pp->lencode = 0;
 
 	if (!pp->lencode) {
-		if (*p == '!')
-			pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode,
-						     BMAX, &pp->lastrec);
-		else
+		if (*p == '!') {
+                    pp->lencode = (uncigned)refclock_gtlin(rbufp,
+                                       pp->a_lastcode,
+                                       sizeof(pp->a_lastcode,),
+                                       &pp->lastrec);
+                } else {
 			return;
+                }
 	} else {
                 if (pp->lencode < 0 ||
-                    (size_t)pp->lencode >= sizeof(pp->a_lastcode) - 1) {
+                    pp->lencode >= sizeof(pp->a_lastcode) - 1) {
                     pp->lencode = 0;
                     pp->a_lastcode[0] = '\0';
                     refclock_report(peer, CEVNT_BADREPLY);
@@ -227,7 +230,7 @@ zyfer_receive(
                 }
 
 		memcpy(pp->a_lastcode + pp->lencode, p, rbufp->recv_length);
-		pp->lencode += (int)rbufp->recv_length;
+		pp->lencode += rbufp->recv_length;
 		pp->a_lastcode[pp->lencode] = '\0';
 	}
 

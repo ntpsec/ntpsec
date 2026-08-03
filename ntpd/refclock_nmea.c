@@ -818,7 +818,7 @@ nmea_receive(
 	nmea_data rdata;
 	char 	  rd_lastcode[BMAX];
 	l_fp 	  rd_timestamp, rd_reftime;
-	int	  rd_lencode;
+	unsigned  rd_lencode;
 	double	  rd_fudge;
 
 	/* working stuff */
@@ -857,7 +857,7 @@ nmea_receive(
 		return;
 
 	default:
-		DPRINT(1, ("%s gpsread: %d '%s'\n",
+		DPRINT(1, ("%s gpsread: %u '%s'\n",
 			   refclock_name(peer), rd_lencode,
 			   rd_lastcode));
 		break;
@@ -941,7 +941,7 @@ nmea_receive(
 		return;
 	}
 
-	DPRINT(1, ("%s processing %d bytes, timecode '%s'\n",
+	DPRINT(1, ("%s processing %u bytes, timecode '%s'\n",
 		   refclock_name(peer), rd_lencode, rd_lastcode));
 
 	/*
@@ -1029,7 +1029,7 @@ nmea_receive(
 		checkres = -1;
 
 	if (checkres != -1) {
-		save_ltc(pp, rd_lastcode, (size_t)rd_lencode);
+		save_ltc(pp, rd_lastcode, rd_lencode);
 		refclock_report(peer, checkres);
 		return;
 	}
@@ -1070,7 +1070,7 @@ nmea_receive(
 
 	/* Data will be accepted. Update stats & log data. */
 	up->tally.accepted++;
-	save_ltc(pp, rd_lastcode, (size_t)rd_lencode);
+	save_ltc(pp, rd_lastcode, rd_lencode);
 	pp->lastrec = rd_timestamp;
 
 #ifdef HAVE_PPSAPI
@@ -1216,7 +1216,7 @@ save_ltc(
 	if (len >= sizeof(pp->a_lastcode)) {
 		len = sizeof(pp->a_lastcode) - 1;
 	}
-	pp->lencode = (unsigned short)len;
+	pp->lencode = (unsigned)len;
 	memcpy(pp->a_lastcode, tc, len);
 	pp->a_lastcode[len] = '\0';
 }

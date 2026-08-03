@@ -296,7 +296,7 @@ true_receive(
 	pp->lencode = rd_lencode;
 	strlcpy(pp->a_lastcode, rd_lastcode, sizeof(pp->a_lastcode));
 	pp->lastrec = rd_tmp;
-	true_debug(peer, "receive(%s) [%d]\n", pp->a_lastcode,
+	true_debug(peer, "receive(%s) [%u]\n", pp->a_lastcode,
 		   pp->lencode);
 
 	up->pollcnt = 2;

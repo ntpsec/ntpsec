@@ -273,13 +273,14 @@ void hpgps_receive(struct recvbuf *rbufp)
 	 * read the receiver response
 	 */
 	*pp->a_lastcode = '\0';
-	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &rd_timestamp);
+	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode,
+                                     sizeof(pp->a_lastcode), &rd_timestamp);
 
-	DPRINT(1, ("hpgps: lencode: %d timecode:%s\n",
+	DPRINT(1, ("hpgps: lencode: %u timecode:%s\n",
 		   pp->lencode, pp->a_lastcode));
 
 if (HPDEBUG) {
-  printf("HP in:%3d %s\n", pp->lencode, pp->a_lastcode);
+  printf("HP in:%3u %s\n", pp->lencode, pp->a_lastcode);
 }
 	/*
 	 * If there's no characters in the reply, we can quit now
@@ -291,7 +292,8 @@ if (HPDEBUG) {
 	while (1) {
 		if (strstr(pp->a_lastcode, "scpi > ") == pp->a_lastcode) {
 			pp->lencode -= 7;
-			memmove(pp->a_lastcode, pp->a_lastcode+7, pp->lencode+1);
+			memmove(pp->a_lastcode, pp->a_lastcode + 7,
+                                pp->lencode + 1);
 			continue;
 		}
 		if (pp->a_lastcode[0] == 'E' &&
@@ -304,7 +306,8 @@ if (HPDEBUG) {
 			DPRINT(0, ("hpgps: error: %s\n", pp->a_lastcode));
 			hpgps_write(peer, "*CLS\r\r");
 			pp->lencode -= 7;
-			memmove(pp->a_lastcode, pp->a_lastcode+7, pp->lencode+1);
+			memmove(pp->a_lastcode, pp->a_lastcode + 7,
+                                pp->lencode + 1);
 			continue;
 		}
 		break;
@@ -319,7 +322,7 @@ if (HPDEBUG) {
 		  *comma = ' ';
 		}
 		*up->lastptr++ = ' ';
-		memcpy(up->lastptr, pp->a_lastcode, (size_t)pp->lencode);
+		memcpy(up->lastptr, pp->a_lastcode, pp->lencode);
 		up->lastptr += pp->lencode;
 		if (up->cmndcnt < COUNTOF(commands)) {
 		  hpgps_write(peer, commands[up->cmndcnt++]);
@@ -354,11 +357,14 @@ if (HPDEBUG) {
 	if (up->linecnt > 0) {
 		up->linecnt--;
 		/* Silently drop whole line if it doesn't fit. */
-		if ((int)(pp->lencode + 2) <= (SMAX - (up->lastptr - up->statscrn))) {
-			if ( (up->lastptr != up->statscrn) || (up->linecnt > 0) )
-				/* ID string stays on same line */
+		if ((int)(pp->lencode + 2) <=
+                    (SMAX - (up->lastptr - up->statscrn))) {
+			if ( (up->lastptr != up->statscrn) ||
+                             (up->linecnt > 0) ) {
+				// ID string stays on same line
 				*up->lastptr++ = '\n';
-			memcpy(up->lastptr, pp->a_lastcode, (size_t)pp->lencode);
+                        }
+			memcpy(up->lastptr, pp->a_lastcode, pp->lencode);
 			up->lastptr += pp->lencode;
 		}
 		/* Status screen is 22 or 23 lines */

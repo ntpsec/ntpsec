@@ -514,7 +514,7 @@ spectracom_poll(
 #endif /* HAVE_PPSAPI */
 	refclock_receive(peer);
 	record_clock_stats(peer, pp->a_lastcode);
-	DPRINT(1, ("spectracom: timecode %d %s\n", pp->lencode,
+	DPRINT(1, ("spectracom: timecode %u %s\n", pp->lencode,
 		   pp->a_lastcode));
 }
 

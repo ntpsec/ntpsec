@@ -520,9 +520,10 @@ shm_timer(
 	 * that interpretation is best left to higher levels.
 	 */
 	/* a_lastcode is seen as timecode with: ntpq -c cv [associd] */
-	c = snprintf(pp->a_lastcode, sizeof(pp->a_lastcode), "%ld.%09ld",
-		     (long)shm_stat.tvt.tv_sec, (long)shm_stat.tvt.tv_nsec);
-	pp->lencode = (c < (int)sizeof(pp->a_lastcode)) ? c : 0;
+	c = snprintf(pp->a_lastcode, sizeof(pp->a_lastcode), "%lld.%09ld",
+		     (long long)shm_stat.tvt.tv_sec,
+                     (long)shm_stat.tvt.tv_nsec);
+	pp->lencode = (c < (int)sizeof(pp->a_lastcode)) ? (unsigned)c : 0;
 
 	/* check 1: age control of local time stamp */
 	tt = shm_stat.tvc.tv_sec - shm_stat.tvr.tv_sec;

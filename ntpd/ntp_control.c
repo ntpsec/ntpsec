@@ -1939,9 +1939,7 @@ ctl_putclock(
 		}
 		break;
 	case CC_TIMECODE:
-		ctl_putstr(CV_NAME,
-			   pcs->p_lastcode,
-			   (unsigned)pcs->lencode);
+		ctl_putstr(CV_NAME, pcs->p_lastcode, pcs->lencode);
 		break;
 
 	CASE_UINT(CC_POLL, pcs->polls);

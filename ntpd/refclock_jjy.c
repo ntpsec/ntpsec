@@ -554,7 +554,9 @@ jjy_receive ( struct recvbuf *rbufp )
 	 */
 	if ( up->linediscipline == LDISC_RAW ) {
 
-		pp->lencode  = (int)refclock_gtraw ( rbufp, pp->a_lastcode, BMAX-1, &tRecvTimestamp ) ;
+		pp->lencode = refclock_gtraw(rbufp, pp->a_lastcode,
+                                             sizeof(pp->a_lastcode) - 1,
+                                             &tRecvTimestamp ) ;
 		/* 3rd argument can be BMAX, but the coverity scan tool claim "Memory - corruptions  (OVERRUN)" */
 		/* "a_lastcode" is defined as "char a_lastcode[BMAX]" in the ntp_refclock.h */
 		/* To avoid its claim, pass the value BMAX-1. */
@@ -562,21 +564,22 @@ jjy_receive ( struct recvbuf *rbufp )
 		/*
 		 * Append received characters to temporary buffer
 		 */
-		for ( i = 0 ;
-		      i < pp->lencode && up->iRawBufLen < MAX_RAWBUF - 2 ;
-		      i ++ , up->iRawBufLen ++ ) {
+		for (i = 0 ;
+		     i < pp->lencode && up->iRawBufLen < MAX_RAWBUF - 2 ;
+		     i ++ , up->iRawBufLen ++ ) {
 			up->sRawBuf[up->iRawBufLen] = pp->a_lastcode[i] ;
 		}
 		up->sRawBuf[up->iRawBufLen] = 0 ;
 
 
 	} else {
-
-		pp->lencode  = refclock_gtlin ( rbufp, pp->a_lastcode, BMAX, &tRecvTimestamp ) ;
-
+		pp->lencode  = refclock_gtlin(rbufp, pp->a_lastcode,
+                                              sizeof(pp->a_lastcode),
+                                              &tRecvTimestamp ) ;
 	}
 #ifdef DEBUG
-	printf( "\nrefclock_jjy.c : %s : Len=%d  ", sFunctionName, pp->lencode ) ;
+	printf("\nrefclock_jjy.c : %s : Len=%u  ",
+               sFunctionName, pp->lencode ) ;
 	for ( i = 0 ; i < pp->lencode ; i ++ ) {
 		if ( iscntrl( pp->a_lastcode[i] & 0x7F ) ) {
 			printf("<x%02X>", (unsigned)(pp->a_lastcode[i] & 0xFF));
@@ -591,18 +594,21 @@ jjy_receive ( struct recvbuf *rbufp )
 	 * The reply with <CR><LF> gives a blank line
 	 */
 
-	if ( pp->lencode == 0 ) return ;
+	if (pp->lencode == 0) {
+            return;
+        }
 
 	/*
 	 * Receiving data is not expected
 	 */
 
-	if ( up->iProcessState == JJY_PROCESS_STATE_IDLE
-	  || up->iProcessState == JJY_PROCESS_STATE_DONE
-	  || up->iProcessState == JJY_PROCESS_STATE_ERROR ) {
-		/* Discard received data */
+	if (up->iProcessState == JJY_PROCESS_STATE_IDLE ||
+	    up->iProcessState == JJY_PROCESS_STATE_DONE ||
+	    up->iProcessState == JJY_PROCESS_STATE_ERROR ) {
+		// Discard received data
 		up->iRawBufLen = 0 ;
-	        DPRINT(1, ( "refclock_jjy.c : %s : Discard received data\n", sFunctionName )) ;
+	        DPRINT(1, ( "refclock_jjy.c : %s : Discard received data\n",
+                           sFunctionName )) ;
 		return ;
 	}
 
@@ -1104,11 +1110,11 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
-		pBuf = up->sTextBuf ;
-		iLen = up->iTextBufLen ;
+		pBuf = up->sTextBuf;
+		iLen = up->iTextBufLen;
 	} else {
-		pBuf = pp->a_lastcode ;
-		iLen = pp->lencode ;
+		pBuf = pp->a_lastcode;
+		iLen = pp->lencode;
 	}
 
 	DEBUG_PRINTF_JJY_RECEIVE( "jjy_receive_tristate_jjy01", iLen ) ;
@@ -1409,11 +1415,11 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
-		pBuf = up->sTextBuf ;
-		iLen = up->iTextBufLen ;
+		pBuf = up->sTextBuf;
+		iLen = up->iTextBufLen;
 	} else {
-		pBuf = pp->a_lastcode ;
-		iLen = pp->lencode ;
+		pBuf = pp->a_lastcode;
+		iLen = pp->lencode;
 	}
 
 	DEBUG_PRINTF_JJY_RECEIVE( "jjy_receive_cdex_jst2000", iLen ) ;
@@ -1579,11 +1585,11 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
-		pBuf = up->sTextBuf ;
-		iLen = up->iTextBufLen ;
+		pBuf = up->sTextBuf;
+		iLen = up->iTextBufLen;
 	} else {
-		pBuf = pp->a_lastcode ;
-		iLen = pp->lencode ;
+		pBuf = pp->a_lastcode;
+		iLen = pp->lencode;
 	}
 
 	DEBUG_PRINTF_JJY_RECEIVE( "jjy_receive_echokeisokuki_lt2000", iLen ) ;
@@ -1805,11 +1811,11 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
-		pBuf = up->sTextBuf ;
-		iLen = up->iTextBufLen ;
+		pBuf = up->sTextBuf;
+		iLen = up->iTextBufLen;
 	} else {
-		pBuf = pp->a_lastcode ;
-		iLen = pp->lencode ;
+		pBuf = pp->a_lastcode;
+		iLen = pp->lencode;
 	}
 
 	DEBUG_PRINTF_JJY_RECEIVE( "jjy_receive_citizentic_jjy200", iLen ) ;
@@ -1995,11 +2001,11 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
-		pBuf = up->sTextBuf ;
-		iLen = up->iTextBufLen ;
+		pBuf = up->sTextBuf;
+		iLen = up->iTextBufLen;
 	} else {
-		pBuf = pp->a_lastcode ;
-		iLen = pp->lencode ;
+		pBuf = pp->a_lastcode;
+		iLen = pp->lencode;
 	}
 
 	DEBUG_PRINTF_JJY_RECEIVE( "jjy_receive_tristate_gpsclock01", iLen ) ;
@@ -2319,11 +2325,11 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
-		pBuf = up->sTextBuf ;
-		iLen = up->iTextBufLen ;
+		pBuf = up->sTextBuf;
+		iLen = up->iTextBufLen;
 	} else {
-		pBuf = pp->a_lastcode ;
-		iLen = pp->lencode ;
+		pBuf = pp->a_lastcode;
+		iLen = pp->lencode;
 	}
 
 	DEBUG_PRINTF_JJY_RECEIVE( "jjy_receive_seiko_tsys_tdc_300", iLen ) ;
@@ -2817,11 +2823,11 @@ jjy_receive_telephone ( struct recvbuf *rbufp )
 	}
 
 	if ( up->linediscipline == LDISC_RAW ) {
-		pBuf = up->sTextBuf ;
-		iLen = (size_t)up->iTextBufLen ;
+		pBuf = up->sTextBuf;
+		iLen = (size_t)up->iTextBufLen;
 	} else {
-		pBuf = pp->a_lastcode ;
-		iLen = (size_t)pp->lencode ;
+		pBuf = pp->a_lastcode;
+		iLen = pp->lencode;
 	}
 
 	up->iTeljjySilentTimer = 0 ;
@@ -3415,11 +3421,11 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 	DEBUG_TELJJY_PRINTF( "teljjy_conn_data" ) ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
-		pBuf = up->sTextBuf ;
-		iLen = up->iTextBufLen ;
+		pBuf = up->sTextBuf;
+		iLen = up->iTextBufLen;
 	} else {
-		pBuf = pp->a_lastcode ;
-		iLen = pp->lencode ;
+		pBuf = pp->a_lastcode;
+		iLen = pp->lencode;
 	}
 
 	if ( teljjy_command_sequence[up->iClockCommandSeq].iEchobackReplyLength == iLen
@@ -3879,11 +3885,11 @@ modem_receive ( struct recvbuf *rbufp )
 	DEBUG_MODEM_PRINTF( sFunctionName ) ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
-		pBuf = up->sTextBuf ;
-		iLen = up->iTextBufLen ;
+		pBuf = up->sTextBuf;
+		iLen = up->iTextBufLen;
 	} else {
-		pBuf = pp->a_lastcode ;
-		iLen = pp->lencode ;
+		pBuf = pp->a_lastcode;
+		iLen = pp->lencode;
 	}
 
 	if      ( iLen ==  2 && strncmp( pBuf, "OK"         ,  2 ) == 0 ) { up->iModemEvent = MODEM_EVENT_RESP_OK          ; }

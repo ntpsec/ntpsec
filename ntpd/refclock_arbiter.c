@@ -313,7 +313,7 @@ arb_receive(
 	strlcpy(pp->a_lastcode, tbuf, sizeof(pp->a_lastcode));
 	pp->a_lastcode[LENARB - 2] = up->qualchar;
 	strlcat(pp->a_lastcode, up->status, sizeof(pp->a_lastcode));
-	pp->lencode = (int)strlen(pp->a_lastcode);
+	pp->lencode = strnlen(pp->a_lastcode, sizeof(pp->a_lastcode));
 	syncchar = ' ';
 	if (sscanf(pp->a_lastcode, "%c%2d %3d %2d:%2d:%2d",
 	    &syncchar, &pp->year, &pp->yday, &pp->hour,

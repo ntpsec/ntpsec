@@ -100,54 +100,54 @@ struct refclockbug {
 #define MAXDIAL		60	/* max length of modem dial strings */
 
 struct refclockproc {
-	void *	unitptr;	/* pointer to unit structure */
-	struct refclock * conf;	/* pointer to driver method table */
-	struct refclockio io;	/* I/O handler structure */
-	uint8_t	refclkunit;	/* reference clock unit number */
-	uint8_t	leap;		/* leap/synchronization code */
-	uint8_t	currentstatus;	/* clock status */
-	uint8_t	lastevent;	/* last exception event */
-	const char *clockname;	/* clock name (tag for logging) */
-	const char *clockdesc;	/* clock description */
-	unsigned long	nextaction;	/* local activity timeout */
-	void	(*action)(struct peer *); /* timeout callback */
+	void *	unitptr;                   // pointer to unit structure
+	struct refclock * conf;            // pointer to driver method table
+	struct refclockio io;              // I/O handler structure
+	uint8_t	refclkunit;                // reference clock unit number
+	uint8_t	leap;	                   // leap/synchronization code
+	uint8_t	currentstatus;             // clock status
+	uint8_t	lastevent;                 // last exception event
+	const char *clockname;             // clock name (tag for logging)
+	const char *clockdesc;             // clock description
+	unsigned long	nextaction;        // local activity timeout
+	void	(*action)(struct peer *);  // timeout callback
 
-	char	a_lastcode[BMAX]; /* last timecode received */
-	int	lencode;	/* length of last timecode */
+	char	a_lastcode[BMAX];          // last timecode received
+	unsigned lencode;                  // length of last timecode
 
-	int	year;		/* year of eternity */
-	int	yday;		/* day of year */
-	int	hour;		/* hour of day */
-	int	minute;		/* minute of hour */
-	int	second;		/* second of minute */
-	long	nsec;		/* nanosecond of second */
-	uint32_t	yearstart;	/* beginning of year */
-	int	coderecv;	/* put pointer */
-	int	codeproc;	/* get pointer */
-	l_fp	lastref;	/* reference timestamp */
-	l_fp	lastrec;	/* receive timestamp */
-	double	offset;		/* mean offset */
-	double	disp;		/* sample dispersion */
-	double	jitter;		/* jitter (mean squares) */
-	double	filter[MAXSTAGE]; /* median filter */
+	int	year;	                   // year of eternity
+	int	yday;	                   // day of year
+	int	hour;	                   // hour of day
+	int	minute;	                   // minute of hour
+	int	second;	                   // second of minute
+	long	nsec;	                   // nanosecond of second
+	uint32_t	yearstart;         // beginning of year
+	int	coderecv;                  // put pointer
+	int	codeproc;                  // get pointer
+	l_fp	lastref;                   // reference timestamp
+	l_fp	lastrec;                   // receive timestamp
+	double	offset;	                   // mean offset
+	double	disp;	                   // sample dispersion
+	double	jitter;	                   // jitter (mean squares)
+	double	filter[MAXSTAGE];          // median filter
 
 	/*
 	 * Configuration data
 	 */
-	double	fudgetime1;	/* fudge time1 */
-	double	fudgetime2;	/* fudge time2 */
-	uint8_t	stratum;	/* server stratum */
-	refid_t	refid;		/* reference identifier */
-	uint8_t	sloppyclockflag; /* driver options */
+	double	fudgetime1;                // fudge time1
+	double	fudgetime2;                // fudge time2
+	uint8_t	stratum;                   // server stratum
+	refid_t	refid;	                   // reference identifier
+	uint8_t	sloppyclockflag;           // driver options
 
 	/*
 	 * Status tallies
  	 */
-	uptime_t		timestarted;	/* time we started this */
-	unsigned long	polls;		/* polls sent */
-	unsigned long	noreply;	/* no replies to polls */
-	unsigned long	badformat;	/* bad format reply */
-	unsigned long	baddata;	/* bad data reply */
+	uptime_t timestarted;              // time we started this
+	unsigned long	polls;	           // polls sent
+	unsigned long	noreply;           // no replies to polls
+	unsigned long	badformat;         // bad format reply
+	unsigned long	baddata;           // bad data reply
 };
 
 /*

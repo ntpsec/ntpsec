@@ -1087,7 +1087,10 @@ trimble_poll (
 	cl = snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
 		 "%4d %03d %02d:%02d:%02d.%09ld",
 		 pp->year, pp->yday, pp->hour,pp->minute, pp->second, pp->nsec);
-	pp->lencode = (cl < (int)sizeof(pp->a_lastcode)) ? cl : 0;
+        if (0 > cl) {
+           cl = 0;
+        }
+	pp->lencode = (cl < (int)sizeof(pp->a_lastcode)) ? (unsigned)cl : 0;
 	record_clock_stats(peer, pp->a_lastcode);
 
 	DPRINT(2, ("trimble_poll: unit %d: %s\n",
