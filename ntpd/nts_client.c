@@ -723,6 +723,7 @@ bool nts_client_process_response(SSL *ssl, struct peer* peer) {
 bool nts_client_process_response_core(uint8_t *buff, int transferred, struct peer* peer) {
         int idx;
         struct BufCtl_t buf;
+        bool sawEOM = false;
 
         peer->nts_state.cookielen = 0;
         peer->nts_state.aead = NO_AEAD;
@@ -845,6 +846,7 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
                                 msyslog(LOG_ERR, "NTSc: EOM not at end: %d", buf.left);
                                 return false;
                         }
+                        sawEOM = true;
                         break;
                     default:
                         msyslog(LOG_ERR, "NTSc: received strange type: T=%d, C=%d, L=%d",
@@ -858,9 +860,14 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
                 }  // case
         }   // while
 
-//      FIXME: Need to check for EOM -- read more??
         if (buf.left > 0)
                 return false;
+
+        // EOM must be last (checked above), so it appears at most once
+        if (!sawEOM) {
+                msyslog(LOG_ERR, "NTSc: No EOM.");
+                return false;
+        }
 
         if (NO_AEAD == peer->nts_state.aead) {
                 msyslog(LOG_ERR, "NTSc: No AEAD algorithm.");
