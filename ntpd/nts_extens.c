@@ -153,7 +153,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
                 }
                 switch (type) {
                     case Unique_Identifier:
-                        if (length > NTS_UID_MAX_LENGTH) {
+                        if (length > NTS_UID_MAX_LENGTH || length < NTS_UID_LENGTH) {
                                 return false;
                         }
                         ntspacket->uidlen = length;
