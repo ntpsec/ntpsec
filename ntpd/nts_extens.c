@@ -412,13 +412,15 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
                                 return false;        // garbage packet
                         noncelen = next_uint16(&buf);
                         outlen = next_uint16(&buf);
-                        if (noncelen&3 || outlen&3)
+                        if (NONCE_LENGTH != noncelen)
+                                return false;        // garbage packet
+                        if (outlen&3)
                                 return false;        // else round up
+                        if (noncelen+CMAC_LENGTH > buf.left)
+                                return false;        // garbage packet
                         nonce = buf.next;
                         ciphertext = nonce+noncelen;
                         plaintext = ciphertext+CMAC_LENGTH;
-                        if (noncelen+CMAC_LENGTH > length)
-                                return false;        // garbage packet
                         outlen = buf.left-noncelen-CMAC_LENGTH;
                         //  printf("ECRa: %lu, %d\n", (long unsigned)outlen,
                        //          noncelen);
