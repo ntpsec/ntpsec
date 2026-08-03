@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 
-FROM gentoo/portage as portage
+FROM gentoo/portage AS portage
 
 FROM gentoo/stage3
 
