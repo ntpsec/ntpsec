@@ -381,6 +381,8 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
         // We may get garbage from the net
         if (cookielen > NTS_MAX_COOKIELEN)
                 return false;
+        if (cookielen < AD_LENGTH)
+                return false;
 
         finger = cookie;
         key = NULL;             // squash uninitialized warning
