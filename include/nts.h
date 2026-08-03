@@ -35,17 +35,16 @@ bool nts_read_cookie_keys(void);
 void nts_make_cookie_key(void);
 bool nts_write_cookie_keys(void);
 
-int nts_make_cookie(uint8_t *cookie,
-  uint16_t aead,
-  uint8_t *c2s, uint8_t *s2c, int keylen);
-bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
+unsigned nts_make_cookie(uint8_t *cookie, uint16_t aead,
+  uint8_t *c2s, uint8_t *s2c, unsigned keylen);
+bool nts_unpack_cookie(uint8_t *cookie, unsigned cookielen,
   uint16_t *aead,
-  uint8_t *c2s, uint8_t *s2c, int *keylen);
+  uint8_t *c2s, uint8_t *s2c, unsigned *keylen);
 
 /* working finger into a buffer - updated by append/unpack routines */
 struct BufCtl_t {
-    uint8_t *next;  /* pointer to next data/space */
-    int left;       /* data left or space available */
+    uint8_t *next;  // pointer to next data/space
+    unsigned left;  // data left or space available
 };
 typedef struct BufCtl_t BufCtl;
 
@@ -75,21 +74,23 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
 /* append_foo appends foo to existing partial record */
 void ke_append_record_null(BufCtl* buf, uint16_t type);
 void ke_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data);
-void ke_append_record_bytes(BufCtl* buf, uint16_t type, uint8_t *data, int length);
+void ke_append_record_bytes(BufCtl* buf, uint16_t type, uint8_t *data,
+                            unsigned length);
 
 void ex_append_record_null(BufCtl* buf, uint16_t type);
 void ex_append_record_uint16(BufCtl* buf, uint16_t type, uint16_t data);
-void ex_append_record_bytes(BufCtl* buf, uint16_t type, uint8_t *data, int length);
+void ex_append_record_bytes(BufCtl* buf, uint16_t type, uint8_t *data,
+                            unsigned length);
 
 void ex_append_header(BufCtl* buf, uint16_t type, uint16_t length);
 void append_header(BufCtl* buf, uint16_t type, uint16_t length);
 void append_uint16(BufCtl* buf, uint16_t data);
-void append_bytes(BufCtl* buf, uint8_t *data, int length);
+void append_bytes(BufCtl* buf, uint8_t *data, unsigned length);
 
-uint16_t ke_next_record(BufCtl* buf, int *length);
-uint16_t ex_next_record(BufCtl* buf, int *length);  /* body length */
+uint16_t ke_next_record(BufCtl* buf, unsigned *length);
+uint16_t ex_next_record(BufCtl* buf, unsigned *length);  // body length
 uint16_t next_uint16(BufCtl* buf);
-uint16_t next_bytes(BufCtl* buf, uint8_t *data, int length);
+uint16_t next_bytes(BufCtl* buf, uint8_t *data, unsigned length);
 
 /***********************************************************/
 
@@ -121,16 +122,16 @@ struct ntscfg_t {
 
 /* Client-side state per connection to server */
 struct ntsclient_t {
-	/* wire connection */
-	uint16_t aead;	/* AEAD algorithm used on wire */
-	int keylen;
+	// wire connection
+	uint16_t aead;	// AEAD algorithm used on wire
+	unsigned keylen;
 	uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
-	/* UID of last request sent - RFC 5.3 */
+	// UID of last request sent - RFC 5.3
 	uint8_t UID[NTS_UID_LENGTH];
-	/* cookies */
-	int readIdx, writeIdx;
-	int count;			/* -1 if not in NTS mode */
-	int cookielen;
+	// cookies
+	unsigned readIdx, writeIdx;
+	int count;			// -1 if not in NTS mode
+	unsigned cookielen;
 	uint8_t cookies[NTS_MAX_COOKIES][NTS_MAX_COOKIELEN];
 };
 
@@ -141,7 +142,7 @@ struct ntspacket_t {
 	uint8_t UID[NTS_UID_MAX_LENGTH];
 	int needed;
 	uint16_t aead;
-	int keylen;
+	unsigned keylen;
 	uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
 };
 

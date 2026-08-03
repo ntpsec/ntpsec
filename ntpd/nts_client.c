@@ -399,7 +399,7 @@ struct addrinfo *find_best_addr(struct addrinfo *answer) {
 			msyslog(LOG_INFO, "NTSc: Skipping %s", errbuf);
 			continue;  /* already in use */
 		}
-		break; 
+		break;
 	}
 	return(answer);
 }
@@ -732,14 +732,14 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 	while (buf.left >= NTS_KE_HDR_LNG) {
 		uint16_t type, data, port;
 		bool critical = false;
-		int length, keylength;
+		unsigned  length, keylength;
 		char errbuf[100];
 #define MAX_SERVER 100
 		char server[MAX_SERVER];
 
 		type = ke_next_record(&buf, &length);
 		if (length > buf.left){
-			msyslog(LOG_ERR, "NTSc: Chunk too big: 0x%x, %d, %d", 
+			msyslog(LOG_ERR, "NTSc: Chunk too big: 0x%x, %u, %u",
 				type, buf.left, length);
 			return false;
 		}
@@ -747,50 +747,63 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 			critical = true;
 			type &= ~NTS_CRITICAL;
 		}
-		if (0) // Handy for debugging but very verbose
-			msyslog(LOG_ERR, "NTSc: Record: T=%d, L=%d, C=%d", type, length, critical);
+		if (0) {
+                        // Handy for debugging but very verbose
+			msyslog(LOG_ERR, "NTSc: Record: T=%d, L=%u, C=%d",
+                                type, length, critical);
+                }
 		switch (type) {
 		    case nts_error:
 			if (sizeof(data) != length) {
-				msyslog(LOG_ERR, "NTSc: wrong length on error: %d", length);
+				msyslog(LOG_ERR,
+                                        "NTSc: wrong length on error: %u",
+                                        length);
 				return false;
 			}
 			data = next_uint16(&buf);
-			msyslog(LOG_ERR, "NTSc: error: %d", data);
+			msyslog(LOG_ERR, "NTSc: error: %u", data);
 			return false;
 		    case nts_next_protocol_negotiation:
 			if (sizeof(data) != length) {
-				msyslog(LOG_ERR, "NTSc: NPN-Wrong length: %d", length);
+				msyslog(LOG_ERR, "NTSc: NPN-Wrong length: %u",
+                                        length);
 				return false;
 			}
 			data = next_uint16(&buf);
 			if (data != nts_protocol_NTP) {
-				msyslog(LOG_ERR, "NTSc: NPN-Bad data: %d", data);
+				msyslog(LOG_ERR, "NTSc: NPN-Bad data: %u",
+                                        data);
 				return false;
 			}
 			break;
 		    case nts_algorithm_negotiation:
 			if (sizeof(data) != length) {
-				msyslog(LOG_ERR, "NTSc: AN-Wrong length: %d", length);
+				msyslog(LOG_ERR, "NTSc: AN-Wrong length: %u",
+                                        length);
 				return false;
 			}
 			data = next_uint16(&buf);
 			keylength = nts_get_key_length(data);
 			if (0 == keylength) {
-				msyslog(LOG_ERR, "NTSc: AN-Unsupported AEAN type: %d", data);
+				msyslog(LOG_ERR,
+                                        "NTSc: AN-Unsupported AEAN type: %u",
+                                       data);
 				return false;
 			}
 			peer->nts_state.aead = data;
 			break;
 		    case nts_new_cookie:
 			if (NTS_MAX_COOKIELEN < length) {
-				msyslog(LOG_ERR, "NTSc: NC cookie too big: %d", length);
+				msyslog(LOG_ERR, "NTSc: NC cookie too big: %u",
+                                       length);
 				return false;
 			}
-			if (0 == peer->nts_state.cookielen)
+			if (0 == peer->nts_state.cookielen) {
 				peer->nts_state.cookielen = length;
+                        }
 			if (length != peer->nts_state.cookielen) {
-				msyslog(LOG_ERR, "NTSc: Cookie length mismatch %d, %d.",
+				msyslog(LOG_ERR,
+                                        "NTSc: Cookie length mismatch %u, %u.",
 					length, peer->nts_state.cookielen);
 				return false;
 			}
@@ -801,50 +814,62 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 				buf.left -= length;
 				break;
 			}
-			next_bytes(&buf, (uint8_t*)&peer->nts_state.cookies[idx], length);
+			next_bytes(&buf,
+                                  (uint8_t*)&peer->nts_state.cookies[idx],
+                                  length);
 			peer->nts_state.writeIdx++;
-			peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
+			peer->nts_state.writeIdx =
+                            peer->nts_state.writeIdx % NTS_MAX_COOKIES;
 			peer->nts_state.count++;
 			break;
 		    case nts_server_negotiation:
-			if (MAX_SERVER < (length+1)) {
-				msyslog(LOG_ERR, "NTSc: server string too long %d.", length);
+			if (MAX_SERVER < (length + 1)) {
+				msyslog(LOG_ERR,
+                                        "NTSc: server string too long %u.",
+                                       length);
 				return false;
 			}
 			next_bytes(&buf, (uint8_t *)server, length);
 			server[length] = '\0';
-			/* save port in case port specified before server */
+			// save port in case port specified before server
 			port = SRCPORT(&sockaddr);
-			if (!nts_server_lookup(server, &sockaddr, AF(&peer->srcadr)))
+			if (!nts_server_lookup(server, &sockaddr,
+                                              AF(&peer->srcadr))) {
 				return false;
+                        }
 			SET_PORT(&sockaddr, port);
 			socktoa_r(&sockaddr, errbuf, sizeof(errbuf));
-			msyslog(LOG_ERR, "NTSc: Using server %s=>%s", server, errbuf);
+			msyslog(LOG_ERR, "NTSc: Using server %s=>%s",
+                                server, errbuf);
 			break;
 		    case nts_port_negotiation:
 			if (sizeof(port) != length) {
-				msyslog(LOG_ERR, "NTSc: PN-Wrong length: %d, %d",
+				msyslog(LOG_ERR,
+                                        "NTSc: PN-Wrong length: %u, %d",
 					length, critical);
 				return false;
 			}
 			port = next_uint16(&buf);
 			SET_PORT(&sockaddr, port);
-			msyslog(LOG_ERR, "NTSc: Using port %d", port);
+			msyslog(LOG_ERR, "NTSc: Using port %u", port);
 			break;
 		    case nts_end_of_message:
 			if ((0 != length) || !critical) {
-				msyslog(LOG_ERR, "NTSc: EOM-Wrong length or not Critical: %d, %d",
-					length, critical);
-				return false;
+                            msyslog(LOG_ERR,
+                              "NTSc: EOM-Wrong length or not Critical: %u, %d",
+			      length, critical);
+                            return false;
 			}
 			if (0 != buf.left) {
-				msyslog(LOG_ERR, "NTSc: EOM not at end: %d", buf.left);
+				msyslog(LOG_ERR,
+                                        "NTSc: EOM not at end: %u", buf.left);
 				return false;
 			}
 			break;
 		    default:
-			msyslog(LOG_ERR, "NTSc: received strange type: T=%d, C=%d, L=%d",
-				type, critical, length);
+			msyslog(LOG_ERR,
+                             "NTSc: received strange type: T=%u, C=%d, L=%u",
+			     type, critical, length);
 			if (critical) {
 				return false;
 			}
@@ -867,8 +892,9 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
 		return false;
 	}
 
-	msyslog(LOG_ERR, "NTSc: Got %d cookies, length %d, aead=%d.",
-		peer->nts_state.count, peer->nts_state.cookielen, peer->nts_state.aead);
+	msyslog(LOG_ERR, "NTSc: Got %d cookies, length %u, aead=%d.",
+		peer->nts_state.count, peer->nts_state.cookielen,
+                peer->nts_state.aead);
 	return true;
 }
 
@@ -876,8 +902,10 @@ bool nts_set_cert_search(SSL_CTX *ctx, const char *filename) {
 	struct stat statbuf;
 	char errbuf[100];
 	if (NULL == filename) {
-		msyslog(LOG_INFO, "NTSc: Using system default root certificates.");
-		SSL_CTX_set_default_verify_paths(ctx);   // Use system root certs
+		msyslog(LOG_INFO,
+                    "NTSc: Using system default root certificates.");
+                // Use system root certs
+		SSL_CTX_set_default_verify_paths(ctx);
 		return true;
 	}
 	if (0 == stat(filename, &statbuf)) {

@@ -546,12 +546,12 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
   char *errbuf, int errlng, const char **errtxt) {
 	while (buf->left >= NTS_KE_HDR_LNG) {
 		uint16_t type, data;
-		int length;
+		unsigned length;
 		bool critical = false;
 		type = ke_next_record(buf, &length);
                 if (length > buf->left) {
 			snprintf(errbuf, errlng,
-				"Chunk too big: 0x%x, %d, %d",
+				"Chunk too big: 0x%x, %u, %u",
                                 type, buf->left, length);
 			*errtxt = errbuf;
                         return false;
@@ -560,32 +560,36 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
 			critical = true;
 			type &= ~NTS_CRITICAL;
 		}
-		if (0) // Handy for debugging but very verbose
-			msyslog(LOG_INFO, "NTSs: Record: T=%d, L=%d, C=%d", type, length, critical);
+		if (0) {
+                        // Handy for debugging but very verbose
+			msyslog(LOG_INFO,
+                                "NTSs: Record: T=%d, L=%u, C=%d",
+                                type, length, critical);
+                }
 		switch (type) {
 		    case nts_error:
 			if (sizeof(data) != length) {
 				snprintf(errbuf, errlng,
-					"Wrong length on error: %d", length);
+					"Wrong length on error: %u", length);
 				*errtxt = errbuf;
 				return false;
 			}
 			data = next_uint16(buf);
 			snprintf(errbuf, errlng,
-				"Received error: %d", data);
+				"Received error: %u", data);
 			*errtxt = errbuf;
 			return false;
 		    case nts_next_protocol_negotiation:
 			if (sizeof(data) != length) {
 				snprintf(errbuf, errlng,
-					"NPN-Wrong length: %d", length);
+					"NPN-Wrong length: %u", length);
 				*errtxt = errbuf;
 				return false;
 			}
 			data = next_uint16(buf);
 			if (data != nts_protocol_NTP) {
 				snprintf(errbuf, errlng,
-					"NPN-Bad data: %d", data);
+					"NPN-Bad data: %u", data);
 				*errtxt = errbuf;
 				return false;
 			}
@@ -593,33 +597,41 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
 		    case nts_algorithm_negotiation:
 			if (length % sizeof(uint16_t) > 0) {
 				snprintf(errbuf, errlng,
-					"AN-Wrong length: %d", length);
+					"AN-Wrong length: %u", length);
 				*errtxt = errbuf;
 				return false;
 			}
-			for (int i=0; i<length; i+=sizeof(uint16_t)) {
+			for (unsigned i = 0; i < length;
+                            i += sizeof(uint16_t)) {
 				data = next_uint16(buf);
 				if (0 == nts_get_key_length(data)) {
-					if (0)  /* for debugging */
-						msyslog(LOG_ERR, "NTSs: AN-Unsupported AEAN type: %d", data);
-					continue;     /* ignore types we don't support */
+                                    if (0) {
+                                        // for debugging
+                                        msyslog(LOG_ERR,
+                                          "NTSs: AN-Unsupported AEAN type: %u",
+                                          data);
+                                    }
+                                    // ignore types we don't support
+                                    continue;
 				}
-				if (*aead != NO_AEAD)
-					continue;     /* already got one */
-				*aead = data;   /* take this one */
+				if (*aead != NO_AEAD) {
+					continue;     // already got one
+                                }
+				*aead = data;   // take this one
 			}
 			break;
 		    case nts_end_of_message:
-			if ((0 != length) || !critical) {
+			if ((0 != length) ||
+                            !critical) {
 				snprintf(errbuf, errlng,
-					"EOM-Wrong length or not Critical: %d, %d",
-					length, critical);
+                                    "EOM-Wrong length or not Critical: %u, %d",
+                                    length, critical);
 				*errtxt = errbuf;
 				return false;
 			}
 			if (0 != buf->left) {
 				snprintf(errbuf, errlng,
-					"EOM not at end: %d", buf->left);
+					"EOM not at end: %u", buf->left);
 				*errtxt = errbuf;
 				return false;
 			}
@@ -628,7 +640,7 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
 			if (critical) {
 			  // This only logs the first one from a connection
 			  snprintf(errbuf, errlng,
-				"Received strange type: T=%d, C=%d, L=%d",
+				"Received strange type: T=%d, C=%d, L=%u",
 				type, critical, length);
 			  // There is an error code for this
 			  return false;

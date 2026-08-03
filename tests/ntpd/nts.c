@@ -324,15 +324,16 @@ TEST(nts, append_bytes) {
 TEST(nts, ke_next_record) {
 	/* Setup */
 	uint8_t buf[16] = {0xFA, 0xCE, 0, 4, 0xFF, 0xEE, 0xDD, 0xCC,
-		0, 0, 0, 0, 0, 0, 0, 0};
+		           0, 0, 0, 0, 0, 0, 0, 0};
 	BufCtl cursor;
 	cursor.next = buf;
 	cursor.left = 16;
-	int length;
+	unsigned  length;
 	uint16_t type;
-	/* Run test */
+
+	// Run test
 	type = ke_next_record(&cursor, &length);
-	/* Check */
+	// Check
 	TEST_ASSERT_EQUAL_INT(4, length);
 	TEST_ASSERT_EQUAL_INT(0xFACE, type);
 	TEST_ASSERT_POINTERS_EQUAL(&buf[4], cursor.next);
@@ -342,15 +343,16 @@ TEST(nts, ke_next_record) {
 TEST(nts, ex_next_record) {
 	/* Setup */
 	uint8_t buf[16] = {0xFA, 0xCE, 0, 8, 0xFF, 0xEE, 0xDD, 0xCC,
-		0, 0, 0, 0, 0, 0, 0, 0};
+	                   0, 0, 0, 0, 0, 0, 0, 0};
 	BufCtl cursor;
 	cursor.next = buf;
 	cursor.left = 16;
-	int length;
+	unsigned  length;
 	uint16_t type;
-	/* Run test */
+
+	// Run test
 	type = ex_next_record(&cursor, &length);
-	/* Check */
+	// Check
 	TEST_ASSERT_EQUAL_INT(4, length);
 	TEST_ASSERT_EQUAL_INT(0xFACE, type);
 	TEST_ASSERT_POINTERS_EQUAL(&buf[4], cursor.next);
@@ -382,9 +384,10 @@ TEST(nts, next_bytes) {
 	cursor.left = 16;
 	uint8_t data[8];
 	uint16_t length;
-	/* Run test */
+
+	// Run test
 	length = next_bytes(&cursor, data, 8);
-	/* Check */
+	// Check
 	TEST_ASSERT_EQUAL_INT(8, length);
 	TEST_ASSERT_EQUAL_UINT8(0xFA, data[0]);
 	TEST_ASSERT_EQUAL_UINT8(0xCE, data[1]);

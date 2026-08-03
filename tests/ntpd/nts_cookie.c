@@ -49,23 +49,27 @@ TEST(nts_cookie, nts_make_cookie_key) {
 }
 
 TEST(nts_cookie, nts_make_unpack_cookie) {
-	/* init */
+	// init
 	uint8_t cookie[NTS_MAX_COOKIELEN];
-	/* Using 16 bytes in test for ease of handling */
-	uint8_t c2s[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-	uint8_t s2c[16] = {16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+	// Using 16 bytes in test for ease of handling
+	uint8_t c2s[16] = {1, 2, 3, 4, 5, 6, 7, 8,
+                           9, 10, 11, 12, 13, 14, 15, 16};
+	uint8_t s2c[16] = {16, 15, 14, 13, 12, 11, 10, 9, 8,
+                           7, 6, 5, 4, 3, 2, 1};
 	uint8_t c2s_2[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	uint8_t s2c_2[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	int len;
-	int keylen;
+	unsigned len;
+	unsigned keylen;
 	bool ok;
-	uint16_t aead; /* retrieved on unpack */
-	/* Init for cookie_ctx */
+	uint16_t aead;   // retrieved on unpack
+
+	// Init for cookie_ctx
 	nts_cookie_init();
 	nts_nKeys = 0;
 	nts_make_cookie_key();
-	/* Test */
-	len = nts_make_cookie(cookie, AEAD_AES_SIV_CMAC_256, c2s, s2c, sizeof(c2s));
+	// Test
+	len = nts_make_cookie(cookie, AEAD_AES_SIV_CMAC_256, c2s, s2c,
+                              sizeof(c2s));
 	TEST_ASSERT_EQUAL(72, len);
 	/* Very limited in what data can be directly checked here */
 	/* Reverse the test */

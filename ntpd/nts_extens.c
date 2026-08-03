@@ -117,14 +117,15 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 	return used;
 }
 
-bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
+bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng)
+{
 	struct BufCtl_t buf;
 	uint16_t aead;
-	int noncelen, cmaclen;
+	unsigned noncelen, cmaclen;
 	bool sawcookie, sawAEEF;
-	int cookielen;			/* cookie and placeholder(s) */
+	unsigned cookielen;			// cookie and placeholder(s)
 
-	nts_cnt.server_recv_bad++;		/* assume bad, undo if OK */
+	nts_cnt.server_recv_bad++;		// assume bad, undo if OK
 
 	buf.next = pkt+LEN_PKT_NOMAC;
 	buf.left = lng-LEN_PKT_NOMAC;
@@ -136,13 +137,15 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 
 	while (buf.left >= NTS_KE_HDR_LNG) {
 		uint16_t type;
-		int length, adlength;
+		unsigned length, adlength;
 		size_t outlen;
 		uint8_t *nonce, *cmac;
 		bool ok;
 
-		type = ex_next_record(&buf, &length); /* length excludes header */
-		if (length&3 || length > buf.left || length < 0) {
+                // length excludes header
+		type = ex_next_record(&buf, &length);
+		if (length&3 ||
+                    length > buf.left) {
 			return false;
 		}
 		switch (type) {
@@ -158,7 +161,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			 * in order to avoid amplification attacks.
 			 */
 			if (sawcookie) {
-				return false; /* second cookie */
+				return false;   // second cookie
 			}
 			if (0 == cookielen) {
 				cookielen = length;
@@ -166,8 +169,9 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			else if (length != cookielen) {
 				return false;
 			}
-			ok = nts_unpack_cookie(buf.next, length, &aead, ntspacket->c2s,
-					       ntspacket->s2c, &ntspacket->keylen);
+			ok = nts_unpack_cookie(buf.next, length, &aead,
+                                               ntspacket->c2s, ntspacket->s2c,
+                                               &ntspacket->keylen);
 			if (!ok) {
 				return false;
 			}
@@ -190,9 +194,10 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			break;
 		    case NTS_AEEF:
 			if (!sawcookie) {
-				return false; /* no cookie yet, no c2s */
+				return false;  // no cookie yet, no c2s
 			}
-			if (length != NTP_EX_HDR_LNG+NONCE_LENGTH+CMAC_LENGTH) {
+			if ((NTP_EX_HDR_LNG + NONCE_LENGTH + CMAC_LENGTH) !=
+			     length) {
 				return false;
 			}
 			/* Additional data is up to this exten. */
@@ -201,13 +206,16 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			noncelen = next_uint16(&buf);
 			cmaclen = next_uint16(&buf);
 			if (noncelen & 3) {
-				return false; /* would require padding */
+				return false;  // would require padding
+			}
+			if (NONCE_LENGTH < noncelen) {
+				return false;  // too big!?
 			}
 			if (CMAC_LENGTH != cmaclen) {
 				return false;
 			}
 			nonce = buf.next;
-			cmac = nonce+NONCE_LENGTH;
+			cmac = nonce + NONCE_LENGTH;
 			outlen = 6;
 			ok = AES_SIV_Decrypt(wire_ctx,
 					     NULL, &outlen,
@@ -221,12 +229,13 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			if (0 != outlen) {
 				return false;
 			}
-			/* we already used 2 length slots way above*/
-			length -= (NTP_EX_U16_LNG+NTP_EX_U16_LNG);
+			// we already used 2 length slots way above
+			length -= NTP_EX_U16_LNG + NTP_EX_U16_LNG;
 			buf.next += length;
 			buf.left -= length;
 			if (0 != buf.left) {
-				return false; /* Reject extens after AEEF block */
+                            // Reject extens after AEEF block
+                            return false;
 			}
 			sawAEEF = true;
 			break;
@@ -243,84 +252,92 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	if (!sawAEEF) {
 		return false;
 	}
-	if (buf.left > 0)
+	if (buf.left > 0) {
 		return false;
+        }
 
-	//  printf("ESRx: %d, %d, %d\n",
-	//      lng-LEN_PKT_NOMAC, ntspacket->needed, ntspacket->keylen);
+	//  printf("ESRx: %u, %u, %u\n",
+	//      lng - LEN_PKT_NOMAC, ntspacket->needed, ntspacket->keylen);
 	ntspacket->valid = true;
 	nts_cnt.server_recv_good++;
 	nts_cnt.server_recv_bad--;
 	return true;
 }
 
-int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
+int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt)
+{
 	struct BufCtl_t buf;
-	int used, adlength;
+	unsigned used, adlength;
 	size_t left;
 	uint8_t *nonce, *packet;
 	uint8_t *plaintext, *ciphertext;;
 	uint8_t cookie[NTS_MAX_COOKIELEN];
-	int cookielen, plainleng, aeadlen;
+	unsigned cookielen, plainleng, aeadlen;
 	bool ok;
 
-	/* get first cookie now so we have length */
+	// get first cookie now so we have length
 	cookielen = nts_make_cookie(cookie, ntspacket->aead,
-				    ntspacket->c2s, ntspacket->s2c, ntspacket->keylen);
+				    ntspacket->c2s, ntspacket->s2c,
+                                    ntspacket->keylen);
 
 	packet = (uint8_t*)xpkt;
 	buf.next = xpkt->exten;
 	buf.left = MAX_EXT_LEN;
 
-	/* UID */
-	if (0 < ntspacket->uidlen)
+	// UID
+	if (0 < ntspacket->uidlen) {
 		ex_append_record_bytes(&buf, Unique_Identifier,
 				       ntspacket->UID, ntspacket->uidlen);
+        }
 
-	adlength = buf.next-packet;		/* up to here is Additional Data */
+	adlength = buf.next-packet;  // up to here is Additional Data
 
-	/* length of whole AEEF */
-	plainleng = ntspacket->needed*(NTP_EX_HDR_LNG+cookielen);
-	/* length of whole AEEF header */
-	aeadlen = NTP_EX_U16_LNG*2+NONCE_LENGTH+CMAC_LENGTH + plainleng;
+	// length of whole AEEF
+	plainleng = ntspacket->needed*(NTP_EX_HDR_LNG + cookielen);
+	// length of whole AEEF header
+	aeadlen = NTP_EX_U16_LNG * 2 + NONCE_LENGTH + CMAC_LENGTH + plainleng;
 	ex_append_header(&buf, NTS_AEEF, aeadlen);
 	append_uint16(&buf, NONCE_LENGTH);
-	append_uint16(&buf, plainleng+CMAC_LENGTH);
+	append_uint16(&buf, plainleng + CMAC_LENGTH);
 
 	nonce = buf.next;
 	ntp_RAND_bytes(nonce, NONCE_LENGTH);
 	buf.next += NONCE_LENGTH;
 	buf.left -= NONCE_LENGTH;
 
-	ciphertext = buf.next;	/* cipher text starts here */
+	ciphertext = buf.next;	// cipher text starts here
 	left = buf.left;
-	buf.next += CMAC_LENGTH;	/* skip space for CMAC */
+	buf.next += CMAC_LENGTH;	// skip space for CMAC
 	buf.left -= CMAC_LENGTH;
-	plaintext = buf.next;		/* encrypt in place */
+	plaintext = buf.next;		// encrypt in place
 
 	ex_append_record_bytes(&buf, NTS_Cookie,
 			       cookie, cookielen);
-	for (int i=1; i<ntspacket->needed; i++) {
-		/* WARN: This may get too big for the MTU. See length calculation above.
-		 * Responses are the same length as requests to avoid DDoS amplification.
-		 * So if it got to us, there is a good chance it will get back.  */
+	for (int i = 1; i < ntspacket->needed; i++) {
+                /* WARN: This may get too big for the MTU. See length
+                * calculation above.  Responses are the same length as
+                * requests to avoid DDoS amplification.  So if it got to
+                * us, there is a good chance it will get back. */
 		nts_make_cookie(cookie, ntspacket->aead,
-				ntspacket->c2s, ntspacket->s2c, ntspacket->keylen);
+				ntspacket->c2s, ntspacket->s2c,
+                                ntspacket->keylen);
 		ex_append_record_bytes(&buf, NTS_Cookie,
 				       cookie, cookielen);
 	}
 
-	//printf("ESSa: %d, %d, %d, %d\n",
+	//printf("ESSa: %u, %u, %u, %u\n",
 	//  adlength, plainleng, cookielen, ntspacket->needed);
 
+        // left: in: max out length, out: length used
 	ok = AES_SIV_Encrypt(wire_ctx,
-			     ciphertext, &left,   /* left: in: max out length, out: length used */
+			     ciphertext, &left,
 			     ntspacket->s2c, ntspacket->keylen,
 			     nonce, NONCE_LENGTH,
 			     plaintext, plainleng,
 			     packet, adlength);
 	if (!ok) {
-		msyslog(LOG_ERR, "NTS: extens_server_send - Error from AES_SIV_Encrypt");
+		msyslog(LOG_ERR,
+                        "NTS: extens_server_send - Error from AES_SIV_Encrypt");
 		nts_log_ssl_error();
 		/* I don't think this should happen,
 		 * so crash rather than work incorrectly.
@@ -330,9 +347,9 @@ int extens_server_send(struct ntspacket_t *ntspacket, struct pkt *xpkt) {
 		exit(1);
 	}
 
-	used = buf.next-xpkt->exten;
+	used = buf.next - xpkt->exten;
 
-	// printf("ESSx: %lu, %d\n", (long unsigned)left, used);
+	// printf("ESSx: %lu, %u\n", (long unsigned)left, used);
 
 	nts_cnt.server_send++;
 	return used;
@@ -350,65 +367,84 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 
 	while (buf.left >= NTS_KE_HDR_LNG) {
 		uint16_t type;
-		int length, adlength, noncelen;
+		unsigned length, adlength, noncelen;
 		uint8_t *nonce, *ciphertext, *plaintext;
 		size_t outlen;
 		bool ok;
 
-		type = ex_next_record(&buf, &length); /* length excludes header */
-		if (length&3 || length > buf.left || length < 0)
+                // length excludes header
+		type = ex_next_record(&buf, &length);
+		if (length & 3 ||
+                    length > buf.left) {
 			return false;
-		//     printf("ECR: %d, %d, %d\n", type, length, buf.left);
+                }
+		//     printf("ECR: %u, %u, %u\n", type, length, buf.left);
 		switch (type) {
 		    case Unique_Identifier:
-			if (NTS_UID_LENGTH != length)
+			if (NTS_UID_LENGTH != length) {
 				return false;
-			if (0 != memcmp(buf.next, peer->nts_state.UID, NTS_UID_LENGTH))
+                        }
+			if (0 != memcmp(buf.next, peer->nts_state.UID,
+                                        NTS_UID_LENGTH)) {
 				return false;
+                        }
 			buf.next += length;
 			buf.left -= length;
 			break;
 		    case NTS_Cookie:
-			if (!sawAEEF)
-				return false;			/* reject unencrypted cookies */
-			if (NTS_MAX_COOKIES <= peer->nts_state.count)
-				return false;			/* reject extra cookies */
-			if (length != peer->nts_state.cookielen)
-				return false;			/* reject length change */
+			if (!sawAEEF) {
+				return false;	// reject unencrypted cookies
+                        }
+			if (NTS_MAX_COOKIES <= peer->nts_state.count) {
+				return false;   // reject extra cookies
+                        }
+			if (length != peer->nts_state.cookielen) {
+				return false;	// reject length change
+                        }
 			idx = peer->nts_state.writeIdx++;
-			memcpy((uint8_t*)&peer->nts_state.cookies[idx], buf.next, length);
-			peer->nts_state.writeIdx = peer->nts_state.writeIdx % NTS_MAX_COOKIES;
+			memcpy(&peer->nts_state.cookies[idx], buf.next,
+                               length);
+			peer->nts_state.writeIdx =
+                           peer->nts_state.writeIdx % NTS_MAX_COOKIES;
 			peer->nts_state.count++;
 			buf.next += length;
 			buf.left -= length;
 			break;
 		    case NTS_AEEF:
-			adlength = buf.next-NTP_EX_HDR_LNG-pkt;  /* backup over header */
-			if (NTP_EX_U16_LNG*2 > length)
-				return false;        /* garbage packet */
+                        // backup over header
+			adlength = buf.next - NTP_EX_HDR_LNG - pkt;
+			if (NTP_EX_U16_LNG * 2 > length) {
+				return false;        // garbage packet
+                        }
 			noncelen = next_uint16(&buf);
 			outlen = next_uint16(&buf);
-			if (noncelen&3 || outlen&3)
-				return false;        /* else round up */
+			if (noncelen & 3 ||
+                            outlen & 3) {
+				return false;        // else round up
+                        }
 			nonce = buf.next;
-			ciphertext = nonce+noncelen;
-			plaintext = ciphertext+CMAC_LENGTH;
-			if (noncelen+CMAC_LENGTH > length)
-				return false;        /* garbage packet */
-			outlen = buf.left-noncelen-CMAC_LENGTH;
-			//      printf("ECRa: %lu, %d\n", (long unsigned)outlen, noncelen);
+			ciphertext = nonce + noncelen;
+			plaintext = ciphertext + CMAC_LENGTH;
+			if (noncelen + CMAC_LENGTH > length) {
+				return false;        // garbage packet
+                        }
+			outlen = buf.left - noncelen - CMAC_LENGTH;
+			//  printf("ECRa: %lu, %u\n",
+                        //         (long unsigned)outlen, noncelen);
 			ok = AES_SIV_Decrypt(wire_ctx,
 					     plaintext, &outlen,
-					     peer->nts_state.s2c, peer->nts_state.keylen,
+					     peer->nts_state.s2c,
+                                             peer->nts_state.keylen,
 					     nonce, noncelen,
-					     ciphertext, outlen+CMAC_LENGTH,
+					     ciphertext, outlen + CMAC_LENGTH,
 					     pkt, adlength);
-			//      printf("ECRb: %d, %lu\n", ok, (long unsigned)outlen);
-			if (!ok)
+			// printf("ECRb: %d, %lu\n", ok, (long unsigned)outlen);
+			if (!ok) {
 				return false;
-			/* setup to process encrypted headers */
-			buf.next += noncelen+CMAC_LENGTH;
-			buf.left -= noncelen+CMAC_LENGTH;
+                        }
+			// setup to process encrypted headers
+			buf.next += noncelen + CMAC_LENGTH;
+			buf.left -= noncelen + CMAC_LENGTH;
 			sawAEEF = true;
 			break;
 		    default:
@@ -426,8 +462,9 @@ bool extens_client_recv(struct peer *peer, uint8_t *pkt, int lng) {
 	if (!sawAEEF) {
 		return false;
 	}
-	if (buf.left > 0)
+	if (buf.left > 0) {
 		return false;
+        }
 	nts_cnt.client_recv_good++;
 	nts_cnt.client_recv_bad--;
 	return true;

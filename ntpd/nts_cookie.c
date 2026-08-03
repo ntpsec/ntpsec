@@ -283,20 +283,20 @@ bool nts_write_cookie_keys(void) {
 	return true;
 }
 
-/* returns actual length */
-int nts_make_cookie(uint8_t *cookie,
-  uint16_t aead,
-  uint8_t *c2s, uint8_t *s2c, int keylen) {
+// returns actual length
+unsigned nts_make_cookie(uint8_t *cookie, uint16_t aead,
+                    uint8_t *c2s, uint8_t *s2c, unsigned keylen) {
 	uint8_t plaintext[NTS_MAX_COOKIELEN];
 	uint8_t *nonce;
-	int used, plainlength;
+	unsigned used, plainlength;
 	bool ok;
 	uint8_t * finger;
-	uint32_t temp;	/* keep 4 byte alignment */
+	uint32_t temp;	// keep 4 byte alignment
 	size_t left;
 
-	if (NULL == cookie_ctx)
-		return 0;		/* We aren't initialized yet. */
+	if (NULL == cookie_ctx) {
+		return 0;		// We aren't initialized yet.
+        }
 
 	nts_cnt.cookie_make++;
 
@@ -357,15 +357,15 @@ int nts_make_cookie(uint8_t *cookie,
 }
 
 /* can't decrypt in place - that would trash the unauthenticated packet */
-bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
-  uint16_t *aead,
-  uint8_t *c2s, uint8_t *s2c, int *keylen) {
+bool nts_unpack_cookie(uint8_t *cookie, unsigned cookielen,
+  uint16_t *aead, uint8_t *c2s, uint8_t *s2c, unsigned *keylen)
+{
 	uint8_t *finger;
 	uint8_t plaintext[NTS_MAX_COOKIELEN];
 	uint8_t *nonce;
 	uint32_t temp;
 	size_t plainlength;
-	int cipherlength;
+	unsigned cipherlength;
 	bool ok;
 	struct NTS_Key *key;
 	int i;
