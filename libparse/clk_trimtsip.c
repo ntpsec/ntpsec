@@ -324,8 +324,7 @@ cvt_trimtsip(
 			    /* current week no */
 			    t->t_week = get_msb_ushort(&mb(18));
 			    if (t->t_week < GPSWRAP) {
-				    /* coverity[copy_paste_error] */
-				    t->t_week = (unsigned short)(t->t_weekleap + GPSWEEKS);
+				    t->t_week += GPSWEEKS;
 			    }
 
 			    lbp = (unsigned char *)&mb(14); /* last update time */
