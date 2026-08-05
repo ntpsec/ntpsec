@@ -123,9 +123,9 @@ static void DoNonce(void)
 
 /* Clone of nts_make_cookie() from ntpd/nts_cookie.c */
 /* returns actual length */
-int nts_make_cookie(uint8_t *cookie,
+unsigned nts_make_cookie(uint8_t *cookie,
   uint16_t aead,
-  uint8_t *c2s, uint8_t *s2c, int keylen) {
+  uint8_t *c2s, uint8_t *s2c, unsigned keylen) {
         uint8_t plaintext[NTS_MAX_COOKIELEN];
         uint8_t *nonce;
         int used, plainlength;
