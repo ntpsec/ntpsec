@@ -247,7 +247,7 @@ SSL_CTX* make_ssl_client_ctx(const char * filename) {
         }
 
         SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
-        SSL_CTX_set_timeout(ctx, NTS_KE_TIMEOUT);  // session lifetime
+        SSL_CTX_set_timeout(ctx, NTS_KE_TIMEOUT);   // session lifetime
 
         ok &= nts_load_versions(ctx);
         ok &= nts_load_ciphers(ctx);
@@ -852,7 +852,7 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
                         buf.left -= length;
                         break;
                 }  // case
-        }  // while
+        }   // while
 
 //      FIXME: Need to check for EOM -- read more??
         if (buf.left > 0)
