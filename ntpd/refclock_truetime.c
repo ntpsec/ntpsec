@@ -26,13 +26,13 @@
  * the PPS event and our being called.)
  */
 #ifdef ENABLE_PPS720
-# undef min  // XXX
-# undef max  // XXX
+# undef min     // XXX
+# undef max     // XXX
 # include <machine/inline.h>
 # include <sys/pcl720.h>
 # include <sys/i8253.h>
-# define PCL720_IOB 0x2a0  // XXX
-# define PCL720_CTR 0  // XXX
+# define PCL720_IOB 0x2a0       // XXX
+# define PCL720_CTR 0           // XXX
 #endif
 
 /*
@@ -75,14 +75,14 @@
  * Definitions
  */
 #define DEVICE          "/dev/true%d"
-#define SPEED232        B9600  // 9600 baud
+#define SPEED232        B9600   // 9600 baud
 
 /*
  * Radio interface parameters
  */
-#define PRECISION       (-10)  // precision assumed (about 1 ms)
-#define REFID           "TRUE"  // reference id
-#define NAME            "TRUETIME"  // shortname
+#define PRECISION       (-10)           // precision assumed (about 1 ms)
+#define REFID           "TRUE"          // reference id
+#define NAME            "TRUETIME"      // shortname
 #define DESCRIPTION     "Kinemetrics/TrueTime Receiver"
 
 /*
@@ -108,15 +108,15 @@ static const char *types[] = {"unknown", "tm", "tcu", "tl3"};
  * unit control structure
  */
 struct true_unit {
-        unsigned int    pollcnt;  // poll message counter
-        unsigned int    station;  // which station we are on
-        bool            polled;  // Hand in a time sample?
-        enum true_state state;  // state machine
-        enum true_type  type;  // what kind of clock is it?
-        int             unit;  // save an extra copy of this
-        FILE            *debug;  // debug logging file
+        unsigned int    pollcnt;        // poll message counter
+        unsigned int    station;        // which station we are on
+        bool            polled;         // Hand in a time sample?
+        enum true_state state;          // state machine
+        enum true_type  type;           // what kind of clock is it?
+        int             unit;           // save an extra copy of this
+        FILE            *debug;         // debug logging file
 #ifdef ENABLE_PPS720
-        int             pcl720init;  // init flag for PCL 720
+        int             pcl720init;     // init flag for PCL 720
 #endif
 };
 
@@ -137,13 +137,13 @@ static  unsigned long   true_sample720  (void);
  * Transfer vector
  */
 struct  refclock refclock_true = {
-        NAME,  // basename of driver
-        true_start,  // start up driver
-        NULL,  // shut down driver in the stabdard way
-        true_poll,  // transmit poll message
-        NULL,  // not used (old true_control)
-        NULL,  // initialize driver (not used)
-        NULL  // timer - not used
+        NAME,                   // basename of driver
+        true_start,             // start up driver
+        NULL,                   // shut down driver in the stabdard way
+        true_poll,              // transmit poll message
+        NULL,                   // not used (old true_control)
+        NULL,                   // initialize driver (not used)
+        NULL                    // timer - not used
 };
 
 
@@ -570,9 +570,9 @@ true_doevent(
         case t_tcu:
                 switch (event) {
                 case e_Init:
-                        true_send(peer, "MD3\r");  // GPS Synch'd Gen.
-                        true_send(peer, "TSU\r");  // UTC, not GPS.
-                        true_send(peer, "AU\r");  // Auto Timestamps.
+                        true_send(peer, "MD3\r");       // GPS Synch'd Gen.
+                        true_send(peer, "TSU\r");       // UTC, not GPS.
+                        true_send(peer, "AU\r");        // Auto Timestamps.
                         up->state = s_Start;
                         break;
                 case e_TS:
@@ -621,9 +621,9 @@ true_doevent(
                         break;
                 case s_InqGOES:
                         switch (event) {
-                        case e_Init:  // FALLTHROUGH
+                        case e_Init:    // FALLTHROUGH
                         case e_Huh:
-                                sleep(1);  // wait for it
+                                sleep(1);               // wait for it
                                 break;
                         case e_F18:
                         case e_F50:
@@ -641,7 +641,7 @@ true_doevent(
                                 up->type = t_tm;
                                 true_doevent(peer, e_Init);
                                 break;
-                        case e_Init:  // FALLTHROUGH
+                        case e_Init:    // FALLTHROUGH
                         case e_Huh:
                                 true_send(peer, "PO\r");
                                 up->state = s_InqTCU;
@@ -663,10 +663,10 @@ true_doevent(
                                 up->type = t_tcu;
                                 true_doevent(peer, e_Init);
                                 break;
-                        case e_Init:  // FALLTHROUGH
+                        case e_Init:    // FALLTHROUGH
                         case e_Huh:
                                 up->state = s_Base;
-                                sleep(1);  // XXX
+                                sleep(1);       // XXX
                                 break;
                         case e_F18:
                         case e_F50:
