@@ -39,7 +39,7 @@ struct refclockstat {
         uint8_t flags;          // clock flags
         uint8_t haveflags;      // bit array of valid flags
         unsigned short  lencode;        // length of last timecode
-        const char *p_lastcode;         // last timecode received
+        const char *p_lastcode;  // last timecode received
         uint32_t        polls;          // transmit polls
         uint32_t        noresponse;     // no response to poll
         uint32_t        badformat;      // bad format timecode received
@@ -62,12 +62,12 @@ struct refclockstat {
  * the reference clock drivers and the I/O module.
  */
 struct refclockio {
-        struct  refclockio *next;                   // link to next structure
+        struct  refclockio *next;  // link to next structure
         void    (*clock_recv) (struct recvbuf *);  // completion routine
-        int     (*io_input)   (struct recvbuf *);  // input routine -
-                                // to avoid excessive buffer use
-                                // due to small bursts
-                                // of refclock input data
+        int     (*io_input)   (struct recvbuf *); /* input routine -
+                                to avoid excessive buffer use
+                                due to small bursts
+                                of refclock input data */
         struct peer *srcclock;  // refclock peer
         size_t  datalen;        // length of data
         int     fd;             // file descriptor
@@ -82,12 +82,12 @@ struct refclockio {
 #define NCLKBUGTIMES    32
 
 struct refclockbug {
-        uint8_t         nvalues;                // values following
-        uint8_t         ntimes;                 // times following
-        unsigned short  svalues;                // values format sign array
-        uint32_t        stimes;                 // times format sign array
+        uint8_t         nvalues;        // values following
+        uint8_t         ntimes;         // times following
+        unsigned short  svalues;        // values format sign array
+        uint32_t        stimes;         // times format sign array
         uint32_t        values[NCLKBUGVALUES];  // real values
-        l_fp            times[NCLKBUGTIMES];    // real times
+        l_fp            times[NCLKBUGTIMES];  // real times
 };
 
 /*
@@ -100,15 +100,15 @@ struct refclockbug {
 #define MAXDIAL         60      // max length of modem dial strings
 
 struct refclockproc {
-        void *  unitptr;         // pointer to unit structure
+        void *  unitptr;        // pointer to unit structure
         struct refclock * conf;  // pointer to driver method table
-        struct refclockio io;    // I/O handler structure
-        uint8_t refclkunit;      // reference clock unit number
-        uint8_t leap;            // leap/synchronization code
-        uint8_t currentstatus;   // clock status
-        uint8_t lastevent;       // last exception event
-        const char *clockname;   // clock name (tag for logging)
-        const char *clockdesc;   // clock description
+        struct refclockio io;   // I/O handler structure
+        uint8_t refclkunit;     // reference clock unit number
+        uint8_t leap;           // leap/synchronization code
+        uint8_t currentstatus;  // clock status
+        uint8_t lastevent;      // last exception event
+        const char *clockname;  // clock name (tag for logging)
+        const char *clockdesc;  // clock description
         unsigned long   nextaction;     // local activity timeout
         void    (*action)(struct peer *);  // timeout callback
 
@@ -122,23 +122,23 @@ struct refclockproc {
         int     second;         // second of minute
         long    nsec;           // nanosecond of second
         uint32_t        yearstart;      // beginning of year
-        int     coderecv;               // put pointer
-        int     codeproc;               // get pointer
-        l_fp    lastref;                // reference timestamp
-        l_fp    lastrec;                // receive timestamp
-        double  offset;                 // mean offset
-        double  disp;                   // sample dispersion
-        double  jitter;                 // jitter (mean squares)
-        double  filter[MAXSTAGE];       // median filter
+        int     coderecv;       // put pointer
+        int     codeproc;       // get pointer
+        l_fp    lastref;        // reference timestamp
+        l_fp    lastrec;        // receive timestamp
+        double  offset;         // mean offset
+        double  disp;           // sample dispersion
+        double  jitter;         // jitter (mean squares)
+        double  filter[MAXSTAGE];  // median filter
 
         /*
          * Configuration data
          */
-        double  fudgetime1;        // fudge time1
-        double  fudgetime2;        // fudge time2
-        uint8_t stratum;           // server stratum
-        refid_t refid;             // reference identifier
-        uint8_t sloppyclockflag;   // driver options
+        double  fudgetime1;     // fudge time1
+        double  fudgetime2;     // fudge time2
+        uint8_t stratum;        // server stratum
+        refid_t refid;          // reference identifier
+        uint8_t sloppyclockflag;  // driver options
 
         /*
          * Status tallies
