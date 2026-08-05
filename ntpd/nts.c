@@ -390,7 +390,7 @@ void nts_get_ssl_error(char *errbuf, int errlng) {
 void nts_log_ssl_error(void) {
         char buff[256];
         int err = ERR_get_error();
-        SSL_load_error_strings();  // Needed on NetBSD
+        SSL_load_error_strings();        // Needed on NetBSD
         while (0 != err) {
                 ERR_error_string_n(err, buff, sizeof(buff));
                 msyslog(LOG_INFO, "NTS: %s", buff);
