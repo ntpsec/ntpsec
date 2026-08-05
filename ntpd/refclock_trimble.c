@@ -42,23 +42,23 @@
  * GPS Definitions
  */
 #define DESCRIPTION     "Trimble Palisade/Thunderbolt/Acutime/Resolution SMT/ACE/Copernicus GPSes"  // Long name
-#define NAME            "TRIMBLE"  // shortname
-#define PRECISION       (-20)  // precision assumed (about 1 us)
-#define REFID           "GPS\0"  // reference ID
-#define TRMB_MINPOLL    4  // 16 seconds
-#define TRMB_MAXPOLL    5  // 32 seconds
-#define MIN_SAMPLES     7  // minimum number of samples in the median filter to allow a poll
+#define NAME            "TRIMBLE"       // shortname
+#define PRECISION       (-20)           // precision assumed (about 1 us)
+#define REFID           "GPS\0"         // reference ID
+#define TRMB_MINPOLL    4               // 16 seconds
+#define TRMB_MAXPOLL    5               // 32 seconds
+#define MIN_SAMPLES     7               // minimum number of samples in the median filter to allow a poll
 
 /*
  * I/O Definitions
  */
 #ifndef ENABLE_CLASSIC_MODE
-#define DEVICE          "/dev/trimble%d"  // device name and unit
+#define DEVICE          "/dev/trimble%d"        // device name and unit
 #else
-#define DEVICE          "/dev/palisade%d"  // device name and unit
+#define DEVICE          "/dev/palisade%d"       // device name and unit
 #endif
-#define SPEED232        B9600  // uart speed (9600 baud)
-#define SPEED232COP     B38400  // uart speed for Copernicus II (38400 baud)
+#define SPEED232        B9600                   // uart speed (9600 baud)
+#define SPEED232COP     B38400                  // uart speed for Copernicus II (38400 baud)
 
 // parse consts
 #define RMAX 172  // TSIP packet 0x58 can be 172 bytes
@@ -99,26 +99,26 @@ struct packettx
  * Trimble unit control structure.
  */
 struct trimble_unit {
-        short                   unit;  // NTP refclock unit number
-        bool                    got_pkt;  // decoded a packet this poll
-        bool                    got_time;  // got a time packet this poll
-        int                     samples;  // samples in filter this poll
-        unsigned char           UTC_flags;  // UTC & leap second flag
-        unsigned char           trk_status;  // reported tracking status
-        char                    rpt_status;  // TSIP Parser State
-        size_t                  rpt_cnt;  // TSIP packet length so far
+        short                   unit;           // NTP refclock unit number
+        bool                    got_pkt;        // decoded a packet this poll
+        bool                    got_time;       // got a time packet this poll
+        int                     samples;        // samples in filter this poll
+        unsigned char           UTC_flags;      // UTC & leap second flag
+        unsigned char           trk_status;     // reported tracking status
+        char                    rpt_status;     // TSIP Parser State
+        size_t                  rpt_cnt;        // TSIP packet length so far
         unsigned char           rpt_buf[RMAX];  // packet assembly buffer
-        int                     type;  // Clock mode type
-        bool                    use_event;  // receiver has event input
-        bool                    event_reply;  // response to event input has been received
-        int                     MCR;  // modem control register value at startup
-        bool                    parity_chk;  // enable parity checking
-        l_fp                    p_recv_time;  // timestamp of last received packet
-        unsigned int            week;  // GPS week number
-        unsigned long int       TOW;  // GPS time of week
-        int                     UTC_offset;  // GPS-UTC offset
-        struct  calendar        date;  // calendar to avoid leap early announce
-        unsigned int            build_week;  // GPS week number of ntpd build date
+        int                     type;           // Clock mode type
+        bool                    use_event;      // receiver has event input
+        bool                    event_reply;    // response to event input has been received
+        int                     MCR;            // modem control register value at startup
+        bool                    parity_chk;     // enable parity checking
+        l_fp                    p_recv_time;    // timestamp of last received packet
+        unsigned int            week;           // GPS week number
+        unsigned long int       TOW;            // GPS time of week
+        int                     UTC_offset;     // GPS-UTC offset
+        struct  calendar        date;           // calendar to avoid leap early announce
+        unsigned int            build_week;     // GPS week number of ntpd build date
 };
 
 /*
@@ -174,26 +174,26 @@ static const bool tb_disc_in_holdover[TB_DISC_MODES+1] = {
  * Transfer vector
  */
 struct refclock refclock_trimble = {
-        NAME,  // basename of driver
-        trimble_start,  // start up driver
-        NULL,  // shut down driver in the standard way
-        trimble_poll,  // transmit poll message
-        NULL,  // control - not used
-        NULL,  // initialize driver (not used)
-        trimble_timer  // called at 1Hz by mainloop
+        NAME,                   // basename of driver
+        trimble_start,          // start up driver
+        NULL,                   // shut down driver in the standard way
+        trimble_poll,           // transmit poll message
+        NULL,                   // control - not used
+        NULL,                   // initialize driver (not used)
+        trimble_timer           // called at 1Hz by mainloop
 };
 
 // Extract the clock type from the mode setting
 #define CLK_TYPE(x) ((int)(((x)->cfg.mode) & 0x7F))
 
 // Supported clock types
-#define CLK_PALISADE            0  // Trimble Palisade
-#define CLK_PRAECIS             1  // Endrun Technologies Praecis
-#define CLK_THUNDERBOLT         2  // Trimble Thunderbolt GPS Receiver
-#define CLK_ACUTIME             3  // Trimble Acutime Gold
-#define CLK_RESOLUTIONSMT       5  // Trimble Resolution SMT Receivers
-#define CLK_ACE                 6  // Trimble ACE III
-#define CLK_COPERNICUS          7  // Trimble Copernicus II
+#define CLK_PALISADE            0       // Trimble Palisade
+#define CLK_PRAECIS             1       // Endrun Technologies Praecis
+#define CLK_THUNDERBOLT         2       // Trimble Thunderbolt GPS Receiver
+#define CLK_ACUTIME             3       // Trimble Acutime Gold
+#define CLK_RESOLUTIONSMT       5       // Trimble Resolution SMT Receivers
+#define CLK_ACE                 6       // Trimble ACE III
+#define CLK_COPERNICUS          7       // Trimble Copernicus II
 
 // packet 8f-ad UTC flags
 #define UTC_AVAILABLE   0x01
@@ -650,7 +650,7 @@ TSIP_decode (
 
                         pp->nsec = (long) (secfrac * NS_PER_S);
 
-                        secint %= SECSPERDAY;  // Only care about today
+                        secint %= SECSPERDAY;    // Only care about today
                         up->date.hour = (int)(secint / SECSPERHR);
                         secint %= SECSPERHR;
                         up->date.minute = (int)(secint / 60);
