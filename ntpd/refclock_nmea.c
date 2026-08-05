@@ -84,10 +84,10 @@
 #define NMEA_EXTLOG_MASK        0x00010000U
 #define NMEA_DATETRUST_MASK     0x02000000U
 
-#define NMEA_PROTO_IDLEN        5  // tag name must be at least 5 chars
+#define NMEA_PROTO_IDLEN        5       // tag name must be at least 5 chars
 // #define NMEA_PROTO_MINLEN 6 * min chars in sentence, excluding CS UNUSED
-#define NMEA_PROTO_MAXLEN       80  // max chars in sentence, excluding CS
-#define NMEA_PROTO_FIELDS       32  // not official; limit on fields per record
+#define NMEA_PROTO_MAXLEN       80      // max chars in sentence, excluding CS
+#define NMEA_PROTO_FIELDS       32      // not official; limit on fields per record
 
 /*
  * We check the timecode format and decode its contents.  We only care
@@ -137,26 +137,26 @@
 /*
  * Definitions
  */
-#define DEVICE          "/dev/gps%d"  // GPS serial device
+#define DEVICE          "/dev/gps%d"    // GPS serial device
 #ifdef HAVE_PPSAPI
 # define        PPSDEV          "/dev/gpspps%d"  // PPSAPI device override
-# define        PPS_PRECISION   (-20)  // precision assumed (~ 1 us)
+# define        PPS_PRECISION   (-20)           // precision assumed (~ 1 us)
 #endif
 #ifdef ENABLE_CLASSIC_MODE
-#define SPEED232        B4800  // uart speed (4800 bps)
+#define SPEED232        B4800           // uart speed (4800 bps)
 #else
-#define SPEED232        B9600  // uart speed (9600 bps)
+#define SPEED232        B9600           // uart speed (9600 bps)
 #endif
-#define PRECISION       (-9)  // precision assumed (about 2 ms)
-#define REFID           "GPS\0"  // reference id
-#define NAME            "NMEA"  // shortname
+#define PRECISION       (-9)            // precision assumed (about 2 ms)
+#define REFID           "GPS\0"         // reference id
+#define NAME            "NMEA"          // shortname
 #define DESCRIPTION     "NMEA GPS Clock"  // who we are
 
 // NMEA sentence array indexes for those we use
-#define NMEA_GPRMC      0  // recommended min. nav.
-#define NMEA_GPGGA      1  // fix and quality
-#define NMEA_GPGLL      2  // geo. lat/long
-#define NMEA_GPZDA      3  // date/time
+#define NMEA_GPRMC      0       // recommended min. nav.
+#define NMEA_GPGGA      1       // fix and quality
+#define NMEA_GPGLL      2       // geo. lat/long
+#define NMEA_GPZDA      3       // date/time
 /*
  * $GPZDG is a proprietary sentence that violates the spec, by not
  * using $P and an assigned company identifier to prefix the sentence
@@ -212,22 +212,22 @@ enum date_fmt {
 typedef struct {
 #ifdef HAVE_PPSAPI
         struct refclock_ppsctl ppsctl;  // PPSAPI structure
-        int     ppsapi_fd;  // fd used with PPSAPI
-        bool    ppsapi_tried;  // attempt PPSAPI once
-        bool    ppsapi_lit;  // time_pps_create() worked
-        bool    ppsapi_gate;  // system is on PPS
+        int     ppsapi_fd;      // fd used with PPSAPI
+        bool    ppsapi_tried;   // attempt PPSAPI once
+        bool    ppsapi_lit;     // time_pps_create() worked
+        bool    ppsapi_gate;    // system is on PPS
 #endif  // HAVE_PPSAPI
-        bool    gps_time;  // use GPS time, not UTC
-        l_fp    last_reftime;  // last processed reference stamp
-        int     wnro;  // last epoch warp, for logging
+        bool    gps_time;       // use GPS time, not UTC
+        l_fp    last_reftime;   // last processed reference stamp
+        int     wnro;           // last epoch warp, for logging
         // tally stats, reset each poll cycle
         struct
         {
                 unsigned int total;
                 unsigned int accepted;
-                unsigned int rejected;  // GPS said not enough signal
+                unsigned int rejected;   // GPS said not enough signal
                 unsigned int malformed;  // Bad checksum, invalid date or time
-                unsigned int filtered;  // mode bits, not GPZDG, same second
+                unsigned int filtered;   // mode bits, not GPZDG, same second
                 unsigned int pps_used;
         }
                 tally;
@@ -239,10 +239,10 @@ typedef struct {
  * helper for faster field access
  */
 typedef struct {
-        char  *base;  // buffer base
-        char  *cptr;  // current field ptr
-        int    blen;  // buffer length
-        int    cidx;  // current field index
+        char  *base;    // buffer base
+        char  *cptr;    // current field ptr
+        int    blen;    // buffer length
+        int    cidx;    // current field index
 } nmea_data;
 
 
@@ -290,13 +290,13 @@ static  void gps_send(int, const char *, struct peer *);
  * -------------------------------------------------------------------
  */
 struct refclock refclock_nmea = {
-        NAME,  // basename of driver
-        nmea_start,  // start up driver
-        nmea_shutdown,  // shut down driver
-        nmea_poll,  // transmit poll message
-        NMEA_CONTROL,  // fudge control
-        NULL,  // initialize driver
-        nmea_timer  // called once per second
+        NAME,                   // basename of driver
+        nmea_start,             // start up driver
+        nmea_shutdown,          // shut down driver
+        nmea_poll,              // transmit poll message
+        NMEA_CONTROL,           // fudge control
+        NULL,                   // initialize driver
+        nmea_timer              // called once per second
 };
 
 /*
@@ -714,18 +714,18 @@ nmea_timer(
  * 'refclock_process_offset()' must be used!)
  * -------------------------------------------------------------------
  */
-#define PPS_RELATE_NONE  0  // no pps correlation possible
-#define PPS_RELATE_EDGE  1  // recv time fixed, no phase lock
-#define PPS_RELATE_PHASE 2  // recv time fixed, phase lock ok
+#define PPS_RELATE_NONE  0      // no pps correlation possible
+#define PPS_RELATE_EDGE  1      // recv time fixed, no phase lock
+#define PPS_RELATE_PHASE 2      // recv time fixed, phase lock ok
 
 static int
 refclock_ppsrelate(
-        const struct refclockproc  * pp     ,  // for sanity
+        const struct refclockproc  * pp     ,   // for sanity
         const struct refclock_ppsctl * ap    ,  // for PPS io
         const l_fp                 * reftime ,
         l_fp                       * rd_stamp,  // i/o read stamp
         double                       pp_fudge,  // pps fudge
-        double                     * rd_fudge  // i/o read fudge
+        double                     * rd_fudge   // i/o read fudge
         )
 {
         pps_info_t      pps_info;
@@ -822,9 +822,9 @@ nmea_receive(
         double    rd_fudge;
 
         // working stuff
-        struct timespec date;  // to keep & convert the time stamp
+        struct timespec date;   // to keep & convert the time stamp
         // results of sentence/date/time parsing
-        uint8_t         sentence;  // sentence tag
+        uint8_t         sentence;       // sentence tag
         int             checkres;
         char *          cp;
         bool            rc_date;
@@ -1006,7 +1006,7 @@ nmea_receive(
                 break;
 
         default:
-                INVARIANT(0);  // Coverity 97123
+                INVARIANT(0);   // Coverity 97123
                 return;
         }
 
@@ -1318,15 +1318,15 @@ gps_send(
  */
 static int
 field_init(
-        nmea_data * data,  // context structure
-        char      * cptr,  // start of raw data
-        int         dlen  // data len, not counting trailing NUL
+        nmea_data * data,       // context structure
+        char      * cptr,       // start of raw data
+        int         dlen        // data len, not counting trailing NUL
         )
 {
-        uint8_t cs_l;  // checksum local computed
-        uint8_t cs_r;  // checksum remote given
-        char * eptr;  // buffer end end pointer
-        char   tmp;  // char buffer
+        uint8_t cs_l;   // checksum local computed
+        uint8_t cs_r;   // checksum remote given
+        char * eptr;    // buffer end end pointer
+        char   tmp;     // char buffer
 
         cs_l = 0;
         cs_r = 0;
@@ -1459,10 +1459,10 @@ field_wipe(
         ...
         )
 {
-        va_list va;  // vararg index list
-        int     fcnt;  // safeguard against runaway arglist
-        int     fidx;  // field to nuke, or -1 for checksum
-        char  * cp;  // overwrite destination
+        va_list va;             // vararg index list
+        int     fcnt;           // safeguard against runaway arglist
+        int     fidx;           // field to nuke, or -1 for checksum
+        char  * cp;             // overwrite destination
 
         fcnt = 8;
         cp = NULL;
@@ -1527,7 +1527,7 @@ parse_qual(
  */
 static bool
 parse_time(
-        struct timespec * dt,  // result date+time
+        struct timespec * dt,   // result date+time
         nmea_data       * rd,
         int               idx
         )
@@ -1582,7 +1582,7 @@ parse_time(
  */
 static bool
 parse_date(
-        struct timespec * dt,  // result pointer
+        struct timespec * dt,   // result pointer
         nmea_data       * rd,
         int               idx,
         enum date_fmt     fmt
@@ -1647,7 +1647,7 @@ parse_date(
         tm.tm_year = y-1900;
         tm.tm_mon = m-1;
         tm.tm_mday = d;
-        dt->tv_sec += timegm(&tm);  // No error checking
+        dt->tv_sec += timegm(&tm);      // No error checking
 
         return true;
 }
