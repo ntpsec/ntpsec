@@ -25,7 +25,7 @@
 bool nts_server_init(void);
 bool nts_client_init(void);
 bool nts_cookie_init(void);
-bool nts_server_init2(void);  // after sandbox
+bool nts_server_init2(void);    // after sandbox
 bool nts_cookie_init2(void);
 
 void nts_cert_timer(void);
@@ -45,7 +45,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
 // working finger into a buffer - updated by append/unpack routines
 struct BufCtl_t {
     uint8_t *next;  // pointer to next data/space
-    int left;  // data left or space available
+    int left;       // data left or space available
 };
 typedef struct BufCtl_t BufCtl;
 
@@ -93,10 +93,10 @@ uint16_t next_bytes(BufCtl* buf, uint8_t *data, int length);
 
 // *********************************************************
 
-#define NTS_MAX_KEYLEN          64  // used in cookies
-#define NTS_MAX_COOKIELEN       192  // see nts_cookie.c
-#define NTS_MAX_COOKIES         8  // RFC 4.1.6
-#define NTS_UID_LENGTH          32  // RFC 5.3
+#define NTS_MAX_KEYLEN          64      // used in cookies
+#define NTS_MAX_COOKIELEN       192     // see nts_cookie.c
+#define NTS_MAX_COOKIES         8       // RFC 4.1.6
+#define NTS_UID_LENGTH          32      // RFC 5.3
 #define NTS_UID_MAX_LENGTH      64
 
 // Here for tester
@@ -108,15 +108,15 @@ struct NTS_Key {
   #define NTS_nKEYS 10
 #endif
 extern struct NTS_Key nts_keys[NTS_nKEYS];
-extern int nts_nKeys;  // for tester
+extern int nts_nKeys;           // for tester
 
 
 /* Client side configuration data for an NTS association
  * All are optional.
  * part of peer struct */
 struct ntscfg_t {
-        char *ca;  // root/trusted certificates
-        char *aead;  // AEAD algorithms on wire
+        char *ca;               // root/trusted certificates
+        char *aead;             // AEAD algorithms on wire
 };
 
 // Client-side state per connection to server
@@ -129,7 +129,7 @@ struct ntsclient_t {
         uint8_t UID[NTS_UID_LENGTH];
         // cookies
         int readIdx, writeIdx;
-        int count;  // -1 if not in NTS mode
+        int count;                      // -1 if not in NTS mode
         int cookielen;
         uint8_t cookies[NTS_MAX_COOKIES][NTS_MAX_COOKIELEN];
 };
@@ -148,16 +148,16 @@ struct ntspacket_t {
 
 // Configuration data for an NTS server or client instance
 struct ntsconfig_t {
-        bool ntsenable;  // enable NTS KE server on this ntpd
-        const char * mintls;  // minimum TLS version allowed
-        const char * maxtls;  // maximum TLS version allowed
+        bool ntsenable;         // enable NTS KE server on this ntpd
+        const char * mintls;    // minimum TLS version allowed
+        const char * maxtls;    // maximum TLS version allowed
         const char *tlsciphersuites;  // allowed TLS 1.3 ciphersuites
         const char *tlsecdhcurves;  // allowed ecdhcurves list
-        const char *cert;  // file holding server certificate key
-        const char *key;  // file holding server private key
-        const char *KI;  // file holding K/I for making cookies
-        const char *ca;  // root cert dir/file
-        const char *aead;  // AEAD algorithms on wire
+        const char *cert;       // file holding server certificate key
+        const char *key;        // file holding server private key
+        const char *KI;         // file holding K/I for making cookies
+        const char *ca;         // root cert dir/file
+        const char *aead;       // AEAD algorithms on wire
         bool tlscipherserverpreference;  // OpenSSL 3.0 default is client
 };
 
@@ -171,9 +171,9 @@ struct ntsconfig_t {
 
 #define NTS_CRITICAL 0x8000
 enum nts_record_type {
-        nts_end_of_message = 0,  // CRITICAL
-        nts_next_protocol_negotiation = 1,  // CRITICAL
-        nts_error = 2,  // CRITICAL
+        nts_end_of_message = 0,         // CRITICAL
+        nts_next_protocol_negotiation = 1,      // CRITICAL
+        nts_error = 2,                  // CRITICAL
         nts_warning = 3,
         nts_algorithm_negotiation = 4,
         nts_new_cookie = 5,
@@ -214,8 +214,8 @@ enum aead_ciphers {
         AEAD_AES_128_CCM_SHORT_12 = 13,
         AEAD_AES_256_CCM_SHORT_12 = 14,
 
-        AEAD_AES_SIV_CMAC_256 = 15,  // RFC 5297
-        AEAD_AES_SIV_CMAC_384 = 16,  // These 3 are the ones we use
+        AEAD_AES_SIV_CMAC_256 = 15,     // RFC 5297
+        AEAD_AES_SIV_CMAC_384 = 16,     // These 3 are the ones we use
         AEAD_AES_SIV_CMAC_512 = 17,
 #define AEAD_AES_SIV_CMAC_256_KEYLEN 32
 #define AEAD_AES_SIV_CMAC_384_KEYLEN 48
@@ -258,7 +258,7 @@ struct nts_counters {
   uint64_t server_recv_good;
   uint64_t server_recv_bad;
   uint64_t cookie_make;
-  uint64_t cookie_not_server;  // we are not a NTS server
+  uint64_t cookie_not_server;   // we are not a NTS server
   uint64_t cookie_decode_total;  // total attempts, includes too old
   uint64_t cookie_decode_current;
   uint64_t cookie_decode_old;
