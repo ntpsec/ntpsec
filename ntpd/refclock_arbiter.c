@@ -87,15 +87,15 @@
 /*
  * Interface definitions
  */
-#define DEVICE          "/dev/gps%d"  // device name and unit
-#define SPEED232        B9600  // uart speed (9600 baud)
-#define PRECISION       (-20)  // precision assumed (about 1 us)
-#define REFID           "GPS "  // reference ID
-#define NAME            "ARBITER"  // shortname
+#define DEVICE          "/dev/gps%d"    // device name and unit
+#define SPEED232        B9600           // uart speed (9600 baud)
+#define PRECISION       (-20)           // precision assumed (about 1 us)
+#define REFID           "GPS "          // reference ID
+#define NAME            "ARBITER"       // shortname
 #define DESCRIPTION     "Arbiter 1088A/B GPS Receiver"  // WRU
-#define LENARB          24  // format B5 timecode length
-#define MAXSTA          40  // max length of status string
-#define MAXPOS          80  // max length of position string
+#define LENARB          24              // format B5 timecode length
+#define MAXSTA          40              // max length of status string
+#define MAXPOS          80              // max length of position string
 
 #define COMMAND_HALT_BCAST ( (peer->cfg.mode % 2) ? "O0" : "B0" )
 #define COMMAND_START_BCAST ( (peer->cfg.mode % 2) ? "O5" : "B5" )
@@ -104,9 +104,9 @@
  * ARB unit control structure
  */
 struct arbunit {
-        l_fp    laststamp;  // last receive timestamp
-        int     tcswitch;  // timecode switch/counter
-        char    qualchar;  // IEEE P1344 quality (TQ command)
+        l_fp    laststamp;      // last receive timestamp
+        int     tcswitch;       // timecode switch/counter
+        char    qualchar;       // IEEE P1344 quality (TQ command)
         char    status[MAXSTA];  // receiver status (SR command)
         char    latlon[MAXPOS];  // receiver position (lat/lon/alt)
 };
@@ -122,13 +122,13 @@ static  void    arb_poll        (int, struct peer *);
  * Transfer vector
  */
 struct  refclock refclock_arbiter = {
-        NAME,  // basename of driver
-        arb_start,  // start up driver
-        NULL,  // shut down driver in standard way
-        arb_poll,  // transmit poll message
-        NULL,  // not used (old arb_control)
-        NULL,  // initialize driver (not used)
-        NULL  // timer - not used
+        NAME,                   // basename of driver
+        arb_start,              // start up driver
+        NULL,                   // shut down driver in standard way
+        arb_poll,               // transmit poll message
+        NULL,                   // not used (old arb_control)
+        NULL,                   // initialize driver (not used)
+        NULL                    // timer - not used
 };
 
 
@@ -207,8 +207,8 @@ arb_receive(
         struct peer *peer;
         l_fp trtmp;
         int temp;
-        uint8_t syncchar;  // synch indicator
-        char    tbuf[BMAX];  // temp buffer
+        uint8_t syncchar;               // synch indicator
+        char    tbuf[BMAX];             // temp buffer
 
         /*
          * Initialize pointers and read the timecode and timestamp
@@ -329,44 +329,44 @@ arb_receive(
          */
         switch (up->qualchar) {
 
-            case '0':  // locked, max accuracy
+            case '0':           // locked, max accuracy
                 pp->disp = 1e-7;
                 pp->lastref = pp->lastrec;
                 break;
 
-            case '4':  // unlock accuracy < 1 us
+            case '4':           // unlock accuracy < 1 us
                 pp->disp = S_PER_US;
                 break;
 
-            case '5':  // unlock accuracy < 10 us
+            case '5':           // unlock accuracy < 10 us
                 pp->disp = 1e-5;
                 break;
 
-            case '6':  // unlock accuracy < 100 us
+            case '6':           // unlock accuracy < 100 us
                 pp->disp = 1e-4;
                 break;
 
-            case '7':  // unlock accuracy < 1 ms
+            case '7':           // unlock accuracy < 1 ms
                 pp->disp = S_PER_MS;
                 break;
 
-            case '8':  // unlock accuracy < 10 ms
+            case '8':           // unlock accuracy < 10 ms
                 pp->disp = .01;
                 break;
 
-            case '9':  // unlock accuracy < 100 ms
+            case '9':           // unlock accuracy < 100 ms
                 pp->disp = .1;
                 break;
 
-            case 'A':  // unlock accuracy < 1 s
+            case 'A':           // unlock accuracy < 1 s
                 pp->disp = 1;
                 break;
 
-            case 'B':  // unlock accuracy < 10 s
+            case 'B':           // unlock accuracy < 10 s
                 pp->disp = 10;
                 break;
 
-            case 'F':  // clock failure
+            case 'F':           // clock failure
                 pp->disp = sys_maxdisp;
                 refclock_report(peer, CEVNT_FAULT);
                 IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
