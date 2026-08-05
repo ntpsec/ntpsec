@@ -93,7 +93,7 @@ TEST(nts_cookie, nts_read_write_cookies) {
         TEST_ASSERT_EQUAL(nts_nKeys, 3);
         ok = nts_write_cookie_keys();
         TEST_ASSERT_EQUAL(true, ok);
-        nts_make_cookie_key();  // scramble things
+        nts_make_cookie_key();    // scramble things
         ZERO(nts_keys);
         nts_nKeys = 377;
         ok = nts_read_cookie_keys();
