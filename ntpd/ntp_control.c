@@ -90,7 +90,7 @@ struct ctl_proc {
         // Only one flag.  Authentication required or not.
 #define NOAUTH  0
 #define AUTH    1
-        void (*handler) (struct recvbuf *, int); // handle request
+        void (*handler) (struct recvbuf *, int);  // handle request
 };
 
 
@@ -123,8 +123,9 @@ static  void    ctl_puttime     (const char *, time_t);
 static  void    ctl_putclock    (int, struct refclockstat *, bool);
 #endif  // REFCLOCK
 
-// 2023-Jan-14 Fedora c compiler barfs on function with
-// arg of const struct foo * unless that is used as a result previously.
+/* 2023-Jan-14 Fedora c compiler barfs on function with
+ * arg of const struct foo * unless that is used as a result previously.
+ */
 static  const struct var * ctl_getitem(const struct var *, char **);
 static  void    ctl_putsys      (const struct var *);
 static  void    ctl_putspecial  (const struct var *);
@@ -144,7 +145,7 @@ static  void    configure       (struct recvbuf *, int);
 static  void    send_mru_entry  (mon_entry *, int);
 #ifdef USE_RANDOMIZE_RESPONSES
 static  void    send_random_tag_value(int);
-#endif // USE_RANDOMIZE_RESPONSES
+#endif  // USE_RANDOMIZE_RESPONSES
 static  void    read_mru_list   (struct recvbuf *, int);
 static  void    send_ifstats_entry(endpt *, unsigned int);
 static  void    read_ifstats    (struct recvbuf *);
@@ -222,7 +223,7 @@ struct var {
     // second pointer for returning recent since-stats-logged
     const uint64_t* u64;
     const uint64_t* l_fp;
-    } p2;  
+    } p2;
   };
 
 #define Var_time(xname, xflags, xlocation) { \
@@ -358,8 +359,8 @@ static const struct var sys_var[] = {
   Var_Pair("ss_processed", processed),
 #undef Var_Pair
 
-// We own this one.  See above.  No proc mode.
-// Note that lots of others are not (yet?) in this table.
+/* We own this one.  See above.  No proc mode.
+ * Note that lots of others are not (yet?) in this table.  */
   Var_u64("ss_numctlreq", RO, numctlreq),
 
   Var_special("peeradr", RO, vs_peeradr),
@@ -450,8 +451,8 @@ static const struct var sys_var[] = {
   Var_Pair("nts_cookie_not_server", nts_cnt.cookie_not_server),
   Var_Pair("nts_cookie_decode_total", nts_cnt.cookie_decode_total),
   Var_Pair("nts_cookie_decode_current", nts_cnt.cookie_decode_current),
-  // Following line is a hack for old versions of ntpq
-  // nts_cookie_decode is old name for nts_cookie_decode_current
+  /* Following line is a hack for old versions of ntpq
+   * nts_cookie_decode is old name for nts_cookie_decode_current */
   Var_Pair("nts_cookie_decode", nts_cnt.cookie_decode_current),
   Var_Pair("nts_cookie_decode_old", nts_cnt.cookie_decode_old),
   Var_Pair("nts_cookie_decode_old2", nts_cnt.cookie_decode_old2),
@@ -547,8 +548,8 @@ static const struct ctl_var peer_var2[] = {
         { CP_REFID,     RO|DEF, "refid" },
 #define CP_REFTIME              17
         { CP_REFTIME,   RO|DEF, "reftime" },
-        // Placeholder. Reporting of "org" is disabled because
-        // leaking it creates a vulnerability
+        /* Placeholder. Reporting of "org" is disabled because
+           leaking it creates a vulnerability */
 #define CP_ORG                  18
         { CP_ORG,       RO, "org" },
 #define CP_REC                  19
@@ -724,7 +725,7 @@ init_control(void) {
 #define PRESET  "settimeofday=\"clock_settime\""
         set_sys_var(PRESET, sizeof(PRESET), RO);
 #undef PRESET
-#endif // ENABLE_CLASSIC_MODE
+#endif  // ENABLE_CLASSIC_MODE
 
 }
 
@@ -924,7 +925,7 @@ process_control(
                 numctlbadpkts++;
                 return;
         }
-#endif // __COVERITY__
+#endif  // __COVERITY__
         reqend = reqpt + req_count;
 
         /*
@@ -1412,9 +1413,10 @@ ctl_putsys(const struct var * v) {
             uptime_t temp_up;
             uint64_t mem;
 
-// FIXME: ****
-// This should get pushed up a layer: flag, once per request
-// This could get data from 2 samples if the clock ticks while we are working..
+/* FIXME: ****
+ * This should get pushed up a layer: flag, once per request
+ * This could get data from 2 samples if the clock ticks while we are working..
+ */
         // The Kernel clock variables need up-to-date output of ntp_adjtime()
         if (v->flags&N_CLOCK && current_time != ntp_adjtime_time) {
                 ZERO(ntx);
@@ -1650,7 +1652,7 @@ ctl_putpeer(
                     strlcpy(buf1, refclock_name(p), sizeof(buf1));
                     ctl_putstr(CV_NAME, buf1, strlen(buf1));
                 }
-#endif // REFCLOCK
+#endif  // REFCLOCK
                 break;
 
         case CP_DSTADR:
@@ -1853,7 +1855,7 @@ ssize_t CI_VARLIST(
                 if (string_split == NULL) {
                         string_length = strlen(row->text);
                 } else {
-                        string_length = string_split - row->text; 
+                        string_length = string_split - row->text;
                 }
                 if (string_length >= buf_end - buffer_lap - (size_t)1) {
                         return -1;
@@ -1872,9 +1874,9 @@ ssize_t CI_VARLIST(
 
 
 void do_sys_var_list(const char* name, const struct var* v) {
-        // This has to be big enough for the whole answer -- all names.
-        // On 2024-Jul-21, that was almost 3000 characters.
-        // We could split this into two: counters and other.
+        /* This has to be big enough for the whole answer -- all names.
+         * On 2024-Jul-21, that was almost 3000 characters.
+         * We could split this into two: counters and other. */
         char buf[5000];
         char *buffer;
         bool first = true;
@@ -2034,8 +2036,8 @@ ctl_getitem(
 
         // Old code deleted white space.  Don't send it.
 
-        // Scan the string in the packet until we hit comma or
-        // EoB. Register position of first '=' on the fly.
+        /* Scan the string in the packet until we hit comma or
+         * EoB. Register position of first '=' on the fly. */
         for (tp = NULL, cp = reqpt; cp < reqend; ++cp) {
                 if (*cp == '=' && tp == NULL) {
                         tp = cp;
@@ -2048,7 +2050,7 @@ ctl_getitem(
         // Process payload for write requests, if any.
         *data = NULL;
         if (NULL != tp) {
-                const char *plhead = tp + 1; // skip the '='
+                const char *plhead = tp + 1;  // skip the '='
                 const char *pltail = cp;
                 size_t      plsize;
 
@@ -2069,10 +2071,11 @@ ctl_getitem(
 
         len = tp-reqpt;
         for (v = var_list; !(EOV & v->flags); ++v) {
-                // Check if the var name matches the buffer. The
-                // name is bracketed by [reqpt..tp] and not NUL
-                // terminated, and it contains no '=' char.
-                if (len == strlen(v->name) 
+                /* Check if the var name matches the buffer. The
+                 * name is bracketed by [reqpt..tp] and not NUL
+                 * terminated, and it contains no '=' char.
+                 */
+                if (len == strlen(v->name)
                     && 0 == memcmp(reqpt, v->name, len)) {
                         break;
                 }
@@ -2085,21 +2088,22 @@ ctl_getitem(
         return v;
 
   badpacket:
-        //TODO? somehow indicate this packet was bad, apart from syslog?
+        // TODO? somehow indicate this packet was bad, apart from syslog?
         numctlbadpkts++;
         NLOG(NLOG_SYSEVENT)
         if (quiet_until <= current_time) {
                 unsigned int port = SRCPORT(rmt_addr);
                 quiet_until = current_time + 300;
-        // The port variable above suppresses a warning on NetBSD 8.0
-        // http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53619
-        // A cast on SRCPORT without the dummy variable didn't work.
+        /* The port variable above suppresses a warning on NetBSD 8.0
+         * http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53619
+         * A cast on SRCPORT without the dummy variable didn't work.
+         */
         msyslog(LOG_WARNING,
                 "Possible 'ntpdx' exploit from %s#%u"
                 " (possibly spoofed)",
                 socktoa(rmt_addr), port);
             }
-        reqpt = reqend; // never again for this packet!
+        reqpt = reqend;  // never again for this packet!
         return NULL;
 }
 
@@ -2113,12 +2117,13 @@ ctl_getitem2(
         char **data
         )
 {
-        // [Bug 3008] First check the packet data sanity, then search
-        // the key. This improves the consistency of result values: If
-        // the result is NULL once, it will never be EOV again for this
-        // packet; If it's EOV, it will never be NULL again until the
-        // variable is found and processed in a given 'var_list'. (That
-        // is, a result is returned that is neither NULL nor EOV).
+        /* [Bug 3008] First check the packet data sanity, then search
+         * the key. This improves the consistency of result values: If
+         * the result is NULL once, it will never be EOV again for this
+         * packet; If it's EOV, it will never be NULL again until the
+         * variable is found and processed in a given 'var_list'. (That
+         * is, a result is returned that is neither NULL nor EOV).
+         */
         static const struct ctl_var eol = { 0, EOV, NULL };
         static char buf[128];
         static u_long quiet_until;
@@ -2139,8 +2144,8 @@ ctl_getitem2(
                 return NULL;
         }
 
-        // Scan the string in the packet until we hit comma or
-        // EoB. Register position of first '=' on the fly.
+        /* Scan the string in the packet until we hit comma or
+         * EoB. Register position of first '=' on the fly. */
         for (tp = NULL, cp = reqpt; cp < reqend; ++cp) {
                 if (*cp == '=' && tp == NULL) {
                         tp = cp;
@@ -2154,7 +2159,7 @@ ctl_getitem2(
         *data = NULL;
         if (NULL != tp) {
                 // eventually strip white space from argument.
-                const char *plhead = tp + 1; // skip the '='
+                const char *plhead = tp + 1;  // skip the '='
                 const char *pltail = cp;
                 size_t      plsize;
 
@@ -2180,27 +2185,29 @@ ctl_getitem2(
                 tp = cp;
         }
 
-        // Part Two
-        //
-        // Now we're sure that the packet data itself is sane. Scan the
-        // list now. Make sure a NULL list is properly treated by
-        // returning a synthetic End-Of-Values record. We must not
-        // return NULL pointers after this point, or the behaviour would
-        // become inconsistent if called several times with different
-        // variable lists after an EoV was returned.  (Such a behavior
-        // actually caused Bug 3008.)
+        /* Part Two
+         *
+         * Now we're sure that the packet data itself is sane. Scan the
+         * list now. Make sure a NULL list is properly treated by
+         * returning a synthetic End-Of-Values record. We must not
+         * return NULL pointers after this point, or the behaviour would
+         * become inconsistent if called several times with different
+         * variable lists after an EoV was returned.  (Such a behavior
+         * actually caused Bug 3008.)
+         */
 
         if (NULL == var_list)
                 return &eol;
 
         for (v = var_list; !(EOV & v->flags); ++v)
                 if (!(PADDING & v->flags)) {
-                        // Check if the var name matches the buffer. The
-                        // name is bracketed by [reqpt..tp] and not NUL
-                        // terminated, and it contains no '=' char. The
-                        // lookup value IS NUL-terminated but might
-                        // include a '='... We have to look out for
-                        // that!
+                        /* Check if the var name matches the buffer. The
+                         * name is bracketed by [reqpt..tp] and not NUL
+                         * terminated, and it contains no '=' char. The
+                         * lookup value IS NUL-terminated but might
+                         * include a '='... We have to look out for
+                         * that!
+                         */
                         const char *sp1 = reqpt;
                         const char *sp2 = v->text;
 
@@ -2214,9 +2221,10 @@ ctl_getitem2(
                                 break;
                 }
 
-        // See if we have found a valid entry or not. If found, advance
-        // the request pointer for the next round; if not, clear the
-        // data pointer so we have no dangling garbage here.
+        /* See if we have found a valid entry or not. If found, advance
+         * the request pointer for the next round; if not, clear the
+         * data pointer so we have no dangling garbage here.
+         */
         if (EOV & v->flags)
                 *data = NULL;
         else
@@ -2224,21 +2232,22 @@ ctl_getitem2(
         return v;
 
   badpacket:
-        //TODO? somehow indicate this packet was bad, apart from syslog?
+        // TODO? somehow indicate this packet was bad, apart from syslog?
         numctlbadpkts++;
         NLOG(NLOG_SYSEVENT)
             if (quiet_until <= current_time) {
                     unsigned int port = SRCPORT(rmt_addr);
                     quiet_until = current_time + 300;
-        // The port variable above suppresses a warning on NetBSD 8.0
-        // http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53619
-        // A cast on SRCPORT without the dummy variable didn't work.
+        /* The port variable above suppresses a warning on NetBSD 8.0
+         * http://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=53619
+         * A cast on SRCPORT without the dummy variable didn't work.
+         */
                     msyslog(LOG_WARNING,
                             "Possible 'ntpdx' exploit from %s#%u"
                             " (possibly spoofed)",
                             socktoa(rmt_addr), port);
             }
-        reqpt = reqend; // never again for this packet!
+        reqpt = reqend;  // never again for this packet!
         return NULL;
 }
 
@@ -2246,7 +2255,7 @@ ctl_getitem2(
 /*
  * control_unspec - response to an unspecified op-code
  */
-//ARGSUSED
+// ARGSUSED
 static void
 control_unspec(
         struct recvbuf *rbufp,
@@ -2280,7 +2289,7 @@ control_unspec(
  * read_status - return either a list of associd's, or a particular
  * peer's status.
  */
-//ARGSUSED
+// ARGSUSED
 static void
 read_status(
         struct recvbuf *rbufp,
@@ -2401,8 +2410,9 @@ read_sysvars(void)
          * and give them to him.
          */
 
-        // Old code had a wants bit map.  Two passes.
-        // Maybe to verify all target names before giving a partial answer.
+        /* Old code had a wants bit map.  Two passes.
+         * Maybe to verify all target names before giving a partial answer.
+         */
         rpkt.status = htons(ctlsysstatus());
 
         if (reqpt == reqend) {
@@ -2418,12 +2428,13 @@ read_sysvars(void)
                 return;
         }
 
-// This code structure is ugly.
-// The basic problem is that parsing the input stream is buried in ctl_getitem
-// and we need to know if parsing failed or it couldn't find a name.
-// If it can't find a name, we try ext_sys_var.
-// Return NULL on error, pointer to EOV on can't find.
-// Advance reqpt on success.
+/* This code structure is ugly.
+ * The basic problem is that parsing the input stream is buried in ctl_getitem
+ * and we need to know if parsing failed or it couldn't find a name.
+ * If it can't find a name, we try ext_sys_var.
+ * Return NULL on error, pointer to EOV on can't find.
+ * Advance reqpt on success.
+ */
         while (reqpt < reqend) {
                 v = ctl_getitem(sys_var, &valuep);
                 if (NULL == v)
@@ -2453,7 +2464,7 @@ read_sysvars(void)
 /*
  * read_variables - return the variables the caller asks for
  */
-//ARGSUSED
+// ARGSUSED
 static void
 read_variables(
         struct recvbuf *rbufp,
@@ -2483,8 +2494,9 @@ static void configure(
         int retval;
         bool replace_nl;
 
-        // I haven't yet implemented changes to an existing association.
-        // Hence check if the association id is 0
+        /* I haven't yet implemented changes to an existing association.
+         * Hence check if the association id is 0
+         */
         if (res_associd != 0) {
                 ctl_error(CERR_BADVALUE);
                 return;
@@ -2609,10 +2621,11 @@ static uint32_t derive_nonce(
         }
 
         if (NULL == evp) {
-          // EVP_md5() doesn't work on FIPS systems.
-          // Check here in case EVP_sha1() gets demoted.
-          // This is making a cookie which is only checked by
-          // this system so the details of how it is made don't matter.
+          /* EVP_md5() doesn't work on FIPS systems.
+           * Check here in case EVP_sha1() gets demoted.
+           * This is making a cookie which is only checked by
+           * this system so the details of how it is made don't matter.
+           */
           evp = EVP_sha1();
           if (NULL == evp) {
             msyslog(LOG_ERR, "ERR: EVP_sha1() failed");
@@ -2726,7 +2739,7 @@ send_random_tag_value(
         snprintf(&buf[4], sizeof(buf) - 4, "%d", indx);
         ctl_putuint(buf, (unsigned long)noise);
 }
-#endif // USE_RANDOMIZE_RESPONSE
+#endif  // USE_RANDOMIZE_RESPONSE
 
 
 /*
@@ -2750,7 +2763,7 @@ send_mru_entry(
         const char sc_fmt[] =           "sc.%d";
         const char dr_fmt[] =           "dr.%d";
         char    tag[32];
-        bool    sent[8]; // 8 tag=value pairs
+        bool    sent[8];  // 8 tag=value pairs
         uint32_t noise;
         unsigned int    which = 0;
         unsigned int    remaining;
@@ -2762,7 +2775,7 @@ send_mru_entry(
         while (remaining > 0) {
 #ifdef USE_RANDOMIZE_RESPONSES
                 which = (noise & 7) % COUNTOF(sent);
-#endif // USE_RANDOMIZE_RESPONSES
+#endif  // USE_RANDOMIZE_RESPONSES
                 noise >>= 3;
                 while (sent[which])
                         which = (which + 1) % COUNTOF(sent);
@@ -3046,8 +3059,9 @@ static void read_mru_list(
         ZERO(last);
         ZERO(addr);
 
-        // have to go through '(void*)' to drop 'const' property from pointer.
-        // ctl_getitem2()' needs some cleanup, too.... perlinger@ntp.org
+        /* have to go through '(void*)' to drop 'const' property from pointer.
+         * ctl_getitem2()' needs some cleanup, too.... perlinger@ntp.org
+         */
         while (NULL != (v = ctl_getitem2(in_parms, (void*)&val)) &&
                !(EOV & v->flags)) {
                 int si;
@@ -3239,7 +3253,7 @@ static void read_mru_list(
 #ifdef USE_RANDOMIZE_RESPONSES
                 if (!count)
                         send_random_tag_value(0);
-#endif // USE_RANDOMIZE_RESPONSES
+#endif  // USE_RANDOMIZE_RESPONSES
                 count++;
                 prior_mon = mon;
         }
@@ -3253,7 +3267,7 @@ static void read_mru_list(
                 if (count > 1) {
                         send_random_tag_value((int)count - 1);
                 }
-#endif // USE_RANDOMIZE_RESPONSES
+#endif  // USE_RANDOMIZE_RESPONSES
                 ctl_putts("now", now);
                 // if any entries were returned confirm the last
                 if (prior_mon != NULL)
@@ -3286,7 +3300,7 @@ send_ifstats_entry(
         const char pc_fmt[] =           "pc.%u";        // peer count
         const char up_fmt[] =           "up.%u";        // uptime
         char    tag[32];
-        uint8_t sent[IFSTATS_FIELDS]; // 9 tag=value pairs
+        uint8_t sent[IFSTATS_FIELDS];  // 9 tag=value pairs
         int     noisebits;
         uint32_t noise;
         unsigned int    which = 0;
@@ -3304,7 +3318,7 @@ send_ifstats_entry(
                 }
 #ifdef USE_RANDOMIZE_RESPONSES
                 which = (noise & 0xf) % COUNTOF(sent);
-#endif // USE_RANDOMIZE_RESPONSES
+#endif  // USE_RANDOMIZE_RESPONSES
                 noise >>= 4;
                 noisebits -= 4;
 
@@ -3368,7 +3382,7 @@ send_ifstats_entry(
         }
 #ifdef USE_RANDOMIZE_RESPONSES
         send_random_tag_value((int)ifnum);
-#endif // USE_RANDOMIZE_RESPONSES
+#endif  // USE_RANDOMIZE_RESPONSES
 }
 
 
@@ -3448,7 +3462,7 @@ send_restrict_entry(
         const char hits_fmt[] =         "hits.%u";
         const char flags_fmt[] =        "flags.%u";
         char            tag[32];
-        uint8_t         sent[RESLIST_FIELDS]; // 4 tag=value pairs
+        uint8_t         sent[RESLIST_FIELDS];  // 4 tag=value pairs
         int             noisebits;
         uint32_t                noise;
         unsigned int            which = 0;
@@ -3472,7 +3486,7 @@ send_restrict_entry(
                 }
 #ifdef USE_RANDOMIZE_RESPONSES
                 which = (noise & 0x3) % COUNTOF(sent);
-#endif // USE_RANDOMIZE_RESPONSES
+#endif  // USE_RANDOMIZE_RESPONSES
                 noise >>= 2;
                 noisebits -= 2;
 
@@ -3522,7 +3536,7 @@ send_restrict_entry(
         }
 #ifdef USE_RANDOMIZE_RESPONSES
         send_random_tag_value((int)idx);
-#endif // USE_RANDOMIZE_RESPONSES
+#endif  // USE_RANDOMIZE_RESPONSES
 }
 
 
@@ -3628,7 +3642,7 @@ static void req_nonce(
 /*
  * read_clockstatus - return clock radio status
  */
-//ARGSUSED
+// ARGSUSED
 static void
 read_clockstatus(
         struct recvbuf *rbufp,
@@ -3808,7 +3822,7 @@ report_event(
                 if (IS_PEER_REFCLOCK(peer))
                         src = refclock_name(peer);
                 else
-#endif // REFCLOCK
+#endif  // REFCLOCK
                 if (AF_UNSPEC == AF(&peer->srcadr))
                     src = peer->hostname;
                 else
@@ -4026,3 +4040,4 @@ free_varlist(
                 free((void *)kv);
         }
 }
+
