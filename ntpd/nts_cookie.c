@@ -81,7 +81,7 @@
  * #define is in include/nts.h
  */
 
-/* cookies use same AEAD algorithms as wire */
+// cookies use same AEAD algorithms as wire
 /* This determines which algorithm we use.
  * Valid choices are 32, 48, and 64
  * making this a variable rather than #define
@@ -90,7 +90,7 @@
  * You can change that by editing the keys file.
  */
 int K_length = AEAD_AES_SIV_CMAC_256_KEYLEN;
-time_t K_time = 0;	/* time K was created, 0 for none */
+time_t K_time = 0;  // time K was created, 0 for none
 struct NTS_Key nts_keys[NTS_nKEYS];
 int nts_nKeys = 0;
 
@@ -105,11 +105,11 @@ void nts_lock_cookielock(void);
 void nts_unlock_cookielock(void);
 
 // FIXME  AEAD_LENGTH
-/* Associated data: aead (rounded up to 4) plus NONCE */
+// Associated data: aead (rounded up to 4) plus NONCE
 #define AD_LENGTH 20
 #define AEAD_LENGTH 4
 
-/* cookie_ctx needed for client side */
+// cookie_ctx needed for client side
 bool nts_cookie_init(void) {
   cookie_ctx = AES_SIV_CTX_new();
   if (NULL == cookie_ctx) {
@@ -119,16 +119,16 @@ bool nts_cookie_init(void) {
   return true;
 }
 
-/* cookie key needed for server side */
+// cookie key needed for server side
 bool nts_cookie_init2(void) {
-	bool OK = true;
-	if (!nts_read_cookie_keys()) {
-		/* Can't read cookie file.  Make one */
-		nts_make_cookie_key();
-		K_time = time(NULL);
-		nts_write_cookie_keys();
-	}
-	return OK;
+        bool OK = true;
+        if (!nts_read_cookie_keys()) {
+                // Can't read cookie file.  Make one
+                nts_make_cookie_key();
+                K_time = time(NULL);
+                nts_write_cookie_keys();
+        }
+        return OK;
 }
 
 /* Rotate key -- 24 hours after last rotation
@@ -142,83 +142,83 @@ bool nts_cookie_init2(void) {
 // Just uncommenting the next line will generate a warning reminder.
 // #define SecondsPerDay 3600
 void nts_cookie_timer(void) {
-	time_t now;
-	if (0 == K_time) {
-		return;
-	}
-	now = time(NULL);
-	if (SecondsPerDay > (now-K_time)) {
-		return;
-	}
-	nts_make_cookie_key();
-	/* In case we were off for many days. */
-	while (SecondsPerDay < (now-K_time)) {
-		K_time += SecondsPerDay;
-	}
-	if (nts_write_cookie_keys() )
-		msyslog(LOG_INFO, "NTS: Wrote new cookie file, %d keys.", nts_nKeys);
-	else
-		msyslog(LOG_INFO, "NTS: Trouble writing new cookie file.");
-	return;
+        time_t now;
+        if (0 == K_time) {
+                return;
+        }
+        now = time(NULL);
+        if (SecondsPerDay > (now-K_time)) {
+                return;
+        }
+        nts_make_cookie_key();
+        // In case we were off for many days.
+        while (SecondsPerDay < (now-K_time)) {
+                K_time += SecondsPerDay;
+        }
+        if (nts_write_cookie_keys() )
+                msyslog(LOG_INFO, "NTS: Wrote new cookie file, %d keys.", nts_nKeys);
+        else
+                msyslog(LOG_INFO, "NTS: Trouble writing new cookie file.");
+        return;
 }
 
 
 bool nts_read_cookie_keys(void) {
-	const char *cookie_filename = NTS_COOKIE_KEY_FILE;
-	FILE *in;
-	unsigned long templ;
-	if (NULL != ntsconfig.KI)
-		cookie_filename = ntsconfig.KI;
-	in = fopen(cookie_filename, "r");
-	if (NULL == in) {
-		char errbuf[100];
-		if (ENOENT == errno)
-			return false;		/* File doesn't exist */
-		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-		msyslog(LOG_ERR, "NTSs: can't read old cookie file: %s=>%s",
-			cookie_filename, errbuf);
-		exit(1);
-	}
-	if (1 != fscanf(in, "T: %lu\n", &templ)) {
-		goto bail;
-	}
-	K_time = templ;
-	if (1 != fscanf(in, "L: %d\n", &K_length)) {
-		goto bail;
-	}
-	if ( !((32 == K_length) || (48 == K_length) || (64 == K_length))) {
-		goto bail;
-	}
-	nts_nKeys = 0;
-	for (int i=0; i<NTS_nKEYS; i++) {
-	  struct NTS_Key *key = &nts_keys[i];
-	  if (1 != fscanf(in, "I: %u\n", &key->I)) {
-		if (0 < nts_nKeys) break;
-		goto bail;
-	  }
-	  if (0 != fscanf(in, "K: ")) {
-		goto bail;
-	  }
-	  for (int j=0; j< K_length; j++) {
-		unsigned int temp;
-		if (1 != fscanf(in, "%02x", &temp)) {
-			goto bail;
-		}
-		key->K[j] = temp;
-	  }
-	  if (0 != fscanf(in, "\n")) {
-		goto bail;
-	  }
-	  nts_nKeys = i+1;
-	}
-	fclose(in);
-	msyslog(LOG_INFO, "NTS: Read cookie file, %d keys.", nts_nKeys);
-	return true;
+        const char *cookie_filename = NTS_COOKIE_KEY_FILE;
+        FILE *in;
+        unsigned long templ;
+        if (NULL != ntsconfig.KI)
+                cookie_filename = ntsconfig.KI;
+        in = fopen(cookie_filename, "r");
+        if (NULL == in) {
+                char errbuf[100];
+                if (ENOENT == errno)
+                        return false;  // File doesn't exist
+                ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+                msyslog(LOG_ERR, "NTSs: can't read old cookie file: %s=>%s",
+                        cookie_filename, errbuf);
+                exit(1);
+        }
+        if (1 != fscanf(in, "T: %lu\n", &templ)) {
+                goto bail;
+        }
+        K_time = templ;
+        if (1 != fscanf(in, "L: %d\n", &K_length)) {
+                goto bail;
+        }
+        if ( !((32 == K_length) || (48 == K_length) || (64 == K_length))) {
+                goto bail;
+        }
+        nts_nKeys = 0;
+        for (int i=0; i<NTS_nKEYS; i++) {
+          struct NTS_Key *key = &nts_keys[i];
+          if (1 != fscanf(in, "I: %u\n", &key->I)) {
+                if (0 < nts_nKeys) break;
+                goto bail;
+          }
+          if (0 != fscanf(in, "K: ")) {
+                goto bail;
+          }
+          for (int j=0; j< K_length; j++) {
+                unsigned int temp;
+                if (1 != fscanf(in, "%02x", &temp)) {
+                        goto bail;
+                }
+                key->K[j] = temp;
+          }
+          if (0 != fscanf(in, "\n")) {
+                goto bail;
+          }
+          nts_nKeys = i+1;
+        }
+        fclose(in);
+        msyslog(LOG_INFO, "NTS: Read cookie file, %d keys.", nts_nKeys);
+        return true;
 
   bail:
-	msyslog(LOG_ERR, "ERR: Error parsing cookie keys file");
-	fclose(in);
-	return false;
+        msyslog(LOG_ERR, "ERR: Error parsing cookie keys file");
+        fclose(in);
+        return false;
 }
 
 /* RFC 8915 describes a ratchet mode to make new keys
@@ -229,241 +229,241 @@ bool nts_read_cookie_keys(void) {
  * they copy the key file to other systems and have them load it.
  */
 void nts_make_cookie_key(void) {
-	if (nts_nKeys < NTS_nKEYS) nts_nKeys++;
-	for (int i=nts_nKeys-1; i>0; i--) {
-	  nts_keys[i] = nts_keys[i-1];
-	}
-	ntp_RAND_priv_bytes(nts_keys[0].K, K_length);
-	ntp_RAND_bytes((uint8_t *)&nts_keys[0].I, sizeof(nts_keys[0].I));
-	return;
+        if (nts_nKeys < NTS_nKEYS) nts_nKeys++;
+        for (int i=nts_nKeys-1; i>0; i--) {
+          nts_keys[i] = nts_keys[i-1];
+        }
+        ntp_RAND_priv_bytes(nts_keys[0].K, K_length);
+        ntp_RAND_bytes((uint8_t *)&nts_keys[0].I, sizeof(nts_keys[0].I));
+        return;
 }
 
 bool nts_write_cookie_keys(void) {
-	const char *cookiefile = NTS_COOKIE_KEY_FILE;
-	char tempfile[PATH_MAX];
-	int fd;
-	FILE *out;
-	char errbuf[100];
-	if (NULL != ntsconfig.KI)
-		cookiefile = ntsconfig.KI;
-	strlcpy(tempfile, cookiefile, sizeof(tempfile));
-	strlcat(tempfile, "-tmp", sizeof(tempfile));
-	fd = open(tempfile, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
-	if (-1 == fd) {
-		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-		msyslog(LOG_ERR, "ERR: can't open %s: %s", tempfile, errbuf);
-		return false;
-	}
-	out = fdopen(fd, "w");
-	if (NULL == out) {
-		ntp_strerror_r(errno, errbuf, sizeof(errbuf));
-		msyslog(LOG_ERR, "ERR: can't fdopen %s: %s", tempfile, errbuf);
-		close(fd);
-		return false;
-	}
+        const char *cookiefile = NTS_COOKIE_KEY_FILE;
+        char tempfile[PATH_MAX];
+        int fd;
+        FILE *out;
+        char errbuf[100];
+        if (NULL != ntsconfig.KI)
+                cookiefile = ntsconfig.KI;
+        strlcpy(tempfile, cookiefile, sizeof(tempfile));
+        strlcat(tempfile, "-tmp", sizeof(tempfile));
+        fd = open(tempfile, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
+        if (-1 == fd) {
+                ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+                msyslog(LOG_ERR, "ERR: can't open %s: %s", tempfile, errbuf);
+                return false;
+        }
+        out = fdopen(fd, "w");
+        if (NULL == out) {
+                ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+                msyslog(LOG_ERR, "ERR: can't fdopen %s: %s", tempfile, errbuf);
+                close(fd);
+                return false;
+        }
 
-	fprintf(out, "T: %lu\n", (unsigned long)K_time);
-	fprintf(out, "L: %d\n", K_length);
-	for (int i=0; i<nts_nKeys; i++) {
-	  struct NTS_Key *key = &nts_keys[i];
-	  fprintf(out, "I: %u\n", key->I);
-	  fprintf(out, "K: ");
-	    for (int j=0; j< K_length; j++) fprintf(out, "%02x", key->K[j]);
-	  fprintf(out, "\n");
-	  key++;
-	}
-	fclose(out);
+        fprintf(out, "T: %lu\n", (unsigned long)K_time);
+        fprintf(out, "L: %d\n", K_length);
+        for (int i=0; i<nts_nKeys; i++) {
+          struct NTS_Key *key = &nts_keys[i];
+          fprintf(out, "I: %u\n", key->I);
+          fprintf(out, "K: ");
+            for (int j=0; j< K_length; j++) fprintf(out, "%02x", key->K[j]);
+          fprintf(out, "\n");
+          key++;
+        }
+        fclose(out);
         if (rename(tempfile, cookiefile)) {
-	    ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+            ntp_strerror_r(errno, errbuf, sizeof(errbuf));
             msyslog(LOG_WARNING,
                     "LOG: Unable to rename temp cookie file %s to %s, %s",
                     tempfile, cookiefile, errbuf);
-	    return false;
-	}
-	return true;
+            return false;
+        }
+        return true;
 }
 
-/* returns actual length */
+// returns actual length
 int nts_make_cookie(uint8_t *cookie,
   uint16_t aead,
   uint8_t *c2s, uint8_t *s2c, int keylen) {
-	uint8_t plaintext[NTS_MAX_COOKIELEN];
-	uint8_t *nonce;
-	int used, plainlength;
-	bool ok;
-	uint8_t * finger;
-	uint32_t temp;	/* keep 4 byte alignment */
-	size_t left;
+        uint8_t plaintext[NTS_MAX_COOKIELEN];
+        uint8_t *nonce;
+        int used, plainlength;
+        bool ok;
+        uint8_t * finger;
+        uint32_t temp;  // keep 4 byte alignment
+        size_t left;
 
-	if (NULL == cookie_ctx)
-		return 0;		/* We aren't initialized yet. */
+        if (NULL == cookie_ctx)
+                return 0;  // We aren't initialized yet.
 
-	nts_cnt.cookie_make++;
+        nts_cnt.cookie_make++;
 
-	INSIST(keylen <= NTS_MAX_KEYLEN);
+        INSIST(keylen <= NTS_MAX_KEYLEN);
 
-	/* collect plaintext
-	 * separate buffer avoids encrypt in place
-	 * but costs cache space
-	 */
-	finger = plaintext;
-	temp = aead;
-	memcpy(finger, &temp, AEAD_LENGTH);
-	finger += AEAD_LENGTH;
-	memcpy(finger, c2s, keylen);
-	finger += keylen;
-	memcpy(finger, s2c, keylen);
-	finger += keylen;
-	plainlength = finger-plaintext;
+        /* collect plaintext
+         * separate buffer avoids encrypt in place
+         * but costs cache space
+         */
+        finger = plaintext;
+        temp = aead;
+        memcpy(finger, &temp, AEAD_LENGTH);
+        finger += AEAD_LENGTH;
+        memcpy(finger, c2s, keylen);
+        finger += keylen;
+        memcpy(finger, s2c, keylen);
+        finger += keylen;
+        plainlength = finger-plaintext;
 
-	/* collect associated data */
-	finger = cookie;
+        // collect associated data
+        finger = cookie;
 
-	memcpy(finger, &nts_keys[0].I, sizeof(nts_keys[0].I));
-	finger += sizeof(nts_keys[0].I);
+        memcpy(finger, &nts_keys[0].I, sizeof(nts_keys[0].I));
+        finger += sizeof(nts_keys[0].I);
 
-	nonce = finger;
-	ntp_RAND_bytes(finger, NONCE_LENGTH);
-	finger += NONCE_LENGTH;
+        nonce = finger;
+        ntp_RAND_bytes(finger, NONCE_LENGTH);
+        finger += NONCE_LENGTH;
 
-	used = finger-cookie;
-	left = NTS_MAX_COOKIELEN-used;
+        used = finger-cookie;
+        left = NTS_MAX_COOKIELEN-used;
 
-	nts_lock_cookielock();
+        nts_lock_cookielock();
 
-	ok = AES_SIV_Encrypt(cookie_ctx,
-			     finger, &left,   /* left: in: max out length, out: length used */
-			     nts_keys[0].K, K_length,
-			     nonce, NONCE_LENGTH,
-			     plaintext, plainlength,
-			     cookie, AD_LENGTH);
+        ok = AES_SIV_Encrypt(cookie_ctx,
+                             finger, &left,  // left: in: max out length, out: length used
+                             nts_keys[0].K, K_length,
+                             nonce, NONCE_LENGTH,
+                             plaintext, plainlength,
+                             cookie, AD_LENGTH);
 
-	nts_unlock_cookielock();
+        nts_unlock_cookielock();
 
-	if (!ok) {
-		msyslog(LOG_ERR, "NTS: nts_make_cookie - Error from AES_SIV_Encrypt");
-		/* I don't think this should happen,
-		 * so crash rather than work incorrectly.
-		 * Hal, 2019-Feb-17
-		 * Similar code in ntp_extens
-		 */
-		exit(1);
-	}
+        if (!ok) {
+                msyslog(LOG_ERR, "NTS: nts_make_cookie - Error from AES_SIV_Encrypt");
+                /* I don't think this should happen,
+                 * so crash rather than work incorrectly.
+                 * Hal, 2019-Feb-17
+                 * Similar code in ntp_extens
+                 */
+                exit(1);
+        }
 
-	used += left;
-	INSIST(used <= NTS_MAX_COOKIELEN);
+        used += left;
+        INSIST(used <= NTS_MAX_COOKIELEN);
 
-	return used;
+        return used;
 }
 
-/* can't decrypt in place - that would trash the unauthenticated packet */
+// can't decrypt in place - that would trash the unauthenticated packet
 bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
   uint16_t *aead,
   uint8_t *c2s, uint8_t *s2c, int *keylen) {
-	uint8_t *finger;
-	uint8_t plaintext[NTS_MAX_COOKIELEN];
-	uint8_t *nonce;
-	uint32_t temp;
-	size_t plainlength;
-	int cipherlength;
-	bool ok;
-	struct NTS_Key *key;
-	int i;
+        uint8_t *finger;
+        uint8_t plaintext[NTS_MAX_COOKIELEN];
+        uint8_t *nonce;
+        uint32_t temp;
+        size_t plainlength;
+        int cipherlength;
+        bool ok;
+        struct NTS_Key *key;
+        int i;
 
-	if (NULL == cookie_ctx)
-		return false;	/* We aren't initialized yet. */
+        if (NULL == cookie_ctx)
+                return false;  // We aren't initialized yet.
 
-	if (0 == nts_nKeys) {
-		nts_cnt.cookie_not_server++;
-		return false;  /* We are not a NTS enabled server. */
-	}
-
-	/* We may get garbage from the net */
-	if (cookielen > NTS_MAX_COOKIELEN)
-		return false;
-
-	finger = cookie;
-	key = NULL;		/* squash uninitialized warning */
-	for (i=0; i<nts_nKeys; i++) {
-	  key = &nts_keys[i];
-	  if (0 == memcmp(finger, &key->I, sizeof(key->I))) {
-		break;
-	  }
-	}
-	nts_cnt.cookie_decode_total++;  /* total attempts, includes too old */
-	if (nts_nKeys == i) {
-		nts_cnt.cookie_decode_too_old++;
-		return false;
+        if (0 == nts_nKeys) {
+                nts_cnt.cookie_not_server++;
+                return false;  // We are not a NTS enabled server.
         }
-	if (0 == i) {
-		nts_cnt.cookie_decode_current++;
-	} else if (1 == i) {
-		nts_cnt.cookie_decode_old++;
-	} else if (2 == i) {
-		nts_cnt.cookie_decode_old2++;
-	} else {
-		nts_cnt.cookie_decode_older++;
-	}
+
+        // We may get garbage from the net
+        if (cookielen > NTS_MAX_COOKIELEN)
+                return false;
+
+        finger = cookie;
+        key = NULL;  // squash uninitialized warning
+        for (i=0; i<nts_nKeys; i++) {
+          key = &nts_keys[i];
+          if (0 == memcmp(finger, &key->I, sizeof(key->I))) {
+                break;
+          }
+        }
+        nts_cnt.cookie_decode_total++;  // total attempts, includes too old
+        if (nts_nKeys == i) {
+                nts_cnt.cookie_decode_too_old++;
+                return false;
+        }
+        if (0 == i) {
+                nts_cnt.cookie_decode_current++;
+        } else if (1 == i) {
+                nts_cnt.cookie_decode_old++;
+        } else if (2 == i) {
+                nts_cnt.cookie_decode_old2++;
+        } else {
+                nts_cnt.cookie_decode_older++;
+        }
 #if 0
-	if (1<i) {
-	  /* Hack for debugging */
-	  /* Beware: DoS possibility on a public server */
-	  msyslog(LOG_INFO, "NTS: Old cookie: %d days.", i);
-	}
+        if (1<i) {
+          // Hack for debugging
+          // Beware: DoS possibility on a public server
+          msyslog(LOG_INFO, "NTS: Old cookie: %d days.", i);
+        }
 #endif
 
-	finger += sizeof(key->I);
-	nonce = finger;
-	finger += NONCE_LENGTH;
+        finger += sizeof(key->I);
+        nonce = finger;
+        finger += NONCE_LENGTH;
 
-	// require(AD_LENGTH==finger-cookie);
+        // require(AD_LENGTH==finger-cookie);
 
-	cipherlength = cookielen - AD_LENGTH;
-	plainlength = NTS_MAX_COOKIELEN;
+        cipherlength = cookielen - AD_LENGTH;
+        plainlength = NTS_MAX_COOKIELEN;
 
-	nts_lock_cookielock();
+        nts_lock_cookielock();
 
-	ok = AES_SIV_Decrypt(cookie_ctx,
-			     plaintext, &plainlength,
-			     key->K, K_length,
-			     nonce, NONCE_LENGTH,
-			     finger, cipherlength,
-			     cookie, AD_LENGTH);
+        ok = AES_SIV_Decrypt(cookie_ctx,
+                             plaintext, &plainlength,
+                             key->K, K_length,
+                             nonce, NONCE_LENGTH,
+                             finger, cipherlength,
+                             cookie, AD_LENGTH);
 
-	nts_unlock_cookielock();
+        nts_unlock_cookielock();
 
-	if (!ok) {
-		nts_cnt.cookie_decode_error++;
-		return false;
-	}
+        if (!ok) {
+                nts_cnt.cookie_decode_error++;
+                return false;
+        }
 
-	*keylen = (plainlength-AEAD_LENGTH)/2;
-	finger = plaintext;
-	memcpy(&temp, finger, AEAD_LENGTH);
-	*aead = temp;
-	finger += AEAD_LENGTH;
-	memcpy(c2s, finger, *keylen);
-	finger += *keylen;
-	memcpy(s2c, finger, *keylen);
-	finger += *keylen;
+        *keylen = (plainlength-AEAD_LENGTH)/2;
+        finger = plaintext;
+        memcpy(&temp, finger, AEAD_LENGTH);
+        *aead = temp;
+        finger += AEAD_LENGTH;
+        memcpy(c2s, finger, *keylen);
+        finger += *keylen;
+        memcpy(s2c, finger, *keylen);
+        finger += *keylen;
 
-	return true;
+        return true;
 }
 
 void nts_lock_cookielock(void) {
-	int err = pthread_mutex_lock(&cookie_lock);
-	if (0 != err) {
-		msyslog(LOG_ERR, "ERR: Can't lock cookie_lock: %d", err);
-		exit(2);
-	}
+        int err = pthread_mutex_lock(&cookie_lock);
+        if (0 != err) {
+                msyslog(LOG_ERR, "ERR: Can't lock cookie_lock: %d", err);
+                exit(2);
+        }
 }
 
 void nts_unlock_cookielock(void) {
-	int err = pthread_mutex_unlock(&cookie_lock);
-	if (0 != err) {
-		msyslog(LOG_ERR, "ERR: Can't unlock cookie_lock: %d", err);
-		exit(2);
-	}
+        int err = pthread_mutex_unlock(&cookie_lock);
+        if (0 != err) {
+                msyslog(LOG_ERR, "ERR: Can't unlock cookie_lock: %d", err);
+                exit(2);
+        }
 }
 
-/* end */
+// end
