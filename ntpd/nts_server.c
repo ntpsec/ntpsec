@@ -204,18 +204,18 @@ void* nts_ke_listener(void* arg) {
         char errbuf[100];
         char addrbuf[100];
         char usingbuf[100];
-        struct timespec start, finish;  // wall clock
+        struct timespec start, finish;          // wall clock
         l_fp wall, usr, sys;
-        const char *errtxt;  // not NULL if error
+        const char *errtxt;     // not NULL if error
 #ifdef RUSAGE_THREAD
         // Not in NetBSD 10.1, 2026-Apr-05
-        struct timespec start_u, finish_u;  // CPU user
-        struct timespec start_s, finish_s;  // CPU system
+        struct timespec start_u, finish_u;      // CPU user
+        struct timespec start_s, finish_s;      // CPU system
         struct rusage usage;
 #endif
 
 #ifdef HAVE_SECCOMP_H
-        setup_SIGSYS_trap();  // enable trap for this thread
+        setup_SIGSYS_trap();   // enable trap for this thread
 #endif
 
 #ifdef RUSAGE_THREAD
@@ -238,7 +238,7 @@ void* nts_ke_listener(void* arg) {
                 SSL *ssl;
                 int client, err;
 
-                sleep(1);  // FIXME: log clutter/DoS
+                sleep(1);                       // FIXME: log clutter/DoS
                 errtxt = NULL;
                 client = accept(sock, &addr.sa, &len);
                 if (client < 0) {
@@ -420,7 +420,7 @@ void nts_ke_request(SSL *ssl,
         if ((NO_AEAD == aead) && (NULL != ntsconfig.aead))
                 aead = nts_string_to_aead(ntsconfig.aead);
         if (NO_AEAD == aead)
-                aead = AEAD_AES_SIV_CMAC_256;  // default
+                aead = AEAD_AES_SIV_CMAC_256;    // default
 
         keylen = nts_get_key_length(aead);
         if (!nts_make_keys(ssl, aead, c2s, s2c, keylen)) {
@@ -602,11 +602,11 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
                                 if (0 == nts_get_key_length(data)) {
                                         if (0)  // for debugging
                                                 msyslog(LOG_ERR, "NTSs: AN-Unsupported AEAN type: %d", data);
-                                        continue;  // ignore types we don't support
+                                        continue;     // ignore types we don't support
                                 }
                                 if (*aead != NO_AEAD)
-                                        continue;  // already got one
-                                *aead = data;  // take this one
+                                        continue;     // already got one
+                                *aead = data;   // take this one
                         }
                         break;
                     case nts_end_of_message:
@@ -639,7 +639,7 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
                         buf->left -= length;
                         break;
                 }  // case
-        }  // while
+        }   // while
 
         /* If we get here, we ran off the end without finding an EOM.
          * nts_ssl_read() should have complained, so this check
