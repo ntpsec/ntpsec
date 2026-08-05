@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-/* Last modified on Sat Aug 28 14:30:11 PDT 1999 by murray */
+// Last modified on Sat Aug 28 14:30:11 PDT 1999 by murray
 
 /*
  * Hack to time aead routines from libaes_siv
@@ -44,7 +44,7 @@ int     key_K_length;
 pthread_mutex_t cookie_lock = PTHREAD_MUTEX_INITIALIZER;
 
 
-/* sizeof(key_I) + sizeof(NONCE) */
+// sizeof(key_I) + sizeof(NONCE)
 #define AD_LENGTH 20
 
 static void ssl_init(void)
@@ -85,44 +85,44 @@ static void ntp_RAND_bytes(unsigned char *buf, int num) {
 
 static void DoLock(void)
 {
-	struct timespec start, stop;
-	double fast;
-	int samplesize = SAMPLESIZE;
+        struct timespec start, stop;
+        double fast;
+        int samplesize = SAMPLESIZE;
 
-	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0; i < samplesize; i++) {
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < samplesize; i++) {
           nts_lock_cookielock();
           nts_unlock_cookielock();
-	}
-	clock_gettime(CLOCK_MONOTONIC, &stop);
-	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
-	printf("LocK          %6.0f %7.3f",
-	       fast/samplesize,  fast/1E9);
-	printf("\n");
+        }
+        clock_gettime(CLOCK_MONOTONIC, &stop);
+        fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
+        printf("LocK          %6.0f %7.3f",
+               fast/samplesize,  fast/1E9);
+        printf("\n");
 }
 
 
 static void DoNonce(void)
 {
         uint8_t nonce[NONCE_LENGTH];
-	struct timespec start, stop;
-	double fast;
-	int samplesize = SAMPLESIZE;
+        struct timespec start, stop;
+        double fast;
+        int samplesize = SAMPLESIZE;
 
-	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0; i < samplesize; i++) {
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < samplesize; i++) {
           ntp_RAND_bytes(nonce, NONCE_LENGTH);
-	}
-	clock_gettime(CLOCK_MONOTONIC, &stop);
-	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
-	printf("Nonce     %3d %6.0f %7.3f",
-	       NONCE_LENGTH, fast/samplesize,  fast/1E9);
-	printf("\n");
+        }
+        clock_gettime(CLOCK_MONOTONIC, &stop);
+        fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
+        printf("Nonce     %3d %6.0f %7.3f",
+               NONCE_LENGTH, fast/samplesize,  fast/1E9);
+        printf("\n");
 }
 
 
-/* Clone of nts_make_cookie() from ntpd/nts_cookie.c */
-/* returns actual length */
+// Clone of nts_make_cookie() from ntpd/nts_cookie.c
+// returns actual length
 int nts_make_cookie(uint8_t *cookie,
   uint16_t aead,
   uint8_t *c2s, uint8_t *s2c, int keylen) {
@@ -131,11 +131,11 @@ int nts_make_cookie(uint8_t *cookie,
         int used, plainlength;
         bool ok;
         uint8_t * finger;
-        uint32_t temp;  /* keep 4 byte alignment */
+        uint32_t temp;  // keep 4 byte alignment
         size_t left;
 
         if (NULL == cookie_ctx)
-                return 0;               /* We aren't initialized yet. */
+                return 0;               // We aren't initialized yet.
 
 //        nts_cookie_make++;
 
@@ -151,7 +151,7 @@ int nts_make_cookie(uint8_t *cookie,
         finger += keylen;
         plainlength = finger-plaintext;
 
-        /* collect associated data */
+        // collect associated data
         finger = cookie;
 
         memcpy(finger, &key_I, sizeof(key_I));
@@ -166,7 +166,7 @@ int nts_make_cookie(uint8_t *cookie,
 
         nts_lock_cookielock();
         ok = AES_SIV_Encrypt(cookie_ctx,
-                             finger, &left,   /* left: in: max out length, out: length used */
+                             finger, &left,   // left: in: max out length, out: length used
                              key_K, key_K_length,
                              nonce, NONCE_LENGTH,
                              plaintext, plainlength,
@@ -186,84 +186,84 @@ int nts_make_cookie(uint8_t *cookie,
 
 
 static void DoMakeCookie(
-  const char *name,       /* name of aead */
-  int     aead,		  /* algorithm used to make cookie */
-  int     keylength       /* length of c2s and s2c */
+  const char *name,       // name of aead
+  int     aead,           // algorithm used to make cookie
+  int     keylength       // length of c2s and s2c
 )
 {
-	uint8_t cookie[NTS_MAX_COOKIELEN];
-	uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
-	struct timespec start, stop;
-	double fast;
-	int cookielength = 0;
-	int samplesize = SAMPLESIZE;
+        uint8_t cookie[NTS_MAX_COOKIELEN];
+        uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
+        struct timespec start, stop;
+        double fast;
+        int cookielength = 0;
+        int samplesize = SAMPLESIZE;
 
-	switch (aead) {
-	  case AEAD_AES_SIV_CMAC_256:
-		key_K_length = AEAD_AES_SIV_CMAC_256_KEYLEN;
-		break;
-	  case AEAD_AES_SIV_CMAC_384:
-		key_K_length = AEAD_AES_SIV_CMAC_384_KEYLEN;
-		break;
-	  case AEAD_AES_SIV_CMAC_512:
-		key_K_length = AEAD_AES_SIV_CMAC_512_KEYLEN;
-		break;
-	  default:
-		printf("Bogus aead\n");
-		exit(1);
-	}
+        switch (aead) {
+          case AEAD_AES_SIV_CMAC_256:
+                key_K_length = AEAD_AES_SIV_CMAC_256_KEYLEN;
+                break;
+          case AEAD_AES_SIV_CMAC_384:
+                key_K_length = AEAD_AES_SIV_CMAC_384_KEYLEN;
+                break;
+          case AEAD_AES_SIV_CMAC_512:
+                key_K_length = AEAD_AES_SIV_CMAC_512_KEYLEN;
+                break;
+          default:
+                printf("Bogus aead\n");
+                exit(1);
+        }
 
         ntp_RAND_bytes(c2s, NTS_MAX_KEYLEN);
         ntp_RAND_bytes(s2c, NTS_MAX_KEYLEN);
 
-	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0; i < samplesize; i++) {
-		cookielength = nts_make_cookie(
-			cookie, aead, c2s, s2c, keylength);
-	}
-	clock_gettime(CLOCK_MONOTONIC, &stop);
-	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
-	printf("%12s  %2d %4d %6.0f %7.3f",
-	       name, keylength, cookielength, fast/samplesize,  fast/1E9);
-	printf("\n");
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < samplesize; i++) {
+                cookielength = nts_make_cookie(
+                        cookie, aead, c2s, s2c, keylength);
+        }
+        clock_gettime(CLOCK_MONOTONIC, &stop);
+        fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
+        printf("%12s  %2d %4d %6.0f %7.3f",
+               name, keylength, cookielength, fast/samplesize,  fast/1E9);
+        printf("\n");
 }
 
 
 static void DoMakeCrypto(
-  const char *name,       /* name of aead */
-  int     aead,		  /* algorithm used to make cookie */
-  int     keylen          /* length of c2s and s2c */
+  const char *name,       // name of aead
+  int     aead,           // algorithm used to make cookie
+  int     keylen          // length of c2s and s2c
 )
 {
-	uint8_t cookie[NTS_MAX_COOKIELEN];
-	uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
-	struct timespec start, stop;
-	double fast;
-	int cookielength = 0;
-	int samplesize = SAMPLESIZE;
+        uint8_t cookie[NTS_MAX_COOKIELEN];
+        uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
+        struct timespec start, stop;
+        double fast;
+        int cookielength = 0;
+        int samplesize = SAMPLESIZE;
 
         uint8_t plaintext[NTS_MAX_COOKIELEN];
         uint8_t *nonce;
         int used, plainlength;
         int ok = 0;
         uint8_t * finger;
-        uint32_t temp;  /* keep 4 byte alignment */
+        uint32_t temp;  // keep 4 byte alignment
         size_t left;
 
-	switch (aead) {
-	  case AEAD_AES_SIV_CMAC_256:
-		key_K_length = AEAD_AES_SIV_CMAC_256_KEYLEN;
-		break;
-	  case AEAD_AES_SIV_CMAC_384:
-		key_K_length = AEAD_AES_SIV_CMAC_384_KEYLEN;
-		break;
-	  case AEAD_AES_SIV_CMAC_512:
-		key_K_length = AEAD_AES_SIV_CMAC_512_KEYLEN;
-		break;
-	  default:
-		printf("Bogus aead\n");
-		exit(1);
-	}
+        switch (aead) {
+          case AEAD_AES_SIV_CMAC_256:
+                key_K_length = AEAD_AES_SIV_CMAC_256_KEYLEN;
+                break;
+          case AEAD_AES_SIV_CMAC_384:
+                key_K_length = AEAD_AES_SIV_CMAC_384_KEYLEN;
+                break;
+          case AEAD_AES_SIV_CMAC_512:
+                key_K_length = AEAD_AES_SIV_CMAC_512_KEYLEN;
+                break;
+          default:
+                printf("Bogus aead\n");
+                exit(1);
+        }
 
         ntp_RAND_bytes(c2s, NTS_MAX_KEYLEN);
         ntp_RAND_bytes(s2c, NTS_MAX_KEYLEN);
@@ -278,7 +278,7 @@ static void DoMakeCrypto(
         finger += keylen;
         plainlength = finger-plaintext;
 
-        /* collect associated data */
+        // collect associated data
         finger = cookie;
 
         memcpy(finger, &key_I, sizeof(key_I));
@@ -291,16 +291,16 @@ static void DoMakeCrypto(
         used = finger-cookie;
         left = NTS_MAX_COOKIELEN-used;
 
-	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0; i < samplesize; i++) {
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < samplesize; i++) {
           ok += AES_SIV_Encrypt(cookie_ctx,
-             finger, &left,   /* left: in: max out length, out: length used */
+             finger, &left,   // left: in: max out length, out: length used
              key_K, key_K_length,
              nonce, NONCE_LENGTH,
              plaintext, plainlength,
              cookie, AD_LENGTH);
-	}
-	clock_gettime(CLOCK_MONOTONIC, &stop);
+        }
+        clock_gettime(CLOCK_MONOTONIC, &stop);
 
         if (samplesize != ok) {
                 printf("NTS: nts_make_cookie - Error from AES_SIV_Encrypt\n");
@@ -310,69 +310,69 @@ static void DoMakeCrypto(
         used += left;
         INSIST(used <= NTS_MAX_COOKIELEN);
 
-	cookielength = used;
+        cookielength = used;
 
-	fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
-	printf("%12s  %2d %4d %6.0f %7.3f",
-	       name, keylen, cookielength, fast/samplesize,  fast/1E9);
-	printf("\n");
+        fast = (stop.tv_sec-start.tv_sec)*1E9 + (stop.tv_nsec-start.tv_nsec);
+        printf("%12s  %2d %4d %6.0f %7.3f",
+               name, keylen, cookielength, fast/samplesize,  fast/1E9);
+        printf("\n");
 }
 
 int main(int argc, char *argv[])
 {
-	char *ctimetxt;
-	time_t now;
-	char buff[256];
+        char *ctimetxt;
+        time_t now;
+        char buff[256];
 
-	UNUSED_ARG(argc);
-	UNUSED_ARG(argv);
+        UNUSED_ARG(argc);
+        UNUSED_ARG(argv);
 
-	setlinebuf(stdout);
+        setlinebuf(stdout);
 
-	ssl_init();
+        ssl_init();
 
         ntp_RAND_bytes(key_K, NTS_MAX_KEYLEN);
 
-	now = time(NULL);
-	ctimetxt = ctime(&now);
-	ctimetxt[24] = 0;	/* Hack: smash return */
-	gethostname(buff, sizeof(buff));
-	printf("# %s on %s\n", ctimetxt, buff);
-	printf("# %s\n", OPENSSL_VERSION_TEXT);
+        now = time(NULL);
+        ctimetxt = ctime(&now);
+        ctimetxt[24] = 0;       // Hack: smash return
+        gethostname(buff, sizeof(buff));
+        printf("# %s on %s\n", ctimetxt, buff);
+        printf("# %s\n", OPENSSL_VERSION_TEXT);
 
-	printf("\n");
-	printf("#       bytes  ns/op sec/run\n");
-	DoLock();
-	DoNonce();
+        printf("\n");
+        printf("#       bytes  ns/op sec/run\n");
+        DoLock();
+        DoNonce();
 
-	printf("\n");
-	printf("# wKL=sizeof(c2s), CL=sizeof(cookie)\n");
-	printf("# Make cookie    wKL   CL  ns/op sec/run\n");
+        printf("\n");
+        printf("# wKL=sizeof(c2s), CL=sizeof(cookie)\n");
+        printf("# Make cookie    wKL   CL  ns/op sec/run\n");
 
 // Sample numbers using old cmac.h
 // run on a Dell 9020/MT with Intel i7-4790 @ 3.60GHz
-	/* 3rd arg is length of c2s and s2c */
-	DoMakeCookie("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 32);
-	DoMakeCookie("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 48);
-	DoMakeCookie("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 64);
+        // 3rd arg is length of c2s and s2c
+        DoMakeCookie("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 32);
+        DoMakeCookie("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 48);
+        DoMakeCookie("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 64);
 // AES_SIV_CMAC_256  32  104   3127   3.127
 // AES_SIV_CMAC_256  48  136   3186   3.186
 // AES_SIV_CMAC_256  64  168   3220   3.220
-	DoMakeCookie("AES_SIV_CMAC_512", AEAD_AES_SIV_CMAC_512, 32);
-	DoMakeCookie("AES_SIV_CMAC_512", AEAD_AES_SIV_CMAC_512, 48);
-	DoMakeCookie("AES_SIV_CMAC_512", AEAD_AES_SIV_CMAC_512, 64);
+        DoMakeCookie("AES_SIV_CMAC_512", AEAD_AES_SIV_CMAC_512, 32);
+        DoMakeCookie("AES_SIV_CMAC_512", AEAD_AES_SIV_CMAC_512, 48);
+        DoMakeCookie("AES_SIV_CMAC_512", AEAD_AES_SIV_CMAC_512, 64);
 // AES_SIV_CMAC_512  32  104   3183   3.183
 // AES_SIV_CMAC_512  48  136   3247   3.247
 // AES_SIV_CMAC_512  64  168   3303   3.303
-	printf("\n");
+        printf("\n");
 
-	printf("# Cookie Crypto  wKL   CL  ns/op sec/run\n");
-	DoMakeCrypto("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 32);
-	DoMakeCrypto("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 48);
-	DoMakeCrypto("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 64);
+        printf("# Cookie Crypto  wKL   CL  ns/op sec/run\n");
+        DoMakeCrypto("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 32);
+        DoMakeCrypto("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 48);
+        DoMakeCrypto("AES_SIV_CMAC_256", AEAD_AES_SIV_CMAC_256, 64);
 // AES_SIV_CMAC_256  32  104   2066   2.066
 // AES_SIV_CMAC_256  48  136   2119   2.119
 // AES_SIV_CMAC_256  64  168   2157   2.157
 
-	return 0;
+        return 0;
 }
