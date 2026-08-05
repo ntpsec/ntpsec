@@ -90,7 +90,7 @@
  * You can change that by editing the keys file.
  */
 int K_length = AEAD_AES_SIV_CMAC_256_KEYLEN;
-time_t K_time = 0;  // time K was created, 0 for none
+time_t K_time = 0;      // time K was created, 0 for none
 struct NTS_Key nts_keys[NTS_nKEYS];
 int nts_nKeys = 0;
 
@@ -173,7 +173,7 @@ bool nts_read_cookie_keys(void) {
         if (NULL == in) {
                 char errbuf[100];
                 if (ENOENT == errno)
-                        return false;  // File doesn't exist
+                        return false;           // File doesn't exist
                 ntp_strerror_r(errno, errbuf, sizeof(errbuf));
                 msyslog(LOG_ERR, "NTSs: can't read old cookie file: %s=>%s",
                         cookie_filename, errbuf);
@@ -296,7 +296,7 @@ int nts_make_cookie(uint8_t *cookie,
         size_t left;
 
         if (NULL == cookie_ctx)
-                return 0;  // We aren't initialized yet.
+                return 0;               // We aren't initialized yet.
 
         nts_cnt.cookie_make++;
 
@@ -332,7 +332,7 @@ int nts_make_cookie(uint8_t *cookie,
         nts_lock_cookielock();
 
         ok = AES_SIV_Encrypt(cookie_ctx,
-                             finger, &left,  // left: in: max out length, out: length used
+                             finger, &left,   // left: in: max out length, out: length used
                              nts_keys[0].K, K_length,
                              nonce, NONCE_LENGTH,
                              plaintext, plainlength,
@@ -371,7 +371,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
         int i;
 
         if (NULL == cookie_ctx)
-                return false;  // We aren't initialized yet.
+                return false;   // We aren't initialized yet.
 
         if (0 == nts_nKeys) {
                 nts_cnt.cookie_not_server++;
@@ -383,7 +383,7 @@ bool nts_unpack_cookie(uint8_t *cookie, int cookielen,
                 return false;
 
         finger = cookie;
-        key = NULL;  // squash uninitialized warning
+        key = NULL;             // squash uninitialized warning
         for (i=0; i<nts_nKeys; i++) {
           key = &nts_keys[i];
           if (0 == memcmp(finger, &key->I, sizeof(key->I))) {
