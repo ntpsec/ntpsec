@@ -132,7 +132,7 @@
 #define DEVICE          "/dev/acts%d"  // device name and unit
 #endif
 #define SPEED232        B19200  // uart speed (19200 bps)
-#define PRECISION       (-10)  // precision assumed (about 1 ms)
+#define PRECISION       (-10)   // precision assumed (about 1 ms)
 #define LOCKFILE        "/var/spool/lock/LCK..cua%d"
 #define NAME            "MODEM"  // shortname
 #define DESCRIPTION     "Automated Computer Time Service"  // WRU
@@ -143,23 +143,23 @@
 /*
  * Calling program modes (mode)
  */
-#define MODE_BACKUP     0  // backup mode
-#define MODE_AUTO       1  // automatic mode
-#define MODE_MANUAL     2  // manual mode
+#define MODE_BACKUP     0       // backup mode
+#define MODE_AUTO       1       // automatic mode
+#define MODE_MANUAL     2       // manual mode
 
 /*
  * Service identifiers (message length)
  */
 #define REFACTS         "NIST"  // NIST reference ID
-#define LENACTS         50  // NIST format
+#define LENACTS         50      // NIST format
 #define REFUSNO         "USNO"  // USNO reference ID
-#define LENUSNO         20  // USNO
+#define LENUSNO         20      // USNO
 #define REFPTB          "PTB\0"  // PTB/NPL reference ID
-#define LENPTB          78  // PTB/NPL format
+#define LENPTB          78      // PTB/NPL format
 #define REFTYPE         "GPS\0"  // Spectracom reference ID
-#define LENTYPE0        22  // SPECTRACOM format 0
-#define LENTYPE2        24  // SPECTRACOM format 2
-#define LF              0x0a  // ASCII LF
+#define LENTYPE0        22      // SPECTRACOM format 0
+#define LENTYPE2        24      // SPECTRACOM format 2
+#define LF              0x0a    // ASCII LF
 
 /*
  * Modem setup strings. These may have to be changed for
@@ -182,34 +182,34 @@ static const char *modem_setup = def_modem_setup;
 /*
  * Timeouts (all in seconds)
  */
-#define SETUP           3  // setup timeout
-#define REDIAL          30  // redial timeout
-#define ANSWER          60  // answer timeout
-#define TIMECODE        60  // message timeout
-#define MAXCODE         20  // max timecodes
+#define SETUP           3       // setup timeout
+#define REDIAL          30      // redial timeout
+#define ANSWER          60      // answer timeout
+#define TIMECODE        60      // message timeout
+#define MAXCODE         20      // max timecodes
 
 /*
  * State machine codes
  */
 typedef enum {
-        S_IDLE,  // wait for poll
-        S_SETUP,  // send modem setup
-        S_CONNECT,  // wait for answer
-        S_MSG  // wait for timecode
+        S_IDLE,                 // wait for poll
+        S_SETUP,                // send modem setup
+        S_CONNECT,              // wait for answer
+        S_MSG                   // wait for timecode
 } teModemState;
 
 /*
  * Unit control structure
  */
 struct modemunit {
-        int     unit;  // unit number
-        int     state;  // the first one was Delaware
-        int     timer;  // timeout counter
-        int     retry;  // retry index
-        int     msgcnt;  // count of messages received
-        l_fp    tstamp;  // on-time timestamp
-        char    *bufptr;  // next incoming char stored here
-        char    buf[BMAX];  // bufptr roams within buf[]
+        int     unit;           // unit number
+        int     state;          // the first one was Delaware
+        int     timer;          // timeout counter
+        int     retry;          // retry index
+        int     msgcnt;         // count of messages received
+        l_fp    tstamp;         // on-time timestamp
+        char    *bufptr;        // next incoming char stored here
+        char    buf[BMAX];      // bufptr roams within buf[]
 };
 
 /*
@@ -229,13 +229,13 @@ static  void    modem_close     (struct refclockproc *);
  * Transfer vector (conditional structure name)
  */
 struct refclock refclock_modem = {
-        NAME,  // basename of driver
-        modem_start,  // start up driver
-        modem_shutdown,  // shut down driver
-        modem_poll,  // transmit poll message
-        NULL,  // control - not used
-        NULL,  // init - not used
-        modem_timer  // housekeeping timer
+        NAME,                   // basename of driver
+        modem_start,            // start up driver
+        modem_shutdown,         // shut down driver
+        modem_poll,             // transmit poll message
+        NULL,                   // control - not used
+        NULL,                   // init - not used
+        modem_timer             // housekeeping timer
 };
 
 /*
@@ -486,7 +486,7 @@ modem_timeout(
          */
         case S_IDLE:
                 if (-1 != pp->io.fd)
-                        return;  // port is already open
+                        return;         // port is already open
 
                 /*
                  * Lock the modem port. If busy, retry later. Note: if
@@ -735,31 +735,31 @@ modem_timer(
  */
 void
 modem_timecode(
-        struct peer *   peer,  // peer structure pointer
-        const char *    str  // timecode string
+        struct peer *   peer,   // peer structure pointer
+        const char *    str     // timecode string
         )
 {
         struct modemunit *up;
         struct refclockproc *pp;
-        int     day;  // day of the month
-        int     month;  // month of the year
-        unsigned long   mjd;  // Modified Julian Day
-        double  dut1;  // DUT adjustment
+        int     day;            // day of the month
+        int     month;          // month of the year
+        unsigned long   mjd;    // Modified Julian Day
+        double  dut1;           // DUT adjustment
 
-        unsigned int    dst;  // ACTS daylight/standard time
-        unsigned int    leap;  // ACTS leap indicator
-        double  msADV;  // ACTS transmit advance (ms)
-        char    utc[10];  // ACTS timescale
-        char    flag;  // ACTS on-time character (* or #)
+        unsigned int    dst;            // ACTS daylight/standard time
+        unsigned int    leap;           // ACTS leap indicator
+        double  msADV;          // ACTS transmit advance (ms)
+        char    utc[10];        // ACTS timescale
+        char    flag;           // ACTS on-time character (* or #)
 
-        char    synchar;  // Spectracom synchronized indicator
-        char    qualchar;  // Spectracom quality indicator
-        char    leapchar;  // Spectracom leap indicator
-        char    dstchar;  // Spectracom daylight/savings indicator
-        int     tz;  // Spectracom timezone
+        char    synchar;        // Spectracom synchronized indicator
+        char    qualchar;       // Spectracom quality indicator
+        char    leapchar;       // Spectracom leap indicator
+        char    dstchar;        // Spectracom daylight/savings indicator
+        int     tz;             // Spectracom timezone
 
-        int     leapmonth;  // PTB/NPL month of leap
-        char    leapdir;  // PTB/NPL leap direction
+        int     leapmonth;      // PTB/NPL month of leap
+        char    leapdir;        // PTB/NPL leap direction
 
         /*
          * The parser selects the modem format based on the message
