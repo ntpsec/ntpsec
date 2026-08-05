@@ -16,7 +16,7 @@
 #ifdef HAVE_PPSAPI
 #include "ppsapi_timepps.h"
 #include "refclock_pps.h"
-#endif /* HAVE_PPSAPI */
+#endif  // HAVE_PPSAPI
 
 /*
  * This driver supports the "Type 2" format emitted by Spectracom time
@@ -35,9 +35,9 @@
  *
  * <cr><lf>i  ddd hh:mm:ss TZ=zz<cr><lf>
  *
- *	on-time = first <cr>
- *	hh:mm:ss = hours, minutes, seconds
- *	i = synchronization flag (' ' = in synch, '?' = out of synch)
+ *      on-time = first <cr>
+ *      hh:mm:ss = hours, minutes, seconds
+ *      i = synchronization flag (' ' = in synch, '?' = out of synch)
  *
  * The alarm condition is indicated by other than ' ' at i, which occurs
  * during initial synchronization and when received signal is lost for
@@ -47,12 +47,12 @@
  *
  * <cr><lf>iqyy ddd hh:mm:ss.fff ld
  *
- *	on-time = <cr>
- *	i = synchronization flag (' ' = in synch, '?' = out of synch)
- *	q = quality indicator (' ' = locked, 'A'...'D' = unlocked)
- *	yy = year (as broadcast)
- *	ddd = day of year
- *	hh:mm:ss.fff = hours, minutes, seconds, milliseconds
+ *      on-time = <cr>
+ *      i = synchronization flag (' ' = in synch, '?' = out of synch)
+ *      q = quality indicator (' ' = locked, 'A'...'D' = unlocked)
+ *      yy = year (as broadcast)
+ *      ddd = day of year
+ *      hh:mm:ss.fff = hours, minutes, seconds, milliseconds
  *
  * The alarm condition is indicated by other than ' ' at i, which occurs
  * during initial synchronization and when received signal is lost for
@@ -96,64 +96,64 @@
 /*
  * Interface definitions
  */
-#define	DEVICE		"/dev/spectracom%d" /* device name and unit */
-#define	SPEED232	B9600		/* uart speed (9600 baud) */
-#define	PRECISION	(-13)		/* precision assumed (about 100 us) */
+#define DEVICE          "/dev/spectracom%d"  // device name and unit
+#define SPEED232        B9600  // uart speed (9600 baud)
+#define PRECISION       (-13)  // precision assumed (about 100 us)
 #ifdef HAVE_PPSAPI
-# define PPS_PRECISION	(-13)		/* precision assumed (about 100 us) */
+# define PPS_PRECISION  (-13)  // precision assumed (about 100 us)
 #endif
-#define	REFID		"GPS\0"		/* reference ID */
-#define NAME		"SPECTRACOM"	/* shortname */
-#define	DESCRIPTION	"Spectracom GPS Receiver" /* WRU */
+#define REFID           "GPS\0"  // reference ID
+#define NAME            "SPECTRACOM"  // shortname
+#define DESCRIPTION     "Spectracom GPS Receiver"  // WRU
 
-#define	LENTYPE0	22		/* format 0 timecode length */
-#define	LENTYPE2	24		/* format 2 timecode length */
-#define LENTYPE3	29		/* format 3 timecode length */
-#define MONLIN		15		/* number of monitoring lines */
+#define LENTYPE0        22  // format 0 timecode length
+#define LENTYPE2        24  // format 2 timecode length
+#define LENTYPE3        29  // format 3 timecode length
+#define MONLIN          15  // number of monitoring lines
 
 /*
  * Spectracom unit control structure
  */
 struct spectracomunit {
 #ifdef HAVE_PPSAPI
-	struct refclock_ppsctl ppsctl; /* PPSAPI structure */
-	int	ppsapi_tried;	/* attempt PPSAPI once */
-	int	ppsapi_lit;	/* time_pps_create() worked */
-	int	tcount;		/* timecode sample counter */
-	int	pcount;		/* PPS sample counter */
-#endif /* HAVE_PPSAPI */
-	l_fp	laststamp;	/* last <CR> timestamp */
-	bool	prev_eol_cr;	/* was last EOL <CR> (not <LF>)? */
-	uint8_t	lasthour;	/* last hour (for monitor) */
-	uint8_t	linect;		/* count ignored lines (for monitor */
+        struct refclock_ppsctl ppsctl;  // PPSAPI structure
+        int     ppsapi_tried;  // attempt PPSAPI once
+        int     ppsapi_lit;  // time_pps_create() worked
+        int     tcount;  // timecode sample counter
+        int     pcount;  // PPS sample counter
+#endif  // HAVE_PPSAPI
+        l_fp    laststamp;  // last <CR> timestamp
+        bool    prev_eol_cr;  // was last EOL <CR> (not <LF>)?
+        uint8_t lasthour;  // last hour (for monitor)
+        uint8_t linect;  // count ignored lines (for monitor
 };
 
 /*
  * Function prototypes
  */
-static	bool	spectracom_start	(int, struct peer *);
-static	void	spectracom_receive	(struct recvbuf *);
-static	void	spectracom_poll		(int, struct peer *);
-static	void	spectracom_timer	(int, struct peer *);
+static  bool    spectracom_start        (int, struct peer *);
+static  void    spectracom_receive      (struct recvbuf *);
+static  void    spectracom_poll         (int, struct peer *);
+static  void    spectracom_timer        (int, struct peer *);
 #ifdef HAVE_PPSAPI
-static	void	spectracom_control	(int, const struct refclockstat *,
-				 struct refclockstat *, struct peer *);
-#define		SPECTRACOM_CONTROL	spectracom_control
+static  void    spectracom_control      (int, const struct refclockstat *,
+                                 struct refclockstat *, struct peer *);
+#define         SPECTRACOM_CONTROL      spectracom_control
 #else
-#define		SPECTRACOM_CONTROL	NULL
-#endif /* HAVE_PPSAPI */
+#define         SPECTRACOM_CONTROL      NULL
+#endif  // HAVE_PPSAPI
 
 /*
  * Transfer vector
  */
-struct	refclock refclock_spectracom = {
-	NAME,				/* basename of driver */
-	spectracom_start,		/* start up driver */
-	NULL,				/* shut down driver in standard way */
-	spectracom_poll,		/* transmit poll message */
-	SPECTRACOM_CONTROL,		/* fudge set/change notification */
-	NULL,				/* initialize driver (not used) */
-	spectracom_timer		/* called once per second */
+struct  refclock refclock_spectracom = {
+        NAME,  // basename of driver
+        spectracom_start,  // start up driver
+        NULL,  // shut down driver in standard way
+        spectracom_poll,  // transmit poll message
+        SPECTRACOM_CONTROL,  // fudge set/change notification
+        NULL,  // initialize driver (not used)
+        spectracom_timer  // called once per second
 };
 
 
@@ -162,52 +162,52 @@ struct	refclock refclock_spectracom = {
  */
 static bool
 spectracom_start(
-	int unit,
-	struct peer *peer
-	)
+        int unit,
+        struct peer *peer
+        )
 {
-	struct spectracomunit *up;
-	struct refclockproc *pp;
-	int fd;
-	char device[20];
+        struct spectracomunit *up;
+        struct refclockproc *pp;
+        int fd;
+        char device[20];
 
-	/*
-	 * Open serial port. Use CLK line discipline, if available.
-	 */
-	snprintf(device, sizeof(device), DEVICE, unit);
-	fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
-			   peer->cfg.baud ? peer->cfg.baud : SPEED232,
-			   LDISC_STD);
-	if (fd <= 0)
-		/* coverity[leaked_handle] */
-		return false;
+        /*
+         * Open serial port. Use CLK line discipline, if available.
+         */
+        snprintf(device, sizeof(device), DEVICE, unit);
+        fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
+                           peer->cfg.baud ? peer->cfg.baud : SPEED232,
+                           LDISC_STD);
+        if (fd <= 0)
+                // coverity[leaked_handle]
+                return false;
 
-	/*
-	 * Allocate and initialize unit structure
-	 */
-	up = emalloc_zero(sizeof(*up));
-	pp = peer->procptr;
-	pp->io.clock_recv = spectracom_receive;
-	pp->io.srcclock = peer;
-	pp->io.datalen = 0;
-	pp->io.fd = fd;
-	if (!io_addclock(&pp->io)) {
-		close(fd);
-		pp->io.fd = -1;
-		free(up);
-		return false;
-	}
-	pp->unitptr = up;
+        /*
+         * Allocate and initialize unit structure
+         */
+        up = emalloc_zero(sizeof(*up));
+        pp = peer->procptr;
+        pp->io.clock_recv = spectracom_receive;
+        pp->io.srcclock = peer;
+        pp->io.datalen = 0;
+        pp->io.fd = fd;
+        if (!io_addclock(&pp->io)) {
+                close(fd);
+                pp->io.fd = -1;
+                free(up);
+                return false;
+        }
+        pp->unitptr = up;
 
-	/*
-	 * Initialize miscellaneous variables
-	 */
-	peer->precision = PRECISION;
-	pp->clockname = NAME;
-	pp->clockdesc = DESCRIPTION;
-	memcpy(&pp->refid, REFID, REFIDLEN);
-	peer->sstclktype = CTL_SST_TS_LF;
-	return true;
+        /*
+         * Initialize miscellaneous variables
+         */
+        peer->precision = PRECISION;
+        pp->clockname = NAME;
+        pp->clockdesc = DESCRIPTION;
+        memcpy(&pp->refid, REFID, REFIDLEN);
+        peer->sstclktype = CTL_SST_TS_LF;
+        return true;
 }
 
 
@@ -216,198 +216,198 @@ spectracom_start(
  */
 static void
 spectracom_receive(
-	struct recvbuf *rbufp
-	)
+        struct recvbuf *rbufp
+        )
 {
-	struct spectracomunit *up;
-	struct refclockproc *pp;
-	struct peer *peer;
+        struct spectracomunit *up;
+        struct refclockproc *pp;
+        struct peer *peer;
 
-	l_fp	trtmp;		/* arrival timestamp */
-	int	tz;		/* time zone */
-	int	day, month;	/* ddd conversion */
-	int	temp;		/* int temp */
-	char	syncchar;	/* synchronization indicator */
-	char	qualchar;	/* quality indicator */
-	char	leapchar;	/* leap indicator */
-	char	dstchar;	/* daylight/standard indicator */
-	char	tmpchar;	/* trashbin */
+        l_fp    trtmp;  // arrival timestamp
+        int     tz;  // time zone
+        int     day, month;  // ddd conversion
+        int     temp;  // int temp
+        char    syncchar;  // synchronization indicator
+        char    qualchar;  // quality indicator
+        char    leapchar;  // leap indicator
+        char    dstchar;  // daylight/standard indicator
+        char    tmpchar;  // trashbin
 
-	/*
-	 * Initialize pointers and read the timecode and timestamp
-	 */
-	peer = rbufp->recv_peer;
-	pp = peer->procptr;
-	up = pp->unitptr;
-	temp = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &trtmp);
+        /*
+         * Initialize pointers and read the timecode and timestamp
+         */
+        peer = rbufp->recv_peer;
+        pp = peer->procptr;
+        up = pp->unitptr;
+        temp = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &trtmp);
 
-	/*
-	 * Note we get a buffer and timestamp for both a <cr> and <lf>,
-	 * but only the <cr> timestamp is retained. Note: in format 0 on
-	 * a Netclock/2 or upgraded 8170 the start bit is delayed 100
-	 * +-50 us relative to the pps; however, on an unmodified 8170
-	 * the start bit can be delayed up to 10 ms. In format 2 the
-	 * reading precision is only to the millisecond. Thus, unless
-	 * you have a PPS gadget and don't have to have the year, format
-	 * 0 provides the lowest jitter.
-	 * Save the timestamp of each <CR> in up->laststamp.  Lines with
-	 * no characters occur for every <LF>, and for some <CR>s when
-	 * format 0 is used. Format 0 starts and ends each cycle with a
-	 * <CR><LF> pair, format 2 starts each cycle with its only pair.
-	 * The preceding <CR> is the on-time character for both formats.
-	 * The timestamp provided with non-empty lines corresponds to
-	 * the <CR> following the timecode, which is ultimately not used
-	 * with format 0 and is used for the following timecode for
-	 * format 2.
-	 */
-	if (temp == 0) {
-		if (up->prev_eol_cr) {
-			DPRINT(2, ("spectracom: <LF> @ %s\n", prettydate(trtmp)));
-		} else {
-			up->laststamp = trtmp;
-			DPRINT(2, ("spectracom: <CR> @ %s\n", prettydate(trtmp)));
-		}
-		up->prev_eol_cr = !up->prev_eol_cr;
-		return;
-	}
-	pp->lencode = temp;
-	pp->lastrec = up->laststamp;
-	up->laststamp = trtmp;
-	up->prev_eol_cr = true;
-	DPRINT(2, ("spectracom: code @ %s\n"
-		   "       using %s minus one char\n",
-		   prettydate(trtmp), prettydate(pp->lastrec)));
-	if (pp->lastrec == 0)
-		return;
+        /*
+         * Note we get a buffer and timestamp for both a <cr> and <lf>,
+         * but only the <cr> timestamp is retained. Note: in format 0 on
+         * a Netclock/2 or upgraded 8170 the start bit is delayed 100
+         * +-50 us relative to the pps; however, on an unmodified 8170
+         * the start bit can be delayed up to 10 ms. In format 2 the
+         * reading precision is only to the millisecond. Thus, unless
+         * you have a PPS gadget and don't have to have the year, format
+         * 0 provides the lowest jitter.
+         * Save the timestamp of each <CR> in up->laststamp.  Lines with
+         * no characters occur for every <LF>, and for some <CR>s when
+         * format 0 is used. Format 0 starts and ends each cycle with a
+         * <CR><LF> pair, format 2 starts each cycle with its only pair.
+         * The preceding <CR> is the on-time character for both formats.
+         * The timestamp provided with non-empty lines corresponds to
+         * the <CR> following the timecode, which is ultimately not used
+         * with format 0 and is used for the following timecode for
+         * format 2.
+         */
+        if (temp == 0) {
+                if (up->prev_eol_cr) {
+                        DPRINT(2, ("spectracom: <LF> @ %s\n", prettydate(trtmp)));
+                } else {
+                        up->laststamp = trtmp;
+                        DPRINT(2, ("spectracom: <CR> @ %s\n", prettydate(trtmp)));
+                }
+                up->prev_eol_cr = !up->prev_eol_cr;
+                return;
+        }
+        pp->lencode = temp;
+        pp->lastrec = up->laststamp;
+        up->laststamp = trtmp;
+        up->prev_eol_cr = true;
+        DPRINT(2, ("spectracom: code @ %s\n"
+                   "       using %s minus one char\n",
+                   prettydate(trtmp), prettydate(pp->lastrec)));
+        if (pp->lastrec == 0)
+                return;
 
-	/*
-	 * We get down to business, check the timecode format and decode
-	 * its contents. This code uses the timecode length to determine
-	 * format 0, 2 or 3. If the timecode has invalid length or is
-	 * not in proper format, we declare bad format and exit.
-	 */
-	syncchar = qualchar = leapchar = dstchar = ' ';
-	tz = 0;
-	switch (pp->lencode) {
+        /*
+         * We get down to business, check the timecode format and decode
+         * its contents. This code uses the timecode length to determine
+         * format 0, 2 or 3. If the timecode has invalid length or is
+         * not in proper format, we declare bad format and exit.
+         */
+        syncchar = qualchar = leapchar = dstchar = ' ';
+        tz = 0;
+        switch (pp->lencode) {
 
-	case LENTYPE0:
+        case LENTYPE0:
 
-		/*
-		 * Timecode format 0: "I  ddd hh:mm:ss DTZ=nn"
-		 */
-		if (sscanf(pp->a_lastcode,
-		    "%c %3d %2d:%2d:%2d%c%cTZ=%2d",
-		    &syncchar, &pp->yday, &pp->hour, &pp->minute,
-		    &pp->second, &tmpchar, &dstchar, &tz) == 8) {
-			pp->nsec = 0;
-			break;
-		}
-		goto bad_format;
+                /*
+                 * Timecode format 0: "I  ddd hh:mm:ss DTZ=nn"
+                 */
+                if (sscanf(pp->a_lastcode,
+                    "%c %3d %2d:%2d:%2d%c%cTZ=%2d",
+                    &syncchar, &pp->yday, &pp->hour, &pp->minute,
+                    &pp->second, &tmpchar, &dstchar, &tz) == 8) {
+                        pp->nsec = 0;
+                        break;
+                }
+                goto bad_format;
 
-	case LENTYPE2:
+        case LENTYPE2:
 
-		/*
-		 * Timecode format 2: "IQyy ddd hh:mm:ss.mmm LD" */
-		if (sscanf(pp->a_lastcode,
-		    "%c%c %2d %3d %2d:%2d:%2d.%3ld %c",
-		    &syncchar, &qualchar, &pp->year, &pp->yday,
-		    &pp->hour, &pp->minute, &pp->second, &pp->nsec,
-		    &leapchar) == 9) {
-			pp->nsec *= 1000000;
-			break;
-		}
-		goto bad_format;
+                /*
+                 * Timecode format 2: "IQyy ddd hh:mm:ss.mmm LD" */
+                if (sscanf(pp->a_lastcode,
+                    "%c%c %2d %3d %2d:%2d:%2d.%3ld %c",
+                    &syncchar, &qualchar, &pp->year, &pp->yday,
+                    &pp->hour, &pp->minute, &pp->second, &pp->nsec,
+                    &leapchar) == 9) {
+                        pp->nsec *= 1000000;
+                        break;
+                }
+                goto bad_format;
 
-	case LENTYPE3:
+        case LENTYPE3:
 
-		/*
-		 * Timecode format 3: "0003I yyyymmdd hhmmss+0000SL#"
-		 * WARNING: Undocumented, and the on-time character # is
-		 * not yet handled correctly by this driver.  It may be
-		 * as simple as compensating for an additional 1/960 s.
-		 */
-		if (sscanf(pp->a_lastcode,
-		    "0003%c %4d%2d%2d %2d%2d%2d+0000%c%c",
-		    &syncchar, &pp->year, &month, &day, &pp->hour,
-		    &pp->minute, &pp->second, &dstchar, &leapchar) == 8)
-		    {
-			pp->yday = ymd2yd(pp->year, month, day);
-			pp->nsec = 0;
-			break;
-		}
-		goto bad_format;
+                /*
+                 * Timecode format 3: "0003I yyyymmdd hhmmss+0000SL#"
+                 * WARNING: Undocumented, and the on-time character # is
+                 * not yet handled correctly by this driver.  It may be
+                 * as simple as compensating for an additional 1/960 s.
+                 */
+                if (sscanf(pp->a_lastcode,
+                    "0003%c %4d%2d%2d %2d%2d%2d+0000%c%c",
+                    &syncchar, &pp->year, &month, &day, &pp->hour,
+                    &pp->minute, &pp->second, &dstchar, &leapchar) == 8)
+                    {
+                        pp->yday = ymd2yd(pp->year, month, day);
+                        pp->nsec = 0;
+                        break;
+                }
+                goto bad_format;
 
-	default:
-	bad_format:
+        default:
+        bad_format:
 
-		/*
-		 * Unknown format: If dumping internal table, record
-		 * stats; otherwise, declare bad format.
-		 */
-		if (up->linect > 0) {
-			up->linect--;
-			record_clock_stats(peer,
-			    pp->a_lastcode);
-		} else {
-			refclock_report(peer, CEVNT_BADREPLY);
-		}
-		return;
-	}
+                /*
+                 * Unknown format: If dumping internal table, record
+                 * stats; otherwise, declare bad format.
+                 */
+                if (up->linect > 0) {
+                        up->linect--;
+                        record_clock_stats(peer,
+                            pp->a_lastcode);
+                } else {
+                        refclock_report(peer, CEVNT_BADREPLY);
+                }
+                return;
+        }
 
-	/*
-	 * Decode synchronization, quality and leap characters. If
-	 * unsynchronized, set the leap bits accordingly and exit.
-	 * Otherwise, set the leap bits according to the leap character.
-	 * Once synchronized, the dispersion depends only on the
-	 * quality character.
-	 */
-	switch (qualchar) {
+        /*
+         * Decode synchronization, quality and leap characters. If
+         * unsynchronized, set the leap bits accordingly and exit.
+         * Otherwise, set the leap bits according to the leap character.
+         * Once synchronized, the dispersion depends only on the
+         * quality character.
+         */
+        switch (qualchar) {
 
-	case ' ':
-		pp->disp = .001;
-		pp->lastref = pp->lastrec;
-		break;
+        case ' ':
+                pp->disp = .001;
+                pp->lastref = pp->lastrec;
+                break;
 
-	case 'A':
-		pp->disp = .01;
-		break;
+        case 'A':
+                pp->disp = .01;
+                break;
 
-	case 'B':
-		pp->disp = .1;
-		break;
+        case 'B':
+                pp->disp = .1;
+                break;
 
-	case 'C':
-		pp->disp = .5;
-		break;
+        case 'C':
+                pp->disp = .5;
+                break;
 
-	case 'D':
-		pp->disp = sys_maxdisp;
-		break;
+        case 'D':
+                pp->disp = sys_maxdisp;
+                break;
 
-	default:
-		pp->disp = sys_maxdisp;
-		refclock_report(peer, CEVNT_BADREPLY);
-		break;
-	}
-	if (syncchar != ' ')
-		pp->leap = LEAP_NOTINSYNC;
-	else if (leapchar == 'L')
-		pp->leap = LEAP_ADDSECOND;
-	else
-		pp->leap = LEAP_NOWARNING;
+        default:
+                pp->disp = sys_maxdisp;
+                refclock_report(peer, CEVNT_BADREPLY);
+                break;
+        }
+        if (syncchar != ' ')
+                pp->leap = LEAP_NOTINSYNC;
+        else if (leapchar == 'L')
+                pp->leap = LEAP_ADDSECOND;
+        else
+                pp->leap = LEAP_NOWARNING;
 
-	/*
-	 * Process the new sample in the median filter and determine the
-	 * timecode timestamp, but only if the PPS is not in control.
-	 */
+        /*
+         * Process the new sample in the median filter and determine the
+         * timecode timestamp, but only if the PPS is not in control.
+         */
 #ifdef HAVE_PPSAPI
-	up->tcount++;
-	if (peer->cfg.flags & FLAG_PPS)
-		return;
+        up->tcount++;
+        if (peer->cfg.flags & FLAG_PPS)
+                return;
 
-#endif /* HAVE_PPSAPI */
-	if (!refclock_process_f(pp, pp->fudgetime2))
-		refclock_report(peer, CEVNT_BADTIME);
+#endif  // HAVE_PPSAPI
+        if (!refclock_process_f(pp, pp->fudgetime2))
+                refclock_report(peer, CEVNT_BADTIME);
 }
 
 
@@ -416,47 +416,47 @@ spectracom_receive(
  */
 static void
 spectracom_timer(
-	int unit,
-	struct peer *peer
-	)
+        int unit,
+        struct peer *peer
+        )
 {
-	UNUSED_ARG(unit);
+        UNUSED_ARG(unit);
 
-	struct spectracomunit *up;
-	struct refclockproc *pp;
-	char	pollchar;	/* character sent to clock */
+        struct spectracomunit *up;
+        struct refclockproc *pp;
+        char    pollchar;  // character sent to clock
 #ifdef DEBUG
-	l_fp	now;
+        l_fp    now;
 #endif
 
-	/*
-	 * Time to poll the clock. The Spectracom clock responds to a
-	 * 'T' by returning a timecode in the format(s) specified above.
-	 * Note there is no checking on state, since this may not be the
-	 * only customer reading the clock. Only one customer need poll
-	 * the clock; all others just listen in.
-	 */
-	pp = peer->procptr;
-	up = pp->unitptr;
-	if (up->linect > 0)
-		pollchar = 'R';
-	else
-		pollchar = 'T';
-	if (write(pp->io.fd, &pollchar, 1) != 1)
-		refclock_report(peer, CEVNT_FAULT);
+        /*
+         * Time to poll the clock. The Spectracom clock responds to a
+         * 'T' by returning a timecode in the format(s) specified above.
+         * Note there is no checking on state, since this may not be the
+         * only customer reading the clock. Only one customer need poll
+         * the clock; all others just listen in.
+         */
+        pp = peer->procptr;
+        up = pp->unitptr;
+        if (up->linect > 0)
+                pollchar = 'R';
+        else
+                pollchar = 'T';
+        if (write(pp->io.fd, &pollchar, 1) != 1)
+                refclock_report(peer, CEVNT_FAULT);
 #ifdef DEBUG
-	get_systime(&now);
-	if (debug) /* SPECIAL DEBUG */
-		printf("%c poll at %s\n", pollchar, prettydate(now));
+        get_systime(&now);
+        if (debug)  // SPECIAL DEBUG
+                printf("%c poll at %s\n", pollchar, prettydate(now));
 #endif
 #ifdef HAVE_PPSAPI
-	if (up->ppsapi_lit &&
-	    refclock_catcher(peer, &up->ppsctl, pp->sloppyclockflag) > 0) {
-		up->pcount++,
-		peer->cfg.flags |= FLAG_PPS;
-		peer->precision = PPS_PRECISION;
-	}
-#endif /* HAVE_PPSAPI */
+        if (up->ppsapi_lit &&
+            refclock_catcher(peer, &up->ppsctl, pp->sloppyclockflag) > 0) {
+                up->pcount++,
+                peer->cfg.flags |= FLAG_PPS;
+                peer->precision = PPS_PRECISION;
+        }
+#endif  // HAVE_PPSAPI
 }
 
 
@@ -465,57 +465,57 @@ spectracom_timer(
  */
 static void
 spectracom_poll(
-	int unit,
-	struct peer *peer
-	)
+        int unit,
+        struct peer *peer
+        )
 {
-	struct spectracomunit *up;
-	struct refclockproc *pp;
+        struct spectracomunit *up;
+        struct refclockproc *pp;
 
-	UNUSED_ARG(unit);
+        UNUSED_ARG(unit);
 
-	/*
-	 * Sweep up the samples received since the last poll. If none
-	 * are received, declare a timeout and keep going.
-	 */
-	pp = peer->procptr;
-	up = pp->unitptr;
-	pp->polls++;
+        /*
+         * Sweep up the samples received since the last poll. If none
+         * are received, declare a timeout and keep going.
+         */
+        pp = peer->procptr;
+        up = pp->unitptr;
+        pp->polls++;
 
-	/*
-	 * If the monitor flag is set (flag4), we dump the internal
-	 * quality table at the first timecode beginning the day.
-	 */
-	if (pp->sloppyclockflag & CLK_FLAG4 && pp->hour <
-	    (int)up->lasthour)
-		up->linect = MONLIN;
-	up->lasthour = (uint8_t)pp->hour;
+        /*
+         * If the monitor flag is set (flag4), we dump the internal
+         * quality table at the first timecode beginning the day.
+         */
+        if (pp->sloppyclockflag & CLK_FLAG4 && pp->hour <
+            (int)up->lasthour)
+                up->linect = MONLIN;
+        up->lasthour = (uint8_t)pp->hour;
 
-	/*
-	 * Process median filter samples. If none received, declare a
-	 * timeout and keep going.
-	 */
+        /*
+         * Process median filter samples. If none received, declare a
+         * timeout and keep going.
+         */
 #ifdef HAVE_PPSAPI
-	if (up->pcount == 0) {
-		peer->cfg.flags &= ~FLAG_PPS;
-		peer->precision = PRECISION;
-	}
-	if (up->tcount == 0) {
-		pp->coderecv = pp->codeproc;
-		refclock_report(peer, CEVNT_TIMEOUT);
-		return;
-	}
-	up->pcount = up->tcount = 0;
-#else /* HAVE_PPSAPI */
-	if (pp->coderecv == pp->codeproc) {
-		refclock_report(peer, CEVNT_TIMEOUT);
-		return;
-	}
-#endif /* HAVE_PPSAPI */
-	refclock_receive(peer);
-	record_clock_stats(peer, pp->a_lastcode);
-	DPRINT(1, ("spectracom: timecode %d %s\n", pp->lencode,
-		   pp->a_lastcode));
+        if (up->pcount == 0) {
+                peer->cfg.flags &= ~FLAG_PPS;
+                peer->precision = PRECISION;
+        }
+        if (up->tcount == 0) {
+                pp->coderecv = pp->codeproc;
+                refclock_report(peer, CEVNT_TIMEOUT);
+                return;
+        }
+        up->pcount = up->tcount = 0;
+#else  // HAVE_PPSAPI
+        if (pp->coderecv == pp->codeproc) {
+                refclock_report(peer, CEVNT_TIMEOUT);
+                return;
+        }
+#endif  // HAVE_PPSAPI
+        refclock_receive(peer);
+        record_clock_stats(peer, pp->a_lastcode);
+        DPRINT(1, ("spectracom: timecode %d %s\n", pp->lencode,
+                   pp->a_lastcode));
 }
 
 
@@ -525,49 +525,49 @@ spectracom_poll(
 #ifdef HAVE_PPSAPI
 static void
 spectracom_control(
-	int unit,
-	const struct refclockstat *in_st,
-	struct refclockstat *out_st,
-	struct peer *peer
-	)
+        int unit,
+        const struct refclockstat *in_st,
+        struct refclockstat *out_st,
+        struct peer *peer
+        )
 {
-	struct spectracomunit *up;
-	struct refclockproc *pp;
+        struct spectracomunit *up;
+        struct refclockproc *pp;
 
-	UNUSED_ARG(unit);
-	UNUSED_ARG(in_st);
-	UNUSED_ARG(out_st);
+        UNUSED_ARG(unit);
+        UNUSED_ARG(in_st);
+        UNUSED_ARG(out_st);
 
-	pp = peer->procptr;
-	up = pp->unitptr;
+        pp = peer->procptr;
+        up = pp->unitptr;
 
-	if (!(pp->sloppyclockflag & CLK_FLAG1)) {
-		if (!up->ppsapi_tried)
-			return;
-		up->ppsapi_tried = 0;
-		if (!up->ppsapi_lit)
-			return;
-		peer->cfg.flags &= ~FLAG_PPS;
-		peer->precision = PRECISION;
-		time_pps_destroy(up->ppsctl.handle);
-		up->ppsctl.handle = 0;
-		up->ppsapi_lit = 0;
-		return;
-	}
+        if (!(pp->sloppyclockflag & CLK_FLAG1)) {
+                if (!up->ppsapi_tried)
+                        return;
+                up->ppsapi_tried = 0;
+                if (!up->ppsapi_lit)
+                        return;
+                peer->cfg.flags &= ~FLAG_PPS;
+                peer->precision = PRECISION;
+                time_pps_destroy(up->ppsctl.handle);
+                up->ppsctl.handle = 0;
+                up->ppsapi_lit = 0;
+                return;
+        }
 
-	if (up->ppsapi_tried)
-		return;
-	/*
-	 * Light up the PPSAPI interface.
-	 */
-	up->ppsapi_tried = 1;
-	if (refclock_ppsapi(pp->io.fd, &up->ppsctl)) {
-		up->ppsapi_lit = 1;
-		return;
-	}
+        if (up->ppsapi_tried)
+                return;
+        /*
+         * Light up the PPSAPI interface.
+         */
+        up->ppsapi_tried = 1;
+        if (refclock_ppsapi(pp->io.fd, &up->ppsctl)) {
+                up->ppsapi_lit = 1;
+                return;
+        }
 
-	msyslog(LOG_WARNING, "REFCLOCK %s flag1 1 but PPSAPI fails",
-		refclock_name(peer));
+        msyslog(LOG_WARNING, "REFCLOCK %s flag1 1 but PPSAPI fails",
+                refclock_name(peer));
 }
-#endif	/* HAVE_PPSAPI */
+#endif  // HAVE_PPSAPI
 
