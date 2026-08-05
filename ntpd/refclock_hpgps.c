@@ -98,12 +98,12 @@
 /*
  * Interface definitions
  */
-#define DEVICE          "/dev/hpgps%d" /* device name and unit */
-#define SPEED232        B9600           /* uart speed (9600 baud) */
-#define SPEED232Z       B19200          /* uart speed (19200 baud) */
-#define PRECISION       (-10)           /* precision assumed (about 1 ms) */
-#define REFID           "GPS\0"         /* reference ID */
-#define NAME            "HPGPS"         /* shortname */
+#define DEVICE          "/dev/hpgps%d"  // device name and unit
+#define SPEED232        B9600           // uart speed (9600 baud)
+#define SPEED232Z       B19200          // uart speed (19200 baud)
+#define PRECISION       (-10)           // precision assumed (about 1 ms)
+#define REFID           "GPS\0"         // reference ID
+#define NAME            "HPGPS"         // shortname
 #define DESCRIPTION     "HP GPS Time and Frequency Reference Receiver"
 
 
@@ -114,26 +114,26 @@
  * Newer versions of firmware have 23 lines of up to 79 characters.
  * Not all lines were full.    Hal Murray, Nov 2023
  */
-#define LMAX            24      /* lines in status screen, plus spare */
-#define SMAX            LMAX*80+1 /* characters */
+#define LMAX            24      // lines in status screen, plus spare
+#define SMAX            LMAX*80+1  // characters
 
-#define MTCODET2        12      /* number of fields in timecode format T2 */
-#define NTCODET2        21      /* number of chars to checksum in format T2 */
+#define MTCODET2        12      // number of fields in timecode format T2
+#define NTCODET2        21      // number of chars to checksum in format T2
 
 /*
  * Unit control structure
  */
 struct hpgpsunit {
-        int     idlesec;        /* seconds since last message */
-        bool    didpoll;        /* poll called recently */
-        unsigned int     cmndcnt;        /* collecting data */
-        int     linecnt;        /* collecting text for status screen */
-        char    *lastptr;       /* pointer to receiver response data */
+        int     idlesec;        // seconds since last message
+        bool    didpoll;        // poll called recently
+        unsigned int     cmndcnt;        // collecting data
+        int     linecnt;        // collecting text for status screen
+        char    *lastptr;       // pointer to receiver response data
         int     wnro;
-        char    statscrn[SMAX]; /* receiver status screen buffer */
-/* Statisitics since last poll: */
-        int     timecnt;        /* Valid time code messages received */
-        int     errorcnt;       /* Errors in received messages */
+        char    statscrn[SMAX];  // receiver status screen buffer
+// Statisitics since last poll:
+        int     timecnt;        // Valid time code messages received
+        int     errorcnt;       // Errors in received messages
 };
 
 /*
@@ -150,22 +150,22 @@ static  bool    hpgps_receive_T2(struct peer *const peer);
  * Transfer vector
  */
 struct  refclock refclock_hpgps = {
-        NAME,                   /* basename of driver */
-        hpgps_start,            /* start up driver */
-        NULL,                   /* shut down driver in the standard way */
-        hpgps_poll,             /* transmit poll message */
-        NULL,                   /* not used (old hpgps_control) */
-        NULL,                   /* initialize driver */
-        hpgps_timer             /* called once per second */
+        NAME,                   // basename of driver
+        hpgps_start,            // start up driver
+        NULL,                   // shut down driver in the standard way
+        hpgps_poll,             // transmit poll message
+        NULL,                   // not used (old hpgps_control)
+        NULL,                   // initialize driver
+        hpgps_timer             // called once per second
 };
 
-/* commands to get extra info */
+// commands to get extra info
 const char *commands[] = {
-  ":GPS:SAT:TRAC:COUNT?\r",       /* sats being tracked */
-  ":ROSC:HOLD:DUR?\r",            /* duration,state 1 if in holdover */
-  ":ROSC:HOLD:TUNC:PRED?\r",      /* 1 day holdover estimate */
-  ":DIAG:ROSC:EFC:ABS?\r",        /* DAC value */
-  ":DIAG:ROSC:EFC:REL?\r"         /* -100 to 100 */
+  ":GPS:SAT:TRAC:COUNT?\r",       // sats being tracked
+  ":ROSC:HOLD:DUR?\r",            // duration,state 1 if in holdover
+  ":ROSC:HOLD:TUNC:PRED?\r",      // 1 day holdover estimate
+  ":DIAG:ROSC:EFC:ABS?\r",        // DAC value
+  ":DIAG:ROSC:EFC:REL?\r"         // -100 to 100
   };
 /* Get E-230 if data not available
  * Test case is PTIME:LEAP:GPST? (hex time of next leap)
@@ -199,12 +199,12 @@ bool hpgps_start(int unit, struct peer *peer)
          * Open serial port. Use CLK line discipline, if available.
          * Default is HP 58503A, mode arg selects HP Z3801A
          */
-        /* mode parameter to server config line shares ttl slot */
+        // mode parameter to server config line shares ttl slot
         /* Need mode rather than flag because this was called
          * before following fudge line was even parsed. */
         ldisc = LDISC_STD;
         speed = SPEED232;
-        /* subtype parameter to server config line shares mode slot */
+        // subtype parameter to server config line shares mode slot
         if (1 == peer->cfg.mode) {
                 ldisc |= LDISC_7O1;
                 speed = SPEED232Z;
@@ -212,7 +212,7 @@ bool hpgps_start(int unit, struct peer *peer)
         fd = refclock_open(peer->cfg.path ? peer->cfg.path : device,
                            peer->cfg.baud ? peer->cfg.baud : speed, ldisc);
         if (fd <= 0)
-                /* coverity[leaked_handle] */
+                // coverity[leaked_handle]
                 return false;
         /*
          * Allocate and initialize unit structure
@@ -287,7 +287,7 @@ if (HPDEBUG) {
         if (pp->lencode == 0)
             return;
 
-        /* Strip off leading prompt to cleanup log files. */
+        // Strip off leading prompt to cleanup log files.
         while (1) {
                 if (strstr(pp->a_lastcode, "scpi > ") == pp->a_lastcode) {
                         pp->lencode -= 7;
@@ -298,7 +298,7 @@ if (HPDEBUG) {
                     pp->a_lastcode[1] == '-' &&
                     pp->a_lastcode[5] == '>' &&
                     pp->a_lastcode[6] == ' ') {
-                        /* "E-nnn> " Error code */
+                        // "E-nnn> " Error code
                         msyslog(LOG_ERR, "HPGPS(%d) error: %s",
                                 pp->refclkunit, pp->a_lastcode);
                         DPRINT(0, ("hpgps: error: %s\n", pp->a_lastcode));
@@ -353,15 +353,15 @@ if (HPDEBUG) {
 
         if (up->linecnt > 0) {
                 up->linecnt--;
-                /* Silently drop whole line if it doesn't fit. */
+                // Silently drop whole line if it doesn't fit.
                 if ((int)(pp->lencode + 2) <= (SMAX - (up->lastptr - up->statscrn))) {
                         if ( (up->lastptr != up->statscrn) || (up->linecnt > 0) )
-                                /* ID string stays on same line */
+                                // ID string stays on same line
                                 *up->lastptr++ = '\n';
                         memcpy(up->lastptr, pp->a_lastcode, (size_t)pp->lencode);
                         up->lastptr += pp->lencode;
                 }
-                /* Status screen is 22 or 23 lines */
+                // Status screen is 22 or 23 lines
                 if ( (up->linecnt == 0) ||
                      (strstr(pp->a_lastcode, "Self Test:") == pp->a_lastcode) ) {
                         up->linecnt = 0;
@@ -376,7 +376,7 @@ if (HPDEBUG) {
         up->idlesec = 0;
 
         if ((pp->sloppyclockflag & CLK_FLAG2) ) {
-                /* Watch only mode.  Ignore everything except T2. */
+                // Watch only mode.  Ignore everything except T2.
                 char *tcp = pp->a_lastcode;
                 if ((*tcp != 'T') || (*(tcp+1) != '2')) return;
         }
@@ -384,7 +384,7 @@ if (HPDEBUG) {
         if (hpgps_receive_T2(peer)) return;
 
         if (!up->didpoll) {
-                /* error ?? */
+                // error ??
                 return;
         }
 
@@ -392,7 +392,7 @@ if (HPDEBUG) {
         up->didpoll = false;
         up->lastptr = up->statscrn;
         *up->lastptr = '\0';
-        /* Do FLAG3 first.  End of FLAG3 processing starts FLAG4 */
+        // Do FLAG3 first.  End of FLAG3 processing starts FLAG4
         if (pp->sloppyclockflag & CLK_FLAG3) {
                 up->lastptr += snprintf(up->statscrn, sizeof(up->statscrn),
                    "%s  %d %d ",  pp->a_lastcode, up->timecnt, up->errorcnt);
@@ -419,19 +419,19 @@ bool hpgps_receive_T2(struct peer *const peer)
         struct hpgpsunit        * const up   = pp->unitptr;
 
         l_fp rd_reftime;
-        char tcodechar1;        /* identifies timecode format */
-        char tcodechar2;        /* identifies timecode format */
-        char timequal;          /* time figure of merit: 0-9 */
-        char freqqual;          /* frequency figure of merit: 0-3 */
-        char leapchar;          /* leapsecond: + or 0 or - */
-        char servchar;          /* request for service: 0 = no, 1 = yes */
-        char syncchar;          /* time info is invalid: 0 = no, 1 = yes */
-        short expectedsm;       /* expected timecode byte checksum */
-        short tcodechksm;       /* computed timecode byte checksum */
+        char tcodechar1;        // identifies timecode format
+        char tcodechar2;        // identifies timecode format
+        char timequal;          // time figure of merit: 0-9
+        char freqqual;          // frequency figure of merit: 0-3
+        char leapchar;          // leapsecond: + or 0 or -
+        char servchar;          // request for service: 0 = no, 1 = yes
+        char syncchar;          // time info is invalid: 0 = no, 1 = yes
+        short expectedsm;       // expected timecode byte checksum
+        short tcodechksm;       // computed timecode byte checksum
         int m, n;
-        struct tm tm;           /* temp storage for parsed data */
-        struct timespec date;   /* time stamp derived from serial port */
-        char *tcp;              /* timecode pointer (skips over the prompt) */
+        struct tm tm;           // temp storage for parsed data
+        struct timespec date;   // time stamp derived from serial port
+        char *tcp;              // timecode pointer (skips over the prompt)
 
         /* We get down to business:
          * Check for a timecode reply and decode it.
@@ -445,7 +445,7 @@ bool hpgps_receive_T2(struct peer *const peer)
          */
 
         tcp = pp->a_lastcode;
-        /* Not expected to happen. Beware of filling up log files. */
+        // Not expected to happen. Beware of filling up log files.
         if (*tcp == ' ') {
             msyslog(LOG_INFO, "HPGPS(%d) Leading space: '%s'",
                 pp->refclkunit, pp->a_lastcode);
@@ -552,7 +552,7 @@ bool hpgps_receive_T2(struct peer *const peer)
                         refclock_report(peer, CEVNT_BADTIME);
                         up->errorcnt++;
                         return(false);
-                } /* end of leapchar switch */
+                }  // end of leapchar switch
         }
 
         /*
@@ -565,11 +565,11 @@ bool hpgps_receive_T2(struct peer *const peer)
          */
         tm.tm_year -= 1900;
         tm.tm_mon -= 1;
-        tm.tm_isdst = 0;        /* Coverity CID 584869, UNINIT */
+        tm.tm_isdst = 0;        // Coverity CID 584869, UNINIT
         date.tv_nsec = 0;
-        date.tv_sec = timegm(&tm);      /* No error checking */
+        date.tv_sec = timegm(&tm);      // No error checking
 
-        /* Z3801A broke 2025-Aug-17 => 2006-Jam-01 */
+        // Z3801A broke 2025-Aug-17 => 2006-Jam-01
         fix_WNRO(&date, &up->wnro, peer);
 
         rd_reftime = tspec_stamp_to_lfp(date);
@@ -621,7 +621,7 @@ static void hpgps_timer(int unit, struct peer *peer)
         if (up->idlesec++ == 5)
             refclock_report(peer, CEVNT_TIMEOUT);
         if (up->idlesec >= 5) {
-                /* FIXME: logging (happens on some commands) */
+                // FIXME: logging (happens on some commands)
                 /* Timeout.  Poke it again.
                  * This recovers from the cable being unplugged for a while.
                  */
@@ -637,7 +637,7 @@ static void hpgps_write(struct peer *peer, const char *msg) {
         int len = strlen(msg);
 if (HPDEBUG) {
   static int counter = 0;
-  char copy[64];  /* msg ends with \r */
+  char copy[64];  // msg ends with \r
   strlcpy(copy, msg, sizeof(copy));
   *strstr(copy, "\r") = 0;
   printf("HPout: %d %s\n", counter++, copy);
