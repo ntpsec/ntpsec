@@ -17,7 +17,7 @@
 #include "ntp_refclock.h"
 #undef fileno
 #include "timespecops.h"
-#include "ntp_calendar.h"  // for SECSPERHR
+#include "ntp_calendar.h"       // for SECSPERHR
 #undef fileno
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
@@ -43,12 +43,12 @@
 /*
  * SHM interface definitions
  */
-#define PRECISION       (-30)  // precision assumed 1 ns
-#define REFID           "SHM"  // reference ID
-#define NAME            "SHM"  // shortname
+#define PRECISION       (-30)    // precision assumed 1 ns
+#define REFID           "SHM"   // reference ID
+#define NAME            "SHM"   // shortname
 #define DESCRIPTION     "SHM/Shared memory interface"
 
-#define NSAMPLES        3  // stages of median filter
+#define NSAMPLES        3       // stages of median filter
 
 /*
  * Mode flags
@@ -70,13 +70,13 @@ static  void    shm_control     (int unit, const struct refclockstat * in_st,
  * Transfer vector
  */
 struct  refclock refclock_shm = {
-        NAME,  // basename of driver
-        shm_start,  // start up driver
-        shm_shutdown,  // shut down driver
-        shm_poll,  // transmit poll message
-        shm_control,  // control settings
-        NULL,  // not used: init
-        shm_timer,  // once per second
+        NAME,                   // basename of driver
+        shm_start,              // start up driver
+        shm_shutdown,           // shut down driver
+        shm_poll,               // transmit poll message
+        shm_control,            // control settings
+        NULL,                   // not used: init
+        shm_timer,              // once per second
 };
 
 struct shmTime {
@@ -97,24 +97,24 @@ struct shmTime {
         int             precision;
         int             nsamples;
         volatile int    valid;
-        unsigned        clockTimeStampNSec;  // Unsigned ns timestamps
-        unsigned        receiveTimeStampNSec;  // Unsigned ns timestamps
+        unsigned        clockTimeStampNSec;     // Unsigned ns timestamps
+        unsigned        receiveTimeStampNSec;   // Unsigned ns timestamps
         int             dummy[8];
 };
 
 struct shmunit {
-        struct shmTime *shm;  // pointer to shared memory segment
-        int forall;  // access for all UIDs?
+        struct shmTime *shm;    // pointer to shared memory segment
+        int forall;             // access for all UIDs?
 
         // debugging/monitoring counters - reset when printed
-        int ticks;  // number of attempts to read data
-        int good;  // number of valid samples
-        int notready;  // number of peeks without data ready
-        int bad;  // number of invalid samples
-        int clash;  // number of access clashes while reading
+        int ticks;              // number of attempts to read data
+        int good;               // number of valid samples
+        int notready;           // number of peeks without data ready
+        int bad;                // number of invalid samples
+        int clash;              // number of access clashes while reading
 
-        time_t max_delta;  // difference limit
-        time_t max_delay;  // age/stale limit
+        time_t max_delta;       // difference limit
+        time_t max_delay;       // age/stale limit
 };
 
 
