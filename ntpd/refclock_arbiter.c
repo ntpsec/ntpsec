@@ -439,7 +439,7 @@ arb_poll(
 	}
 	refclock_receive(peer);
 	record_clock_stats(peer, pp->a_lastcode);
-	DPRINT(1, ("arbiter: timecode %d %s\n",
+	DPRINT(1, ("arbiter: timecode %u %s\n",
 		   pp->lencode, pp->a_lastcode));
 }
 

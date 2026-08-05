@@ -205,16 +205,15 @@ zyfer_receive(
 
 	if (!pp->lencode) {
 		if (*p == '!') {
-                    pp->lencode = (uncigned)refclock_gtlin(rbufp,
+                    pp->lencode = (unsigned)refclock_gtlin(rbufp,
                                        pp->a_lastcode,
-                                       sizeof(pp->a_lastcode,),
+                                       sizeof(pp->a_lastcode),
                                        &pp->lastrec);
                 } else {
 			return;
                 }
 	} else {
-                if (pp->lencode < 0 ||
-                    pp->lencode >= sizeof(pp->a_lastcode) - 1) {
+                if (pp->lencode >= sizeof(pp->a_lastcode) - 1) {
                     pp->lencode = 0;
                     pp->a_lastcode[0] = '\0';
                     refclock_report(peer, CEVNT_BADREPLY);

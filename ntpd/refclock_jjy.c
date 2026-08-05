@@ -539,8 +539,9 @@ jjy_receive ( struct recvbuf *rbufp )
 
 	l_fp	tRecvTimestamp;		/* arrival timestamp */
 	int 	rc ;
-	char	*pBuf, sLogText [ MAX_LOGTEXT ] ;
-	int 	i, j, iReadRawBuf, iBreakPosition ;
+	char	*pBuf, sLogText [ MAX_LOGTEXT ];
+        unsigned i;
+	int 	j, iReadRawBuf, iBreakPosition;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp
@@ -648,7 +649,8 @@ jjy_receive ( struct recvbuf *rbufp )
 
 			/* Copy characters from temporary buffer to process buffer */
 			up->iLineBufLen = up->iTextBufLen = 0 ;
-			for ( i = iReadRawBuf ; i <= iBreakPosition ; i ++ ) {
+			for (i = iReadRawBuf ; (int)i <= iBreakPosition ;
+                             i ++ ) {
 
 				/* Copy all characters */
 				up->sLineBuf[up->iLineBufLen] = up->sRawBuf[i] ;
