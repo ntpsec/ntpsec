@@ -50,12 +50,6 @@ static uint32_t conf_file_sum;  // Simple sum of characters read
 
 static struct FILE_INFO * lex_stack = NULL;
 
-/* CONSTANTS AND MACROS
- * --------------------
- */
-#define ENDSWITH(str, suff) (strcmp(str + strlen(str) - strlen(suff), suff)==0)
-#define CONF_ENABLE(s)  ENDSWITH(s, ".conf")
-
 
 /* SCANNER GLOBAL VARIABLES
  * ------------------------
@@ -76,10 +70,7 @@ static int is_keyword(char *lexeme, follby *pfollowedby);
  *             Example: keyword(T_Server) returns "server"
  *                      token_name(T_Server) returns "T_Server"
  */
-const char *
-keyword(
-        int token
-        )
+const char * keyword(int token)
 {
         size_t i;
         const char *text;
@@ -133,16 +124,12 @@ keyword(
  * secure than keeping a reference to some other storage that might go
  * out of scope.
  */
-static struct FILE_INFO *
-lex_open(
-        const char *path,
-        const char *mode
-        )
+static struct FILE_INFO * lex_open(const char *path, const char *mode)
 {
         struct FILE_INFO *stream;
         size_t            nnambuf;
 
-        nnambuf = strlen(path);
+        nnambuf = strnlen(path, PATH_MAX);
         stream = emalloc_zero(sizeof(*stream) + nnambuf);
         stream->curpos.nline = 1;
         stream->backch = EOF;
@@ -355,13 +342,6 @@ lex_flush_stack(void) {
         return retv;
 }
 
-/* Reversed string comparison - we want to LIFO directory subfiles so they
- * actually get evaluated in sort order.
- */
-static int rcmpstring(const void *p1, const void *p2) {
-        return strcmp(*(const char * const *)p1, *(const char * const *)p2);
-}
-
 bool is_directory(const char *path) {
         struct stat sb;
         return stat(path, &sb) == 0 && S_ISDIR(sb.st_mode);
@@ -383,101 +363,124 @@ void reparent(char *fullpath, size_t fullpathsize,
         strlcat(fullpath, base, fullpathsize);
 }
 
+// two helpers for scandir()
+
+// return 1 if d_name ends with ".conf"
+static int conf_enable_filter(const struct dirent *dp)
+{
+    const char conf[] = ".conf";
+    int ret;
+    size_t name_len;
+
+    if ('.' == dp->d_name[0]) {
+        // no hiddden paths
+        return 0;
+    }
+
+    name_len = strnlen(dp->d_name, NAME_MAX + 1);
+    if (sizeof(conf) > name_len) {
+        // too short.  Like . and ..
+        return 0;
+    }
+    ret = strncmp(dp->d_name + name_len - (sizeof(conf) - 1), conf,
+                  sizeof(conf) - 1);
+    return 0 == ret ? 1: 0;
+}
+
+/* sort by name
+ * Reversed string comparison - we want to LIFO directory subfiles so they
+ * actually get evaluated in sort order.
+ */
+static int dirent_rcmp(const struct dirent **a, const struct dirent **b)
+{
+    return strncmp((*a)->d_name, (*b)->d_name, NAME_MAX);
+}
+
 /* Push another file on the parsing stack. If the mode is NULL, create a
  * FILE_INFO suitable for in-memory parsing; otherwise, create a
  * FILE_INFO that is bound to a local/disc file. Note that 'path' must
  * not be NULL, or the function will fail.
  *
  * If the pathname is a directory, push all subfiles and
- * subdirectories with paths satisying the predicate CONF_ENABLE(),
- * recursively depth first to be interpreted in ASCII sort order.
+ * subdirectories with paths ending in .conf,  recursively depth first
+ * to be interpreted in ASCII sort order.
  *
  * Relative pathnames are interpreted relative to the directory
  * of the previous entry on the stack, not the current directory.
  * This is so "include foo" from within /etc/conf will reliably
  * pick up /etc/foo.
  *
+ * Does not follow sym links
+ * Does not read hidden files (those starting with a period).
+ *
  * Returns true if a new info record was pushed onto the stack.
  */
-bool lex_push_file(
-        const char * path
-        )
+bool lex_push_file(const char * path)
 {
         struct FILE_INFO * next = NULL;
+        char fullpath[PATH_MAX];
 
-        if (NULL != path) {
-                char fullpath[PATH_MAX];
-                if (lex_stack != NULL) {
-                        reparent(fullpath, sizeof(fullpath), lex_stack->fname, path);
-                } else {
-                        strlcpy(fullpath, path, sizeof(fullpath));
-                }
-                //fprintf(stderr, "lex_push_file(%s)\n", fullpath);
-                if (is_directory(fullpath)) {
-                        // directory scanning
-                        DIR *dfd;
-                        struct dirent *dp;
-                        char **baselist;
-                        int basecount = 0;
-                        if ((dfd = opendir(fullpath)) == NULL)
-                                return false;
-                        baselist = (char **)malloc(sizeof(char *));
-                        if (NULL == baselist) {
-                                msyslog(LOG_ERR,
-                                    "CONFIG: lex_push_file: NULL from malloc");
-                                exit(3);
-                        }
-                        while ((dp = readdir(dfd)) != NULL)
-                        {
-                                if (!CONF_ENABLE(dp->d_name)) {
-                                        continue;
-                                }
-                                baselist[basecount++] = strdup(dp->d_name);
-                                baselist = realloc(baselist,
-                                       (size_t)(basecount+1) * sizeof(char *));
-                                if (NULL == baselist) {
-                                        msyslog(LOG_ERR,
-                                            "CONFIG: lex_push_file: "
-                                            "NULL from realloc");
-                                        exit(3);
-                                }
-                        }
-                        closedir(dfd);
-                        qsort(baselist, (size_t)basecount, sizeof(char *),
-                              rcmpstring);
-                        for (int i = 0; i < basecount; i++) {
-                                char subpath[PATH_MAX];
-                                size_t pathlen = strlcpy(subpath, fullpath, PATH_MAX);
-                                if ((pathlen < PATH_MAX - 1) &&
-                                        (subpath[pathlen -1] != DIR_SEP)
-                                ) {
-                                        char *ep = subpath + strlen(subpath);
-                                        *ep++ = DIR_SEP;
-                                        *ep = '\0';
-                                }
-                                strlcat(subpath, baselist[i], PATH_MAX);
-                                /* This should barf safely if the complete
-                                 * filename was too long to fit in the buffer.
-                                 */
-                                msyslog(LOG_NOTICE,
-                                        "CONFIG: opening <%s> from dir <%s>",
-                                        subpath, fullpath);
-                                lex_push_file(subpath);
-                        }
-                        for (int i = 0; i < basecount; i++) {
-                                free(baselist[i]);
-                        }
-                        free(baselist);
-                        return basecount > 0;
-                } else {
-                        next = lex_open(fullpath, "r");
-                        if (NULL != next) {
-                                next->st_next = lex_stack;
-                                lex_stack = next;
-                        }
-                }
+        if (NULL == path) {
+           return false;
         }
-        return (NULL != next);
+
+        if (NULL != lex_stack) {
+                reparent(fullpath, sizeof(fullpath), lex_stack->fname, path);
+        } else {
+                strlcpy(fullpath, path, sizeof(fullpath));
+        }
+        // msyslog(LOG_DEBUG, "CONFIG: lex_push_file(%s)\n", fullpath);
+
+        if (is_directory(fullpath)) {
+            // directory scanning
+            struct dirent **namelist;
+            int basecount;
+            int i;
+
+            // msyslog(LOG_DEBUG, "CONFIG: recursing %s\n", fullpath);
+            basecount = scandir(fullpath, &namelist,
+                                conf_enable_filter, dirent_rcmp);
+            if (0 > basecount) {
+                return false;
+            }
+
+            for (i = 0; i < basecount; i++) {
+                char subpath[PATH_MAX];
+                size_t pathlen = strlcpy(subpath, fullpath,
+                                         sizeof(subpath));
+
+                if ((pathlen < PATH_MAX - 1) &&
+                    (subpath[pathlen - 1] != DIR_SEP)) {
+                    char *ep = subpath + strnlen(subpath,
+                                                 sizeof(subpath));
+                    *ep++ = DIR_SEP;
+                    *ep = '\0';
+                }
+                strlcat(subpath, namelist[i]->d_name, sizeof(subpath));
+                /* This should barf safely if the complete
+                 * filename was too long to fit in the buffer.
+                 */
+                msyslog(LOG_NOTICE, "CONFIG: opening <%s> from dir <%s>",
+                        subpath, fullpath);
+                lex_push_file(subpath);
+            }
+
+            // clen up the heap refuse
+            for (i = 0; i < basecount; i++) {
+                free(namelist[i]);
+            }
+            free(namelist);
+
+            return basecount > 0;
+        }
+        //  else
+        next = lex_open(fullpath, "r");
+        if (NULL == next) {
+            return false;
+        }
+        next->st_next = lex_stack;
+        lex_stack = next;
+        return true;
 }
 
 /* Pop, close & free the top of the include stack, unless the stack
@@ -487,8 +490,7 @@ bool lex_push_file(
  *
  * Returns true if an object was successfully popped from the stack.
  */
-bool
-lex_pop_file(void)
+bool lex_pop_file(void)
 {
         struct FILE_INFO * head = lex_stack;
         struct FILE_INFO * tail = NULL;
@@ -548,11 +550,7 @@ lex_current(void)
  */
 
 // Keywords
-static int
-is_keyword(
-        char *lexeme,
-        follby *pfollowedby
-        )
+static int is_keyword(char *lexeme, follby *pfollowedby)
 {
         follby fb;
         int curr_s;  // current state index
