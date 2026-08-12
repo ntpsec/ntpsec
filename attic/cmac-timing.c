@@ -63,9 +63,9 @@ static void ssl_init(void)
 #if OPENSSL_VERSION_NUMBER > 0x20000000L && !defined(LIBRESSL_VERSION_NUMBER)
 	EVP_MAC *mac;
 #endif
-	ERR_load_crypto_strings();
-	OpenSSL_add_all_digests();
-	OpenSSL_add_all_ciphers();
+//	ERR_load_crypto_strings();
+//	OpenSSL_add_all_digests();
+//	OpenSSL_add_all_ciphers();
 	cmac = CMAC_CTX_new();
 #if OPENSSL_VERSION_NUMBER > 0x20000000L && !defined(LIBRESSL_VERSION_NUMBER)
 	mac = EVP_MAC_fetch(NULL, "cmac", NULL);
@@ -74,6 +74,7 @@ static void ssl_init(void)
 	evp = EVP_MAC_CTX_new(mac);
 	if (NULL == evp)
 		printf("## Oops, EVP_MAC_CTX_new() failed.\n");
+	EVP_MAC_free(mac);
 #endif
 }
 
