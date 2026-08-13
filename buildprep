@@ -201,23 +201,23 @@ daemon () {
 	    ;;
 	pkgin)
 	    # NetBSD
-	    #  There is nothing magic about 3.7.
-	    #  In Dec 2018, 3.6 and 2.7 are also good candidates.
-	    $install bison python37 py37-curses-3.7
+	    #  There is nothing magic about 3.14
+	    #  In Aug 2026, 3.14 was the latest available
+	    $install bison python314
 	    # certificates for NTS
 	    $install mozilla-rootcerts mozilla-rootcerts-openssl
 	    # Also needs "nts ca /etc/openssl/certs/"
 	    # setup "python" from command line
-	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python
-	    $do ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python3
+	    $do ln -s /usr/pkg/bin/python3.14 /usr/pkg/bin/python
+	    $do ln -s /usr/pkg/bin/python3.14 /usr/pkg/bin/python3
 	    # Add to Python search path
 	    if [ "$DRYRUN" = "yes" ]
             then
-		echo echo /usr/local/lib/python3.7/site-packages \> \\
-		echo "  " /usr/pkg/lib/python3.7/site-packages/ntpsec.pth
+		echo echo /usr/local/lib/python3.14/site-packages \> \\
+		echo "  " /usr/pkg/lib/python3.14/site-packages/ntpsec.pth
 	    else
-		echo /usr/local/lib/python3.7/site-packages > \
-			/usr/pkg/lib/python3.7/site-packages/ntpsec.pth
+		echo /usr/local/lib/python3.14/site-packages > \
+			/usr/pkg/lib/python3.14/site-packages/ntpsec.pth
 	    fi
 	    echo "Last tested a long time ago"
 	    ;;
