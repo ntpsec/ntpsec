@@ -390,7 +390,7 @@ gentoo-basic:
   <<: *job_definition
   image: $CI_REGISTRY_IMAGE/gentoo
   script:
-    - echo /usr/local/lib/python3.13/site-packages/ > /usr/lib/python3.13/site-packages/ntpsec.pth
+    - echo /usr/local/lib/python3.14/site-packages/ > /usr/lib/python3.14/site-packages/ntpsec.pth
     - python ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build
     - python ./waf install
     - python ./waf uninstall
