@@ -5,46 +5,46 @@
  *
  * Driver for some of the various the Motorola Oncore GPS receivers.
  *   should work with Basic, PVT6, VP, UT, UT+, GT, GT+, SL, M12, M12+T
- *	The receivers with TRAIM (VP, UT, UT+, M12+T), will be more accurate
- *	   than the others.
- *	The receivers without position hold (GT, GT+) will be less accurate.
+ *      The receivers with TRAIM (VP, UT, UT+, M12+T), will be more accurate
+ *         than the others.
+ *      The receivers without position hold (GT, GT+) will be less accurate.
  *
  * Tested with:
  *
- *		(UT)				   (VP)
- *   COPYRIGHT 1991-1997 MOTOROLA INC.	COPYRIGHT 1991-1996 MOTOROLA INC.
- *   SFTW P/N #     98-P36848P		SFTW P/N # 98-P36830P
- *   SOFTWARE VER # 2			SOFTWARE VER # 8
- *   SOFTWARE REV # 2			SOFTWARE REV # 8
- *   SOFTWARE DATE  APR 24 1998 	SOFTWARE DATE  06 Aug 1996
- *   MODEL #	R1121N1114		MODEL #    B4121P1155
- *   HWDR P/N # 1			HDWR P/N # _
- *   SERIAL #	R0010A			SERIAL #   SSG0226478
- *   MANUFACTUR DATE 6H07		MANUFACTUR DATE 7E02
- *					OPTIONS LIST	IB
+ *              (UT)                               (VP)
+ *   COPYRIGHT 1991-1997 MOTOROLA INC.  COPYRIGHT 1991-1996 MOTOROLA INC.
+ *   SFTW P/N #     98-P36848P          SFTW P/N # 98-P36830P
+ *   SOFTWARE VER # 2                   SOFTWARE VER # 8
+ *   SOFTWARE REV # 2                   SOFTWARE REV # 8
+ *   SOFTWARE DATE  APR 24 1998         SOFTWARE DATE  06 Aug 1996
+ *   MODEL #    R1121N1114              MODEL #    B4121P1155
+ *   HWDR P/N # 1                       HDWR P/N # _
+ *   SERIAL #   R0010A                  SERIAL #   SSG0226478
+ *   MANUFACTUR DATE 6H07               MANUFACTUR DATE 7E02
+ *                                      OPTIONS LIST    IB
  *
- *	      (Basic)				   (M12)
- *   COPYRIGHT 1991-1994 MOTOROLA INC.	COPYRIGHT 1991-2000 MOTOROLA INC.
- *   SFTW P/N # 98-P39949M		SFTW P/N # 61-G10002A
- *   SOFTWARE VER # 5			SOFTWARE VER # 1
- *   SOFTWARE REV # 0			SOFTWARE REV # 3
- *   SOFTWARE DATE  20 JAN 1994 	SOFTWARE DATE  Mar 13 2000
- *   MODEL #	A11121P116		MODEL #    P143T12NR1
- *   HDWR P/N # _			HWDR P/N # 1
- *   SERIAL #	SSG0049809		SERIAL #   P003UD
- *   MANUFACTUR DATE 417AMA199		MANUFACTUR DATE 0C27
+ *            (Basic)                              (M12)
+ *   COPYRIGHT 1991-1994 MOTOROLA INC.  COPYRIGHT 1991-2000 MOTOROLA INC.
+ *   SFTW P/N # 98-P39949M              SFTW P/N # 61-G10002A
+ *   SOFTWARE VER # 5                   SOFTWARE VER # 1
+ *   SOFTWARE REV # 0                   SOFTWARE REV # 3
+ *   SOFTWARE DATE  20 JAN 1994         SOFTWARE DATE  Mar 13 2000
+ *   MODEL #    A11121P116              MODEL #    P143T12NR1
+ *   HDWR P/N # _                       HWDR P/N # 1
+ *   SERIAL #   SSG0049809              SERIAL #   P003UD
+ *   MANUFACTUR DATE 417AMA199          MANUFACTUR DATE 0C27
  *   OPTIONS LIST    AB
  *
- *	      (M12+T)				  (M12+T later version)
- *   COPYRIGHT 1991-2002 MOTOROLA INC.	COPYRIGHT 1991-2003 MOTOROLA INC.
- *   SFTW P/N #     61-G10268A		SFTW P/N #     61-G10268A
- *   SOFTWARE VER # 2			SOFTWARE VER # 2
- *   SOFTWARE REV # 0			SOFTWARE REV # 1
- *   SOFTWARE DATE  AUG 14 2002 	SOFTWARE DATE  APR 16 2003
- *   MODEL #	P283T12T11		MODEL #    P273T12T12
- *   HWDR P/N # 2			HWDR P/N # 2
- *   SERIAL #	P04DC2			SERIAL #   P05Z7Z
- *   MANUFACTUR DATE 2J17		MANUFACTUR DATE 3G15
+ *            (M12+T)                             (M12+T later version)
+ *   COPYRIGHT 1991-2002 MOTOROLA INC.  COPYRIGHT 1991-2003 MOTOROLA INC.
+ *   SFTW P/N #     61-G10268A          SFTW P/N #     61-G10268A
+ *   SOFTWARE VER # 2                   SOFTWARE VER # 2
+ *   SOFTWARE REV # 0                   SOFTWARE REV # 1
+ *   SOFTWARE DATE  AUG 14 2002         SOFTWARE DATE  APR 16 2003
+ *   MODEL #    P283T12T11              MODEL #    P273T12T12
+ *   HWDR P/N # 2                       HWDR P/N # 2
+ *   SERIAL #   P04DC2                  SERIAL #   P05Z7Z
+ *   MANUFACTUR DATE 2J17               MANUFACTUR DATE 3G15
  *
  * --------------------------------------------------------------------------
  * Reg Clemens (June 2009)
@@ -108,12 +108,12 @@
  * this driver will 'grab' it for you if you don't have one in /usr/include
  * --------------------------------------------------------------------------
  * This code uses the two devices
- *	/dev/oncore.serial.n
- *	/dev/oncore.pps.n
+ *      /dev/oncore.serial.n
+ *      /dev/oncore.pps.n
  * which may be linked to the same device.
  * and can read initialization data from the file
- *	/etc/ntp.oncoreN, /etc/ntp.oncore.N, or /etc/ntp.oncore, where
- *	n or N are the unit number
+ *      /etc/ntp.oncoreN, /etc/ntp.oncore.N, or /etc/ntp.oncore, where
+ *      n or N are the unit number
  * --------------------------------------------------------------------------
  * Reg.Clemens <reg@dwf.com> Sep98.
  *  Original code written for FreeBSD.
@@ -135,12 +135,12 @@
  * When we do it ourselves, take 10000 3D fixes.
  */
 
-#define POS_HOLD_AVERAGE	10000	/* nb, 10000s ~= 2h45m */
+#define POS_HOLD_AVERAGE        10000   // nb, 10000s ~= 2h45m
 
 /*
  * ONCORE_SHMEM_STATUS will create a mmap(2)'ed file named according to a
  * "STATUS" line in the oncore config file, which contains the most recent
- * copy of all types of messages we recognize.	This file can be mmap(2)'ed
+ * copy of all types of messages we recognize.  This file can be mmap(2)'ed
  * by monitoring and statistics programs.
  *
  * See separate HTML documentation for this option.
@@ -162,54 +162,54 @@
 #  include <sys/mman.h>
 #  ifndef MAP_FAILED
 #   define MAP_FAILED ((uint8_t *) -1)
-#  endif  /* MAP_FAILED */
-#endif /* ENABLE_ONCORE_SHMEM */
+#  endif  // MAP_FAILED
+#endif  // ENABLE_ONCORE_SHMEM
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
 #endif
 
-#define NAME		"ONCORE"
-#define DESCRIPTION	"Motorola Oncore GPS Receiver"
+#define NAME            "ONCORE"
+#define DESCRIPTION     "Motorola Oncore GPS Receiver"
 
 struct Bl {
-	int	dt_ls;
-	int	dt_lsf;
-	int	WN;
-	int	DN;
-	int	WN_lsf;
-	int	DN_lsf;
-	int	wn_flg;
-	int	lsf_flg;
-	int	Bl_day;
+        int     dt_ls;
+        int     dt_lsf;
+        int     WN;
+        int     DN;
+        int     WN_lsf;
+        int     DN_lsf;
+        int     wn_flg;
+        int     lsf_flg;
+        int     Bl_day;
 } Bl;
 
 enum receive_state {
-	ONCORE_NO_IDEA,
-	ONCORE_CHECK_ID,
-	ONCORE_CHECK_CHAN,
-	ONCORE_HAVE_CHAN,
-	ONCORE_RESET_SENT,
-	ONCORE_TEST_SENT,
-	ONCORE_INIT,
-	ONCORE_ALMANAC,
-	ONCORE_RUN
+        ONCORE_NO_IDEA,
+        ONCORE_CHECK_ID,
+        ONCORE_CHECK_CHAN,
+        ONCORE_HAVE_CHAN,
+        ONCORE_RESET_SENT,
+        ONCORE_TEST_SENT,
+        ONCORE_INIT,
+        ONCORE_ALMANAC,
+        ONCORE_RUN
 };
 
 enum site_survey_state {
-	ONCORE_SS_UNKNOWN,
-	ONCORE_SS_TESTING,
-	ONCORE_SS_HW,
-	ONCORE_SS_SW,
-	ONCORE_SS_DONE
+        ONCORE_SS_UNKNOWN,
+        ONCORE_SS_TESTING,
+        ONCORE_SS_HW,
+        ONCORE_SS_SW,
+        ONCORE_SS_DONE
 };
 
 enum antenna_state {
       ONCORE_ANTENNA_UNKNOWN = -1,
-      ONCORE_ANTENNA_OK      =	0,
-      ONCORE_ANTENNA_OC      =	1,
-      ONCORE_ANTENNA_UC      =	2,
-      ONCORE_ANTENNA_NV      =	3
+      ONCORE_ANTENNA_OK      =  0,
+      ONCORE_ANTENNA_OC      =  1,
+      ONCORE_ANTENNA_UC      =  2,
+      ONCORE_ANTENNA_NV      =  3
 };
 
 /* Model Name, derived from the @@Cj message.
@@ -217,16 +217,16 @@ enum antenna_state {
  */
 
 enum oncore_model {
-	ONCORE_BASIC,
-	ONCORE_PVT6,
-	ONCORE_VP,
-	ONCORE_UT,
-	ONCORE_UTPLUS,
-	ONCORE_GT,
-	ONCORE_GTPLUS,
-	ONCORE_SL,
-	ONCORE_M12,
-	ONCORE_UNKNOWN
+        ONCORE_BASIC,
+        ONCORE_PVT6,
+        ONCORE_VP,
+        ONCORE_UT,
+        ONCORE_UTPLUS,
+        ONCORE_GT,
+        ONCORE_GTPLUS,
+        ONCORE_SL,
+        ONCORE_M12,
+        ONCORE_UNKNOWN
 };
 
 /* the bits that describe these properties are in the same place
@@ -236,11 +236,11 @@ enum oncore_model {
  */
 
 struct RSM {
-	uint8_t	posn0D;
-	uint8_t	posn2D;
-	uint8_t	posn3D;
-	uint8_t	bad_almanac;
-	uint8_t	bad_fix;
+        uint8_t posn0D;
+        uint8_t posn2D;
+        uint8_t posn3D;
+        uint8_t bad_almanac;
+        uint8_t bad_fix;
 };
 
 /* It is possible to test the VP/UT each cycle (@@Ea or equivalent) to
@@ -249,171 +249,171 @@ struct RSM {
  */
 
 enum posn_mode {
-	MODE_UNKNOWN,
-	MODE_0D,
-	MODE_2D,
-	MODE_3D
+        MODE_UNKNOWN,
+        MODE_0D,
+        MODE_2D,
+        MODE_3D
 };
 
 struct instance {
-	int	unit;
-	struct	refclockproc *pp;
-	struct	peer *peer;
+        int     unit;
+        struct  refclockproc *pp;
+        struct  peer *peer;
 
-	int	ttyfd;		/* TTY file descriptor */
-	int	ppsfd;		/* PPS file descriptor */
-	int	shmemfd;	/* Status shm descriptor */
-	pps_handle_t pps_h;
-	pps_params_t pps_p;
-	enum receive_state o_state;		/* Receive state */
-	enum posn_mode mode;			/* 0D, 2D, 3D */
-	enum site_survey_state site_survey;	/* Site Survey state */
-	enum antenna_state ant_state;		/* antenna state */
+        int     ttyfd;          // TTY file descriptor
+        int     ppsfd;          // PPS file descriptor
+        int     shmemfd;        // Status shm descriptor
+        pps_handle_t pps_h;
+        pps_params_t pps_p;
+        enum receive_state o_state;             // Receive state
+        enum posn_mode mode;                    // 0D, 2D, 3D
+        enum site_survey_state site_survey;     // Site Survey state
+        enum antenna_state ant_state;           // antenna state
 
-	int	Bj_day;
+        int     Bj_day;
 
-	unsigned long	delay;		/* ns */
-	long	offset; 	/* ns */
+        unsigned long   delay;          // ns
+        long    offset;         // ns
 
-	uint8_t	*shmem;
-	char	*shmem_fname;
-	unsigned int	shmem_Cb;
-	unsigned int	shmem_Ba;
-	unsigned int	shmem_Ea;
-	unsigned int	shmem_Ha;
-	uint8_t	shmem_reset;
-	uint8_t	shmem_Posn;
-	uint8_t	shmem_bad_Ea;
-	uint8_t	almanac_from_shmem;
+        uint8_t *shmem;
+        char    *shmem_fname;
+        unsigned int    shmem_Cb;
+        unsigned int    shmem_Ba;
+        unsigned int    shmem_Ea;
+        unsigned int    shmem_Ha;
+        uint8_t shmem_reset;
+        uint8_t shmem_Posn;
+        uint8_t shmem_bad_Ea;
+        uint8_t almanac_from_shmem;
 
-	double	ss_lat;
-	double	ss_long;
-	double	ss_ht;
-	double	dH;
-	int	ss_count;
-	uint8_t	posn_set;
+        double  ss_lat;
+        double  ss_long;
+        double  ss_ht;
+        double  dH;
+        int     ss_count;
+        uint8_t posn_set;
 
-	enum oncore_model model;
-	unsigned int	version;
-	unsigned int	revision;
+        enum oncore_model model;
+        unsigned int    version;
+        unsigned int    revision;
 
-	uint8_t	chan;		/* 6 for PVT6 or BASIC, 8 for UT/VP, 12 for m12, 0 if unknown */
-	int8_t	traim;		/* do we have traim? yes UT/VP, M12+T, no BASIC, GT, M12, -1 unknown, 0 no, +1 yes */
-				/* the following 7 are all timing counters */
-	uint8_t	traim_delay;	/* seconds counter, waiting for reply */
-	uint8_t	count;		/* cycles through Ea before starting */
-	uint8_t	count1; 	/* cycles through Ea after SS_TESTING, waiting for SS_HW */
-	uint8_t	count2; 	/* cycles through Ea after count, to check for @@Ea */
-	uint8_t	count3; 	/* cycles through Ea checking for # channels */
-	uint8_t	count4; 	/* cycles through leap after Gj to issue Bj */
-	uint8_t	count5; 	/* cycles through get_timestamp waiting for valid UTC correction */
-	uint8_t	count5_set;	/* only set count5 once */
-	uint8_t	counta; 	/* count for waiting on almanac message */
-	uint8_t	pollcnt;
-	uint8_t	timeout;	/* count to retry Cj after Fa self-test */
-	uint8_t	max_len;	/* max length message seen by oncore_log, for debugging */
-	uint8_t	max_count;	/* count for message statistics */
+        uint8_t chan;           // 6 for PVT6 or BASIC, 8 for UT/VP, 12 for m12, 0 if unknown
+        int8_t  traim;          // do we have traim? yes UT/VP, M12+T, no BASIC, GT, M12, -1 unknown, 0 no, +1 yes
+                                // the following 7 are all timing counters
+        uint8_t traim_delay;    // seconds counter, waiting for reply
+        uint8_t count;          // cycles through Ea before starting
+        uint8_t count1;         // cycles through Ea after SS_TESTING, waiting for SS_HW
+        uint8_t count2;         // cycles through Ea after count, to check for @@Ea
+        uint8_t count3;         // cycles through Ea checking for # channels
+        uint8_t count4;         // cycles through leap after Gj to issue Bj
+        uint8_t count5;         // cycles through get_timestamp waiting for valid UTC correction
+        uint8_t count5_set;     // only set count5 once
+        uint8_t counta;         // count for waiting on almanac message
+        uint8_t pollcnt;
+        uint8_t timeout;        // count to retry Cj after Fa self-test
+        uint8_t max_len;        // max length message seen by oncore_log, for debugging
+        uint8_t max_count;      // count for message statistics
 
-	struct	RSM rsm;	/* bits extracted from Receiver Status Msg in @@Ea */
-	struct	Bl Bl;		/* Satellite Broadcast Data Message */
-	uint8_t	printed;
-	uint8_t	polled;
-	unsigned long	ev_serial;
-	unsigned	Rcvptr;
-	uint8_t	Rcvbuf[500];
-	uint8_t	BEHa[160];	/* Ba, Ea or Ha */
-	uint8_t	BEHn[80];	/* Bn , En , or Hn */
-	uint8_t	Cj[300];
-	uint8_t	Ag;		/* Satellite mask angle */
-	uint8_t	saw_At;
-	uint8_t	saw_Ay;
-	uint8_t	saw_Az;
-	int8_t	saw_Bj;
-	int8_t	saw_Gj;
-	uint8_t	have_dH;
-	uint8_t	init_type;
-	int8_t	saw_tooth;
-	int8_t	chan_in;	/* chan number from INPUT, will always use it */
-	uint8_t	chan_id;	/* chan number determined from part number */
-	uint8_t	chan_ck;	/* chan number determined by sending commands to hardware */
-	int8_t	traim_in;	/* TRAIM from INPUT, will always use ON/OFF specified */
-	int8_t	traim_id;	/* TRAIM determined from part number */
-	uint8_t	traim_ck;	/* TRAIM determined by sending commands to hardware */
-	uint8_t	once;		/* one pass code at top of BaEaHa */
-	int8_t	assert;
-	uint8_t	hardpps;
-	int8_t	pps_control;	/* PPS control, M12 only */
-	int8_t	pps_control_msg_seen;
+        struct  RSM rsm;        // bits extracted from Receiver Status Msg in @@Ea
+        struct  Bl Bl;          // Satellite Broadcast Data Message
+        uint8_t printed;
+        uint8_t polled;
+        unsigned long   ev_serial;
+        unsigned        Rcvptr;
+        uint8_t Rcvbuf[500];
+        uint8_t BEHa[160];      // Ba, Ea or Ha
+        uint8_t BEHn[80];       // Bn , En , or Hn
+        uint8_t Cj[300];
+        uint8_t Ag;             // Satellite mask angle
+        uint8_t saw_At;
+        uint8_t saw_Ay;
+        uint8_t saw_Az;
+        int8_t  saw_Bj;
+        int8_t  saw_Gj;
+        uint8_t have_dH;
+        uint8_t init_type;
+        int8_t  saw_tooth;
+        int8_t  chan_in;        // chan number from INPUT, will always use it
+        uint8_t chan_id;        // chan number determined from part number
+        uint8_t chan_ck;        // chan number determined by sending commands to hardware
+        int8_t  traim_in;       // TRAIM from INPUT, will always use ON/OFF specified
+        int8_t  traim_id;       // TRAIM determined from part number
+        uint8_t traim_ck;       // TRAIM determined by sending commands to hardware
+        uint8_t once;           // one pass code at top of BaEaHa
+        int8_t  assert;
+        uint8_t hardpps;
+        int8_t  pps_control;    // PPS control, M12 only
+        int8_t  pps_control_msg_seen;
 };
 
-#define rcvbuf	instance->Rcvbuf
-#define rcvptr	instance->Rcvptr
+#define rcvbuf  instance->Rcvbuf
+#define rcvptr  instance->Rcvptr
 
-static	bool	oncore_start	      (int, struct peer *);
-static	void	oncore_poll	      (int, struct peer *);
-static	void	oncore_shutdown       (struct refclockproc *);
-static	void	oncore_consume	      (struct instance *);
-static	void	oncore_read_config    (struct instance *);
-static	void	oncore_receive	      (struct recvbuf *);
-static	bool	oncore_ppsapi	      (struct instance *);
-static	void	oncore_get_timestamp  (struct instance *, long, long);
+static  bool    oncore_start          (int, struct peer *);
+static  void    oncore_poll           (int, struct peer *);
+static  void    oncore_shutdown       (struct refclockproc *);
+static  void    oncore_consume        (struct instance *);
+static  void    oncore_read_config    (struct instance *);
+static  void    oncore_receive        (struct recvbuf *);
+static  bool    oncore_ppsapi         (struct instance *);
+static  void    oncore_get_timestamp  (struct instance *, long, long);
 #ifdef ENABLE_ONCORE_SHMEM
-static	void	oncore_init_shmem     (struct instance *);
+static  void    oncore_init_shmem     (struct instance *);
 #endif
 
-static	void	oncore_antenna_report (struct instance *, enum antenna_state);
-static	void	oncore_chan_test      (struct instance *);
-static	void	oncore_check_almanac  (struct instance *);
-static	void	oncore_check_antenna  (struct instance *);
-static	void	oncore_check_leap_sec (struct instance *);
-static	int	oncore_checksum_ok    (uint8_t *, int);
-static	void	oncore_compute_dH     (struct instance *);
-static	void	oncore_load_almanac   (struct instance *);
-static	void	oncore_log	      (struct instance *, int, const char *);
-static	int	oncore_log_f	      (struct instance *, int, const char *, ...)
-		NTP_PRINTF(3, 4);
-static	void	oncore_print_Cb       (struct instance *, uint8_t *);
-/* static  void    oncore_print_array	 (uint8_t *, int);	*/
-static	void	oncore_print_posn     (struct instance *);
-static	void	oncore_sendmsg	      (struct instance *, uint8_t *, size_t);
-static	void	oncore_set_posn       (struct instance *);
-static	void	oncore_set_traim      (struct instance *);
-static	void	oncore_shmem_get_3D   (struct instance *);
-static	void	oncore_ss	      (struct instance *);
-static	bool	oncore_wait_almanac   (struct instance *);
+static  void    oncore_antenna_report (struct instance *, enum antenna_state);
+static  void    oncore_chan_test      (struct instance *);
+static  void    oncore_check_almanac  (struct instance *);
+static  void    oncore_check_antenna  (struct instance *);
+static  void    oncore_check_leap_sec (struct instance *);
+static  int     oncore_checksum_ok    (uint8_t *, int);
+static  void    oncore_compute_dH     (struct instance *);
+static  void    oncore_load_almanac   (struct instance *);
+static  void    oncore_log            (struct instance *, int, const char *);
+static  int     oncore_log_f          (struct instance *, int, const char *, ...)
+                NTP_PRINTF(3, 4);
+static  void    oncore_print_Cb       (struct instance *, uint8_t *);
+// static  void    oncore_print_array    (uint8_t *, int);
+static  void    oncore_print_posn     (struct instance *);
+static  void    oncore_sendmsg        (struct instance *, uint8_t *, size_t);
+static  void    oncore_set_posn       (struct instance *);
+static  void    oncore_set_traim      (struct instance *);
+static  void    oncore_shmem_get_3D   (struct instance *);
+static  void    oncore_ss             (struct instance *);
+static  bool    oncore_wait_almanac   (struct instance *);
 
-static	void	oncore_msg_any	   (struct instance *, uint8_t *, size_t, int);
-static	void	oncore_msg_Adef    (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Ag	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_As	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_At	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Ay	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Az	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_BaEaHa  (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Bd	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Bj	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Bl	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_BnEnHn  (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_CaFaIa  (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Cb	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Cf	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Cj	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Cj_id   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Cj_init (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Ga	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Gb	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Gc	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Gj	   (struct instance *, uint8_t *, size_t);
-static	void	oncore_msg_Sz	   (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_any     (struct instance *, uint8_t *, size_t, int);
+static  void    oncore_msg_Adef    (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Ag      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_As      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_At      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Ay      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Az      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_BaEaHa  (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Bd      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Bj      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Bl      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_BnEnHn  (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_CaFaIa  (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Cb      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Cf      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Cj      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Cj_id   (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Cj_init (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Ga      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Gb      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Gc      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Gj      (struct instance *, uint8_t *, size_t);
+static  void    oncore_msg_Sz      (struct instance *, uint8_t *, size_t);
 
-struct	refclock refclock_oncore = {
-	NAME,			/* basename of driver */
-	oncore_start,		/* start up driver */
-	oncore_shutdown,	/* shut down driver */
-	oncore_poll,		/* transmit poll message */
-	NULL,			/* control - not used */
-	NULL,			/* init - not used */
-	NULL 			/* timer - not used */
+struct  refclock refclock_oncore = {
+        NAME,                   // basename of driver
+        oncore_start,           // start up driver
+        oncore_shutdown,        // shut down driver
+        oncore_poll,            // transmit poll message
+        NULL,                   // control - not used
+        NULL,                   // init - not used
+        NULL                    // timer - not used
 };
 
 /*
@@ -422,155 +422,155 @@ struct	refclock refclock_oncore = {
  */
 
 static struct msg_desc {
-	const char	flag[3];
-	const int	len;
-	void		(*handler) (struct instance *, uint8_t *, size_t);
-	const char	*fmt;
-	int		shmem;
+        const char      flag[3];
+        const int       len;
+        void            (*handler) (struct instance *, uint8_t *, size_t);
+        const char      *fmt;
+        int             shmem;
 } oncore_messages[] = {
-			/* Ea and En first since they're most common */
-	{ "Ea",  76,    oncore_msg_BaEaHa, "mdyyhmsffffaaaaoooohhhhmmmmvvhhddtntimsdimsdimsdimsdimsdimsdimsdimsdsC", 0 },
-	{ "Ba",  68,    oncore_msg_BaEaHa, "mdyyhmsffffaaaaoooohhhhmmmmvvhhddtntimsdimsdimsdimsdimsdimsdsC", 0 },
-	{ "Ha", 154,    oncore_msg_BaEaHa, "mdyyhmsffffaaaaoooohhhhmmmmaaaaoooohhhhmmmmVVvvhhddntimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddssrrccooooTTushmvvvvvvC", 0 },
-	{ "Bn",  59,    oncore_msg_BnEnHn, "otaapxxxxxxxxxxpysreensffffsffffsffffsffffsffffsffffC", 0 },
-	{ "En",  69,    oncore_msg_BnEnHn, "otaapxxxxxxxxxxpysreensffffsffffsffffsffffsffffsffffsffffsffffC", 0 },
-	{ "Hn",  78,    oncore_msg_BnEnHn, "", 0 },
-	{ "Ab",  10,    0,                 "", 0 },
-	{ "Ac",  11,    0,                 "", 0 },
-	{ "Ad",  11,    oncore_msg_Adef,   "", 0 },
-	{ "Ae",  11,    oncore_msg_Adef,   "", 0 },
-	{ "Af",  15,    oncore_msg_Adef,   "", 0 },
-	{ "Ag",   8,    oncore_msg_Ag,     "", 0 }, /* Satellite mask angle */
-	{ "As",  20,    oncore_msg_As,     "", 0 },
-	{ "At",   8,    oncore_msg_At,     "", 0 },
-	{ "Au",  12,    0,                 "", 0 },
-	{ "Av",   8,    0,                 "", 0 },
-	{ "Aw",   8,    0,                 "", 0 },
-	{ "Ay",  11,    oncore_msg_Ay,     "", 0 },
-	{ "Az",  11,    oncore_msg_Az,     "", 0 },
-	{ "AB",   8,    0,                 "", 0 },
-	{ "Bb",  92,    0,                 "", 0 },
-	{ "Bd",  23,    oncore_msg_Bd,     "", 0 },
-	{ "Bj",   8,    oncore_msg_Bj,     "", 0 },
-	{ "Bl",  41,    oncore_msg_Bl,     "", 0 },
-	{ "Ca",   9,    oncore_msg_CaFaIa, "", 0 },
-	{ "Cb",  33,    oncore_msg_Cb,     "", 0 },
-	{ "Cf",   7,    oncore_msg_Cf,     "", 0 },
-	{ "Cg",   8,    0,                 "", 0 },
-	{ "Ch",   9,    0,                 "", 0 },
-	{ "Cj", 294,    oncore_msg_Cj,     "", 0 },
-	{ "Ek",  71,    0,                 "", 0 },
-	{ "Fa",   9,    oncore_msg_CaFaIa, "", 0 },
-	{ "Ga",  20,    oncore_msg_Ga,     "", 0 },
-	{ "Gb",  17,    oncore_msg_Gb,     "", 0 },
-	{ "Gc",   8,    oncore_msg_Gc,     "", 0 },
-	{ "Gd",   8,    0,                 "", 0 },
-	{ "Ge",   8,    0,                 "", 0 },
-	{ "Gj",  21,    oncore_msg_Gj,     "", 0 },
-	{ "Ia",  10,    oncore_msg_CaFaIa, "", 0 },
-	{ "Sz",   8,    oncore_msg_Sz,     "", 0 },
-	{ {0},	  7,	0,		   "", 0 }
+                        // Ea and En first since they're most common
+        { "Ea",  76,    oncore_msg_BaEaHa, "mdyyhmsffffaaaaoooohhhhmmmmvvhhddtntimsdimsdimsdimsdimsdimsdimsdimsdsC", 0 },
+        { "Ba",  68,    oncore_msg_BaEaHa, "mdyyhmsffffaaaaoooohhhhmmmmvvhhddtntimsdimsdimsdimsdimsdimsdsC", 0 },
+        { "Ha", 154,    oncore_msg_BaEaHa, "mdyyhmsffffaaaaoooohhhhmmmmaaaaoooohhhhmmmmVVvvhhddntimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddimsiddssrrccooooTTushmvvvvvvC", 0 },
+        { "Bn",  59,    oncore_msg_BnEnHn, "otaapxxxxxxxxxxpysreensffffsffffsffffsffffsffffsffffC", 0 },
+        { "En",  69,    oncore_msg_BnEnHn, "otaapxxxxxxxxxxpysreensffffsffffsffffsffffsffffsffffsffffsffffC", 0 },
+        { "Hn",  78,    oncore_msg_BnEnHn, "", 0 },
+        { "Ab",  10,    0,                 "", 0 },
+        { "Ac",  11,    0,                 "", 0 },
+        { "Ad",  11,    oncore_msg_Adef,   "", 0 },
+        { "Ae",  11,    oncore_msg_Adef,   "", 0 },
+        { "Af",  15,    oncore_msg_Adef,   "", 0 },
+        { "Ag",   8,    oncore_msg_Ag,     "", 0 },  // Satellite mask angle
+        { "As",  20,    oncore_msg_As,     "", 0 },
+        { "At",   8,    oncore_msg_At,     "", 0 },
+        { "Au",  12,    0,                 "", 0 },
+        { "Av",   8,    0,                 "", 0 },
+        { "Aw",   8,    0,                 "", 0 },
+        { "Ay",  11,    oncore_msg_Ay,     "", 0 },
+        { "Az",  11,    oncore_msg_Az,     "", 0 },
+        { "AB",   8,    0,                 "", 0 },
+        { "Bb",  92,    0,                 "", 0 },
+        { "Bd",  23,    oncore_msg_Bd,     "", 0 },
+        { "Bj",   8,    oncore_msg_Bj,     "", 0 },
+        { "Bl",  41,    oncore_msg_Bl,     "", 0 },
+        { "Ca",   9,    oncore_msg_CaFaIa, "", 0 },
+        { "Cb",  33,    oncore_msg_Cb,     "", 0 },
+        { "Cf",   7,    oncore_msg_Cf,     "", 0 },
+        { "Cg",   8,    0,                 "", 0 },
+        { "Ch",   9,    0,                 "", 0 },
+        { "Cj", 294,    oncore_msg_Cj,     "", 0 },
+        { "Ek",  71,    0,                 "", 0 },
+        { "Fa",   9,    oncore_msg_CaFaIa, "", 0 },
+        { "Ga",  20,    oncore_msg_Ga,     "", 0 },
+        { "Gb",  17,    oncore_msg_Gb,     "", 0 },
+        { "Gc",   8,    oncore_msg_Gc,     "", 0 },
+        { "Gd",   8,    0,                 "", 0 },
+        { "Ge",   8,    0,                 "", 0 },
+        { "Gj",  21,    oncore_msg_Gj,     "", 0 },
+        { "Ia",  10,    oncore_msg_CaFaIa, "", 0 },
+        { "Sz",   8,    oncore_msg_Sz,     "", 0 },
+        { {0},    7,    0,                 "", 0 }
 };
 
 
-static uint8_t oncore_cmd_Aa[]  = { 'A', 'a', 0, 0, 0 }; 			    /* 6/8	Time of Day				*/
-static uint8_t oncore_cmd_Ab[]  = { 'A', 'b', 0, 0, 0 }; 			    /* 6/8	GMT Correction				*/
-static uint8_t oncore_cmd_AB[]  = { 'A', 'B', 4 };				    /* VP	Application Type: Static		*/
-static uint8_t oncore_cmd_Ac[]  = { 'A', 'c', 0, 0, 0, 0 };			    /* 6/8	Date					*/
-static uint8_t oncore_cmd_Ad[]  = { 'A', 'd', 0,0,0,0 }; 			    /* 6/8	Latitude				*/
-static uint8_t oncore_cmd_Ae[]  = { 'A', 'e', 0,0,0,0 }; 			    /* 6/8	Longitude				*/
-static uint8_t oncore_cmd_Af[]  = { 'A', 'f', 0,0,0,0, 0 };			    /* 6/8	Height					*/
-static uint8_t oncore_cmd_Ag[]  = { 'A', 'g', 0 };				    /* 6/8/12	Satellite Mask Angle			*/
-static uint8_t oncore_cmd_Agx[] = { 'A', 'g', 0xff };				    /* 6/8/12	Satellite Mask Angle: read		*/
-static uint8_t oncore_cmd_As[]  = { 'A', 's', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };	    /* 6/8/12	Posn Hold Parameters			*/
-static uint8_t oncore_cmd_Asx[] = { 'A', 's', 0x7f,0xff,0xff,0xff,		    /* 6/8/12	Posn Hold Readback			*/
-					     0x7f,0xff,0xff,0xff,		    /*		 on UT+ this doesn't work with 0xff	*/
-					     0x7f,0xff,0xff,0xff, 0xff };	    /*		 but does work with 0x7f (sigh).	*/
-static uint8_t oncore_cmd_At0[] = { 'A', 't', 0 };				    /* 6/8	Posn Hold: off				*/
-static uint8_t oncore_cmd_At1[] = { 'A', 't', 1 };				    /* 6/8	Posn Hold: on				*/
-static uint8_t oncore_cmd_At2[] = { 'A', 't', 2 };				    /* 6/8	Posn Hold: Start Site Survey		*/
-static uint8_t oncore_cmd_Atx[] = { 'A', 't', 0xff };				    /* 6/8	Posn Hold: Read Back			*/
-static uint8_t oncore_cmd_Au[]  = { 'A', 'u', 0,0,0,0, 0 };			    /* GT/M12	Altitude Hold Ht.			*/
-static uint8_t oncore_cmd_Av0[] = { 'A', 'v', 0 };				    /* VP/GT	Altitude Hold: off			*/
-static uint8_t oncore_cmd_Av1[] = { 'A', 'v', 1 };				    /* VP/GT	Altitude Hold: on			*/
-static uint8_t oncore_cmd_Aw[]  = { 'A', 'w', 1 };				    /* 6/8/12	UTC/GPS time selection			*/
-static uint8_t oncore_cmd_Ay[]  = { 'A', 'y', 0, 0, 0, 0 };			    /* Timing	1PPS time offset: set			*/
-static uint8_t oncore_cmd_Ayx[] = { 'A', 'y', 0xff, 0xff, 0xff, 0xff };		    /* Timing	1PPS time offset: Read			*/
-static uint8_t oncore_cmd_Az[]  = { 'A', 'z', 0, 0, 0, 0 };			    /* 6/8UT/12 1PPS Cable Delay: set			*/
-static uint8_t oncore_cmd_Azx[] = { 'A', 'z', 0xff, 0xff, 0xff, 0xff };		    /* 6/8UT/12 1PPS Cable Delay: Read			*/
-static uint8_t oncore_cmd_Ba0[] = { 'B', 'a', 0 };				    /* 6	Position/Data/Status: off		*/
-static uint8_t oncore_cmd_Ba[]  = { 'B', 'a', 1 };				    /* 6	Position/Data/Status: on		*/
-static uint8_t oncore_cmd_Bb[]  = { 'B', 'b', 1 };				    /* 6/8/12	Visible Satellites			*/
-static uint8_t oncore_cmd_Bd[]  = { 'B', 'd', 1 };				    /* 6/8/12?	Almanac Status Msg.			*/
-static uint8_t oncore_cmd_Be[]  = { 'B', 'e', 1 };				    /* 6/8/12	Request Almanac Data			*/
-static uint8_t oncore_cmd_Bj[]  = { 'B', 'j', 0 };				    /* 6/8	Leap Second Pending			*/
-static uint8_t oncore_cmd_Bl[]  = { 'B', 'l', 1 };				    /* VP	Satellite Broadcast Data Msg		*/
-static uint8_t oncore_cmd_Bn0[] = { 'B', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg off, traim on	*/
-static uint8_t oncore_cmd_Bn[]  = { 'B', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg on,  traim on	*/
-static uint8_t oncore_cmd_Bnx[] = { 'B', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg off, traim off	*/
-static uint8_t oncore_cmd_Ca[]  = { 'C', 'a' };					    /* 6	Self Test				*/
-static uint8_t oncore_cmd_Cf[]  = { 'C', 'f' };					    /* 6/8/12	Set to Defaults 			*/
-static uint8_t oncore_cmd_Cg[]  = { 'C', 'g', 1 };				    /* VP	Posn Fix/Idle Mode			*/
-static uint8_t oncore_cmd_Cj[]  = { 'C', 'j' };					    /* 6/8/12	Receiver ID				*/
-static uint8_t oncore_cmd_Ea0[] = { 'E', 'a', 0 };				    /* 8	Position/Data/Status: off		*/
-static uint8_t oncore_cmd_Ea[]  = { 'E', 'a', 1 };				    /* 8	Position/Data/Status: on		*/
-static uint8_t oncore_cmd_Ek[]  = { 'E', 'k', 0 }; /* just turn off */		    /* 8	Posn/Status/Data - extension		*/
-static uint8_t oncore_cmd_En0[] = { 'E', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg off, traim on	*/
-static uint8_t oncore_cmd_En[]  = { 'E', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg on,  traim on	*/
-static uint8_t oncore_cmd_Enx[] = { 'E', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg off, traim off	*/
-static uint8_t oncore_cmd_Fa[]  = { 'F', 'a' };					    /* 8	Self Test				*/
-static uint8_t oncore_cmd_Ga[]  = { 'G', 'a', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };	    /* 12	Position Set				*/
-static uint8_t oncore_cmd_Gax[] = { 'G', 'a', 0xff, 0xff, 0xff, 0xff,		    /* 12	Position Set: Read			*/
-					     0xff, 0xff, 0xff, 0xff,		    /*							*/
-					     0xff, 0xff, 0xff, 0xff, 0xff };	    /*							*/
-static uint8_t oncore_cmd_Gb[]  = { 'G', 'b', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	    /* 12	set Date/Time				*/
-static uint8_t oncore_cmd_Gc[]  = { 'G', 'c', 0 };				    /* 12	PPS Control: Off, On, 1+satellite,TRAIM */
-static uint8_t oncore_cmd_Gd0[] = { 'G', 'd', 0 };				    /* 12	Position Control: 3D (no hold)		*/
-static uint8_t oncore_cmd_Gd1[] = { 'G', 'd', 1 };				    /* 12	Position Control: 0D (3D hold)		*/
-static uint8_t oncore_cmd_Gd2[] = { 'G', 'd', 2 };				    /* 12	Position Control: 2D (Alt Hold) 	*/
-static uint8_t oncore_cmd_Gd3[] = { 'G', 'd', 3 };				    /* 12	Position Coltrol: Start Site Survey	*/
-static uint8_t oncore_cmd_Ge0[] = { 'G', 'e', 0 };				    /* M12+T	TRAIM: off				*/
-static uint8_t oncore_cmd_Ge[]  = { 'G', 'e', 1 };				    /* M12+T	TRAIM: on				*/
-static uint8_t oncore_cmd_Gj[]  = { 'G', 'j' };					    /* 8?/12	Leap Second Pending			*/
-static uint8_t oncore_cmd_Ha0[] = { 'H', 'a', 0 };				    /* 12	Position/Data/Status: off		*/
-static uint8_t oncore_cmd_Ha[]  = { 'H', 'a', 1 };				    /* 12	Position/Data/Status: on		*/
-static uint8_t oncore_cmd_Hn0[] = { 'H', 'n', 0 };				    /* 12	TRAIM Status: off			*/
-static uint8_t oncore_cmd_Hn[]  = { 'H', 'n', 1 };				    /* 12	TRAIM Status: on			*/
-static uint8_t oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
+static uint8_t oncore_cmd_Aa[]  = { 'A', 'a', 0, 0, 0 };                            // 6/8      Time of Day
+static uint8_t oncore_cmd_Ab[]  = { 'A', 'b', 0, 0, 0 };                            // 6/8      GMT Correction
+static uint8_t oncore_cmd_AB[]  = { 'A', 'B', 4 };                                  // VP       Application Type: Static
+static uint8_t oncore_cmd_Ac[]  = { 'A', 'c', 0, 0, 0, 0 };                         // 6/8      Date
+static uint8_t oncore_cmd_Ad[]  = { 'A', 'd', 0,0,0,0 };                            // 6/8      Latitude
+static uint8_t oncore_cmd_Ae[]  = { 'A', 'e', 0,0,0,0 };                            // 6/8      Longitude
+static uint8_t oncore_cmd_Af[]  = { 'A', 'f', 0,0,0,0, 0 };                         // 6/8      Height
+static uint8_t oncore_cmd_Ag[]  = { 'A', 'g', 0 };                                  // 6/8/12   Satellite Mask Angle
+static uint8_t oncore_cmd_Agx[] = { 'A', 'g', 0xff };                               // 6/8/12   Satellite Mask Angle: read
+static uint8_t oncore_cmd_As[]  = { 'A', 's', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };       // 6/8/12   Posn Hold Parameters
+static uint8_t oncore_cmd_Asx[] = { 'A', 's', 0x7f,0xff,0xff,0xff,                  // 6/8/12   Posn Hold Readback
+                                             0x7f,0xff,0xff,0xff,                   // on UT+ this doesn't work with 0xff
+                                             0x7f,0xff,0xff,0xff, 0xff };           // but does work with 0x7f (sigh).
+static uint8_t oncore_cmd_At0[] = { 'A', 't', 0 };                                  // 6/8      Posn Hold: off
+static uint8_t oncore_cmd_At1[] = { 'A', 't', 1 };                                  // 6/8      Posn Hold: on
+static uint8_t oncore_cmd_At2[] = { 'A', 't', 2 };                                  // 6/8      Posn Hold: Start Site Survey
+static uint8_t oncore_cmd_Atx[] = { 'A', 't', 0xff };                               // 6/8      Posn Hold: Read Back
+static uint8_t oncore_cmd_Au[]  = { 'A', 'u', 0,0,0,0, 0 };                         // GT/M12   Altitude Hold Ht.
+static uint8_t oncore_cmd_Av0[] = { 'A', 'v', 0 };                                  // VP/GT    Altitude Hold: off
+static uint8_t oncore_cmd_Av1[] = { 'A', 'v', 1 };                                  // VP/GT    Altitude Hold: on
+static uint8_t oncore_cmd_Aw[]  = { 'A', 'w', 1 };                                  // 6/8/12   UTC/GPS time selection
+static uint8_t oncore_cmd_Ay[]  = { 'A', 'y', 0, 0, 0, 0 };                         // Timing   1PPS time offset: set
+static uint8_t oncore_cmd_Ayx[] = { 'A', 'y', 0xff, 0xff, 0xff, 0xff };             // Timing   1PPS time offset: Read
+static uint8_t oncore_cmd_Az[]  = { 'A', 'z', 0, 0, 0, 0 };                         // 6/8UT/12 1PPS Cable Delay: set
+static uint8_t oncore_cmd_Azx[] = { 'A', 'z', 0xff, 0xff, 0xff, 0xff };             // 6/8UT/12 1PPS Cable Delay: Read
+static uint8_t oncore_cmd_Ba0[] = { 'B', 'a', 0 };                                  // 6        Position/Data/Status: off
+static uint8_t oncore_cmd_Ba[]  = { 'B', 'a', 1 };                                  // 6        Position/Data/Status: on
+static uint8_t oncore_cmd_Bb[]  = { 'B', 'b', 1 };                                  // 6/8/12   Visible Satellites
+static uint8_t oncore_cmd_Bd[]  = { 'B', 'd', 1 };                                  // 6/8/12?  Almanac Status Msg.
+static uint8_t oncore_cmd_Be[]  = { 'B', 'e', 1 };                                  // 6/8/12   Request Almanac Data
+static uint8_t oncore_cmd_Bj[]  = { 'B', 'j', 0 };                                  // 6/8      Leap Second Pending
+static uint8_t oncore_cmd_Bl[]  = { 'B', 'l', 1 };                                  // VP       Satellite Broadcast Data Msg
+static uint8_t oncore_cmd_Bn0[] = { 'B', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 };  // 6       TRAIM setup/status: msg off, traim on
+static uint8_t oncore_cmd_Bn[]  = { 'B', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 };  // 6       TRAIM setup/status: msg on,  traim on
+static uint8_t oncore_cmd_Bnx[] = { 'B', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 };  // 6       TRAIM setup/status: msg off, traim off
+static uint8_t oncore_cmd_Ca[]  = { 'C', 'a' };                                     // 6        Self Test
+static uint8_t oncore_cmd_Cf[]  = { 'C', 'f' };                                     // 6/8/12   Set to Defaults
+static uint8_t oncore_cmd_Cg[]  = { 'C', 'g', 1 };                                  // VP       Posn Fix/Idle Mode
+static uint8_t oncore_cmd_Cj[]  = { 'C', 'j' };                                     // 6/8/12   Receiver ID
+static uint8_t oncore_cmd_Ea0[] = { 'E', 'a', 0 };                                  // 8        Position/Data/Status: off
+static uint8_t oncore_cmd_Ea[]  = { 'E', 'a', 1 };                                  // 8        Position/Data/Status: on
+static uint8_t oncore_cmd_Ek[]  = { 'E', 'k', 0 };  // just turn off              /* 8        Posn/Status/Data - extension            */
+static uint8_t oncore_cmd_En0[] = { 'E', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 };  // 8/GT    TRAIM setup/status: msg off, traim on
+static uint8_t oncore_cmd_En[]  = { 'E', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 };  // 8/GT    TRAIM setup/status: msg on,  traim on
+static uint8_t oncore_cmd_Enx[] = { 'E', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 };  // 8/GT    TRAIM setup/status: msg off, traim off
+static uint8_t oncore_cmd_Fa[]  = { 'F', 'a' };                                     // 8        Self Test
+static uint8_t oncore_cmd_Ga[]  = { 'G', 'a', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };       // 12       Position Set
+static uint8_t oncore_cmd_Gax[] = { 'G', 'a', 0xff, 0xff, 0xff, 0xff,               // 12       Position Set: Read
+                                             0xff, 0xff, 0xff, 0xff,                // 
+                                             0xff, 0xff, 0xff, 0xff, 0xff };        // 
+static uint8_t oncore_cmd_Gb[]  = { 'G', 'b', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };       // 12       set Date/Time
+static uint8_t oncore_cmd_Gc[]  = { 'G', 'c', 0 };                                  // 12       PPS Control: Off, On, 1+satellite,TRAIM
+static uint8_t oncore_cmd_Gd0[] = { 'G', 'd', 0 };                                  // 12       Position Control: 3D (no hold)
+static uint8_t oncore_cmd_Gd1[] = { 'G', 'd', 1 };                                  // 12       Position Control: 0D (3D hold)
+static uint8_t oncore_cmd_Gd2[] = { 'G', 'd', 2 };                                  // 12       Position Control: 2D (Alt Hold)
+static uint8_t oncore_cmd_Gd3[] = { 'G', 'd', 3 };                                  // 12       Position Coltrol: Start Site Survey
+static uint8_t oncore_cmd_Ge0[] = { 'G', 'e', 0 };                                  // M12+T    TRAIM: off
+static uint8_t oncore_cmd_Ge[]  = { 'G', 'e', 1 };                                  // M12+T    TRAIM: on
+static uint8_t oncore_cmd_Gj[]  = { 'G', 'j' };                                     // 8?/12    Leap Second Pending
+static uint8_t oncore_cmd_Ha0[] = { 'H', 'a', 0 };                                  // 12       Position/Data/Status: off
+static uint8_t oncore_cmd_Ha[]  = { 'H', 'a', 1 };                                  // 12       Position/Data/Status: on
+static uint8_t oncore_cmd_Hn0[] = { 'H', 'n', 0 };                                  // 12       TRAIM Status: off
+static uint8_t oncore_cmd_Hn[]  = { 'H', 'n', 1 };                                  // 12       TRAIM Status: on
+static uint8_t oncore_cmd_Ia[]  = { 'I', 'a' };                                     // 12       Self Test
 
 /* it appears that as of 1997/1998, the UT had As,At, but not Au,Av
- *				    the GT had Au,Av, but not As,At
+ *                                  the GT had Au,Av, but not As,At
  * This was as of v2.0 of both firmware sets. possibly 1.3 for UT.
  * Bj in UT at v1.3
  * don't see Bd in UT/GT through 1999
  * Gj in UT as of 3.0, 1999 , Bj as of 1.3
  */
 
-#define DEVICE1 	"/dev/oncore.serial.%d" /* name of serial device */
-#define DEVICE2 	"/dev/oncore.pps.%d"    /* name of pps device */
+#define DEVICE1         "/dev/oncore.serial.%d"  // name of serial device
+#define DEVICE2         "/dev/oncore.pps.%d"    // name of pps device
 
-#define SPEED		B9600		/* Oncore Binary speed (9600 bps) */
+#define SPEED           B9600           // Oncore Binary speed (9600 bps)
 
 /*
  * Assemble and disassemble 32bit signed quantities from a buffer.
  *
  */
 
-	/* to buffer, int w, uint8_t *buf */
-#define w32_buf(buf,w)	{ unsigned int i_tmp;			   \
-			  i_tmp = (unsigned int)((w<0) ? (~(-w)+1) : (w)); \
-			  (buf)[0] = (i_tmp >> 24) & 0xff; \
-			  (buf)[1] = (i_tmp >> 16) & 0xff; \
-			  (buf)[2] = (i_tmp >>	8) & 0xff; \
-			  (buf)[3] = (i_tmp	 ) & 0xff; \
-			}
+        // to buffer, int w, uint8_t *buf
+#define w32_buf(buf,w)  { unsigned int i_tmp;                      \
+                          i_tmp = (unsigned int)((w<0) ? (~(-w)+1) : (w)); \
+                          (buf)[0] = (i_tmp >> 24) & 0xff; \
+                          (buf)[1] = (i_tmp >> 16) & 0xff; \
+                          (buf)[2] = (i_tmp >>  8) & 0xff; \
+                          (buf)[3] = (i_tmp      ) & 0xff; \
+                        }
 
 #define w32(buf)      (((buf)[0]&0xff) << 24 | \
-		       ((buf)[1]&0xff) << 16 | \
-		       ((buf)[2]&0xff) <<  8 | \
-		       ((buf)[3]&0xff) )
+                       ((buf)[1]&0xff) << 16 | \
+                       ((buf)[2]&0xff) <<  8 | \
+                       ((buf)[3]&0xff) )
 
-	/* from buffer, char *buf, result to an int */
+        // from buffer, char *buf, result to an int
 #define buf_w32(buf) (((buf)[0]&0200) ? (-(~w32(buf)+1)) : w32(buf))
 
 
@@ -580,182 +580,182 @@ static uint8_t oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
 
 static bool
 oncore_start(
-	int unit,
-	struct peer *peer
-	)
+        int unit,
+        struct peer *peer
+        )
 {
-#define STRING_LEN	32
-	struct instance *instance;
-	struct refclockproc *pp;
-	int fd1, fd2;
-	char device1[STRING_LEN], device2[STRING_LEN];
-	struct stat stat1, stat2;
+#define STRING_LEN      32
+        struct instance *instance;
+        struct refclockproc *pp;
+        int fd1, fd2;
+        char device1[STRING_LEN], device2[STRING_LEN];
+        struct stat stat1, stat2;
 
-	/* create instance structure for this unit */
+        // create instance structure for this unit
 
-	instance = emalloc_zero(sizeof(*instance));
+        instance = emalloc_zero(sizeof(*instance));
 
-	/* initialize miscellaneous variables */
+        // initialize miscellaneous variables
 
-	pp = peer->procptr;
-	instance->pp   = pp;
-	instance->unit = unit;
-	instance->peer = peer;
-	instance->assert = 1;
-	instance->once = 1;
+        pp = peer->procptr;
+        instance->pp   = pp;
+        instance->unit = unit;
+        instance->peer = peer;
+        instance->assert = 1;
+        instance->once = 1;
 
-	instance->Bj_day = -1;
-	instance->traim = -1;
-	instance->traim_in = -1;
-	instance->chan_in = -1;
-	instance->pps_control = -1;	/* PPS control, M12 only */
-	instance->pps_control_msg_seen = -1;	/* Have seen response to Gc msg */
-	instance->model = ONCORE_UNKNOWN;
-	instance->mode = MODE_UNKNOWN;
-	instance->site_survey = ONCORE_SS_UNKNOWN;
-	instance->Ag = 0xff;		/* Satellite mask angle, unset by user */
-	instance->ant_state = ONCORE_ANTENNA_UNKNOWN;
+        instance->Bj_day = -1;
+        instance->traim = -1;
+        instance->traim_in = -1;
+        instance->chan_in = -1;
+        instance->pps_control = -1;     // PPS control, M12 only
+        instance->pps_control_msg_seen = -1;    // Have seen response to Gc msg
+        instance->model = ONCORE_UNKNOWN;
+        instance->mode = MODE_UNKNOWN;
+        instance->site_survey = ONCORE_SS_UNKNOWN;
+        instance->Ag = 0xff;            // Satellite mask angle, unset by user
+        instance->ant_state = ONCORE_ANTENNA_UNKNOWN;
 
-	peer->cfg.flags &= ~FLAG_PPS;	/* PPS not active yet */
-	peer->precision = -26;
-	peer->cfg.minpoll = 4;
-	peer->cfg.maxpoll = 4;
-	pp->clockname = NAME;
-	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, "GPS\0", (size_t) 4);
+        peer->cfg.flags &= ~FLAG_PPS;   // PPS not active yet
+        peer->precision = -26;
+        peer->cfg.minpoll = 4;
+        peer->cfg.maxpoll = 4;
+        pp->clockname = NAME;
+        pp->clockdesc = DESCRIPTION;
+        memcpy((char *)&pp->refid, "GPS\0", (size_t) 4);
 
-	oncore_log(instance, LOG_NOTICE, "ONCORE DRIVER -- CONFIGURING");
-	instance->o_state = ONCORE_NO_IDEA;
-	oncore_log(instance, LOG_NOTICE, "state = ONCORE_NO_IDEA");
+        oncore_log(instance, LOG_NOTICE, "ONCORE DRIVER -- CONFIGURING");
+        instance->o_state = ONCORE_NO_IDEA;
+        oncore_log(instance, LOG_NOTICE, "state = ONCORE_NO_IDEA");
 
-	/* Now open files.
-	 * This is a bit complicated, and we don't want to open the same file twice
-	 * (it's a problem on some OS), and device2 may not exist for the new PPS
-	 */
+        /* Now open files.
+         * This is a bit complicated, and we don't want to open the same file twice
+         * (it's a problem on some OS), and device2 may not exist for the new PPS
+         */
 
-	(void)snprintf(device1, sizeof(device1), DEVICE1, unit);
-	(void)snprintf(device2, sizeof(device2), DEVICE2, unit);
+        (void)snprintf(device1, sizeof(device1), DEVICE1, unit);
+        (void)snprintf(device2, sizeof(device2), DEVICE2, unit);
 
-	/* OPEN DEVICES */
-	/* opening different devices for fd1 and fd2 presents no problems */
-	/* opening the SAME device twice, seems to be OS dependent.
-		(a) on Linux (no streams) no problem
-		(b) on SunOS (and possibly Solaris, untested), (streams)
-			never see the line discipline.
-	   Since things ALWAYS work if we only open the device once, we check
-	     to see if the two devices are in fact the same, then proceed to
-	     do one open or two.
+        // OPEN DEVICES
+        // opening different devices for fd1 and fd2 presents no problems
+        /* opening the SAME device twice, seems to be OS dependent.
+                (a) on Linux (no streams) no problem
+                (b) on SunOS (and possibly Solaris, untested), (streams)
+                        never see the line discipline.
+           Since things ALWAYS work if we only open the device once, we check
+             to see if the two devices are in fact the same, then proceed to
+             do one open or two.
 
-	   For use with linuxPPS we assume that the N_TTY file has been opened
-	     and that the line discipline has been changed to N_PPS by another
-	     program (say ppsldisc) so that the two files expected by the oncore
-	     driver can be opened.
+           For use with linuxPPS we assume that the N_TTY file has been opened
+             and that the line discipline has been changed to N_PPS by another
+             program (say ppsldisc) so that the two files expected by the oncore
+             driver can be opened.
 
-	   Note that the linuxPPS N_PPS file is just like a N_TTY, so we can do
-	     the stat below without error even though the file has already had its
-	     line discipline changed by another process.
-	*/
-	if (stat(device1, &stat1)) {
-		oncore_log_f(instance, LOG_ERR, "Can't stat fd1 (%s)",
-			     device1);
-		free(instance);
-		return false;		/* exit, no file, can't start driver */
-	}
+           Note that the linuxPPS N_PPS file is just like a N_TTY, so we can do
+             the stat below without error even though the file has already had its
+             line discipline changed by another process.
+        */
+        if (stat(device1, &stat1)) {
+                oncore_log_f(instance, LOG_ERR, "Can't stat fd1 (%s)",
+                             device1);
+                free(instance);
+                return false;           // exit, no file, can't start driver
+        }
 
-	fd1 = refclock_open(device1, SPEED, LDISC_RAW);
-	if (fd1 <= 0) {
-		oncore_log_f(instance, LOG_ERR, "Can't open fd1 (%s)",
-			     device1);
-		free(instance);
-		return false;		/* exit, can't open file, can't start driver */
-	}
+        fd1 = refclock_open(device1, SPEED, LDISC_RAW);
+        if (fd1 <= 0) {
+                oncore_log_f(instance, LOG_ERR, "Can't open fd1 (%s)",
+                             device1);
+                free(instance);
+                return false;           // exit, can't open file, can't start driver
+        }
 
-	/* coverity[toctou] */
-	if (stat(device2, &stat2)) {
-		stat2.st_dev = stat2.st_ino = (ino_t)-2;
-		oncore_log_f(instance, LOG_ERR, "Can't stat fd2 (%s) %d %s",
-			     device2, errno, strerror(errno));
-	}
+        // coverity[toctou]
+        if (stat(device2, &stat2)) {
+                stat2.st_dev = stat2.st_ino = (ino_t)-2;
+                oncore_log_f(instance, LOG_ERR, "Can't stat fd2 (%s) %d %s",
+                             device2, errno, strerror(errno));
+        }
 
-	/* for LINUX the PPS device is the result of a line discipline.
-	   It seems simplest to let an external program create the appropriate
-	   /dev/pps<n> file, and only check (carefully) for its existence here
-	 */
-	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino)) {	/* same device here */
-		fd2 = fd1;
-	} else
-	{	/* different devices here */
-		/* coverity[toctou] */
-		if ((fd2=open(device2, O_RDWR, 0777)) < 0) {
-			oncore_log_f(instance, LOG_ERR,
-				     "Can't open fd2 (%s)", device2);
-			close(fd1);
-			free(instance);
-			return false;	/* exit, can't open PPS file, can't start driver */
-		}
-	}
+        /* for LINUX the PPS device is the result of a line discipline.
+           It seems simplest to let an external program create the appropriate
+           /dev/pps<n> file, and only check (carefully) for its existence here
+         */
+        if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino)) {  // same device here
+                fd2 = fd1;
+        } else
+        {       // different devices here
+                // coverity[toctou]
+                if ((fd2=open(device2, O_RDWR, 0777)) < 0) {
+                        oncore_log_f(instance, LOG_ERR,
+                                     "Can't open fd2 (%s)", device2);
+                        close(fd1);
+                        free(instance);
+                        return false;   // exit, can't open PPS file, can't start driver
+                }
+        }
 
-	/* open ppsapi source */
+        // open ppsapi source
 
-	if (time_pps_create(fd2, &instance->pps_h) < 0) {
-		oncore_log(instance, LOG_ERR, "exit, PPSAPI not found in kernel");
-		free(instance);
-		return false;		/* exit, don't find PPSAPI in kernel */
-	}
+        if (time_pps_create(fd2, &instance->pps_h) < 0) {
+                oncore_log(instance, LOG_ERR, "exit, PPSAPI not found in kernel");
+                free(instance);
+                return false;           // exit, don't find PPSAPI in kernel
+        }
 
-	/* continue initialization */
+        // continue initialization
 
-	instance->ttyfd = fd1;
-	instance->ppsfd = fd2;
+        instance->ttyfd = fd1;
+        instance->ppsfd = fd2;
 
-	/* go read any input data in /etc/ntp.oncoreX or /etc/ntp/oncore.X */
+        // go read any input data in /etc/ntp.oncoreX or /etc/ntp/oncore.X
 
-	oncore_read_config(instance);
+        oncore_read_config(instance);
 
-	if (!oncore_ppsapi(instance)) {
-		close(fd1);
-		free(instance);
-		return false;
-	}
+        if (!oncore_ppsapi(instance)) {
+                close(fd1);
+                free(instance);
+                return false;
+        }
 
-	pp->io.clock_recv = oncore_receive;
-	pp->io.srcclock = peer;
-	pp->io.datalen = 0;
-	pp->io.fd = fd1;
-	if (!io_addclock(&pp->io)) {
-		oncore_log(instance, LOG_ERR, "can't do io_addclock");
-		close(fd1);
-		pp->io.fd = -1;
-		free(instance);
-		return false;
-	}
-	pp->unitptr = instance;
-        /* can not trivially free instance now */
+        pp->io.clock_recv = oncore_receive;
+        pp->io.srcclock = peer;
+        pp->io.datalen = 0;
+        pp->io.fd = fd1;
+        if (!io_addclock(&pp->io)) {
+                oncore_log(instance, LOG_ERR, "can't do io_addclock");
+                close(fd1);
+                pp->io.fd = -1;
+                free(instance);
+                return false;
+        }
+        pp->unitptr = instance;
+        // can not trivially free instance now
 
 #ifdef ENABLE_ONCORE_SHMEM
-	/*
-	 * Before starting ONCORE, lets setup SHMEM
-	 * This will include merging an old SHMEM into the new one if
-	 * an old one is found.
-	 */
+        /*
+         * Before starting ONCORE, lets setup SHMEM
+         * This will include merging an old SHMEM into the new one if
+         * an old one is found.
+         */
 
-	oncore_init_shmem(instance);
+        oncore_init_shmem(instance);
 #endif
 
-	/*
-	 * This will return the Model of the Oncore receiver.
-	 * and start the Initialization loop in oncore_msg_Cj.
-	 */
+        /*
+         * This will return the Model of the Oncore receiver.
+         * and start the Initialization loop in oncore_msg_Cj.
+         */
 
-	instance->o_state = ONCORE_CHECK_ID;
-	oncore_log(instance, LOG_NOTICE, "state = ONCORE_CHECK_ID");
+        instance->o_state = ONCORE_CHECK_ID;
+        oncore_log(instance, LOG_NOTICE, "state = ONCORE_CHECK_ID");
 
-	instance->timeout = 4;
-	oncore_sendmsg(instance, oncore_cmd_Cg, sizeof(oncore_cmd_Cg)); /* Set Posn Fix mode (not Idle (VP)) */
-	oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
+        instance->timeout = 4;
+        oncore_sendmsg(instance, oncore_cmd_Cg, sizeof(oncore_cmd_Cg));  // Set Posn Fix mode (not Idle (VP))
+        oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
 
-	instance->pollcnt = 2;
-	return true;
+        instance->pollcnt = 2;
+        return true;
 }
 
 
@@ -765,29 +765,29 @@ oncore_start(
 
 static void
 oncore_shutdown(
-	struct refclockproc *pp
-	)
+        struct refclockproc *pp
+        )
 {
-	struct instance *instance = pp->unitptr;
+        struct instance *instance = pp->unitptr;
 
-	if (pp->io.fd != -1)
-		io_closeclock(&pp->io);
+        if (pp->io.fd != -1)
+                io_closeclock(&pp->io);
 
-	if (instance != NULL) {
-		time_pps_destroy (instance->pps_h);
+        if (instance != NULL) {
+                time_pps_destroy (instance->pps_h);
 
-		close(instance->ttyfd);
+                close(instance->ttyfd);
 
-		if ((instance->ppsfd != -1) && (instance->ppsfd != instance->ttyfd)) {
-			close(instance->ppsfd);
-		}
+                if ((instance->ppsfd != -1) && (instance->ppsfd != instance->ttyfd)) {
+                        close(instance->ppsfd);
+                }
 
-		if (instance->shmemfd) {
-			close(instance->shmemfd);
-		}
+                if (instance->shmemfd) {
+                        close(instance->shmemfd);
+                }
 
-		free(instance);
-	}
+                free(instance);
+        }
 }
 
 
@@ -798,34 +798,34 @@ oncore_shutdown(
 
 static void
 oncore_poll(
-	int unit,
-	struct peer *peer
-	)
+        int unit,
+        struct peer *peer
+        )
 {
-	struct instance *instance;
+        struct instance *instance;
 
-	UNUSED_ARG(unit);
+        UNUSED_ARG(unit);
 
-	instance = peer->procptr->unitptr;
-	if (instance->timeout) {
-		instance->timeout--;
-		if (instance->timeout == 0) {
-			oncore_log(instance, LOG_ERR,
-			    "Oncore: No response from @@Cj, shutting down driver");
-			oncore_shutdown(peer->procptr);
-		} else {
-			oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
-			oncore_log(instance, LOG_WARNING, "Oncore: Resend @@Cj");
-		}
-		return;
-	}
+        instance = peer->procptr->unitptr;
+        if (instance->timeout) {
+                instance->timeout--;
+                if (instance->timeout == 0) {
+                        oncore_log(instance, LOG_ERR,
+                            "Oncore: No response from @@Cj, shutting down driver");
+                        oncore_shutdown(peer->procptr);
+                } else {
+                        oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
+                        oncore_log(instance, LOG_WARNING, "Oncore: Resend @@Cj");
+                }
+                return;
+        }
 
-	if (!instance->pollcnt)
-		refclock_report(peer, CEVNT_TIMEOUT);
-	else
-		instance->pollcnt--;
-	peer->procptr->polls++;
-	instance->polled = 1;
+        if (!instance->pollcnt)
+                refclock_report(peer, CEVNT_TIMEOUT);
+        else
+                instance->pollcnt--;
+        peer->procptr->polls++;
+        instance->polled = 1;
 }
 
 
@@ -836,84 +836,84 @@ oncore_poll(
 
 static bool
 oncore_ppsapi(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	int cap, mode, mode1;
-	const char *cp;
+        int cap, mode, mode1;
+        const char *cp;
 
-	if (time_pps_getcap(instance->pps_h, &cap) < 0) {
-		oncore_log_f(instance, LOG_ERR, "time_pps_getcap failed: %s", strerror(errno));
-		return false;
-	}
+        if (time_pps_getcap(instance->pps_h, &cap) < 0) {
+                oncore_log_f(instance, LOG_ERR, "time_pps_getcap failed: %s", strerror(errno));
+                return false;
+        }
 
-	if (time_pps_getparams(instance->pps_h, &instance->pps_p) < 0) {
-		oncore_log_f(instance, LOG_ERR, "time_pps_getparams failed: %s", strerror(errno));
-		return false;
-	}
+        if (time_pps_getparams(instance->pps_h, &instance->pps_p) < 0) {
+                oncore_log_f(instance, LOG_ERR, "time_pps_getparams failed: %s", strerror(errno));
+                return false;
+        }
 
-	/* nb. only turn things on, if someone else has turned something
-	 *	on before we get here, leave it alone!
-	 */
+        /* nb. only turn things on, if someone else has turned something
+         *      on before we get here, leave it alone!
+         */
 
-	if (instance->assert) {
-		cp = "Assert";
-		mode = PPS_CAPTUREASSERT;
-		mode1 = PPS_OFFSETASSERT;
-	} else {
-		cp = "Clear";
-		mode = PPS_CAPTURECLEAR;
-		mode1 = PPS_OFFSETCLEAR;
-	}
-	oncore_log_f(instance, LOG_INFO, "Initializing timing to %s.",
-		     cp);
+        if (instance->assert) {
+                cp = "Assert";
+                mode = PPS_CAPTUREASSERT;
+                mode1 = PPS_OFFSETASSERT;
+        } else {
+                cp = "Clear";
+                mode = PPS_CAPTURECLEAR;
+                mode1 = PPS_OFFSETCLEAR;
+        }
+        oncore_log_f(instance, LOG_INFO, "Initializing timing to %s.",
+                     cp);
 
-	if (!(mode & cap)) {
-		oncore_log_f(instance, LOG_ERR,
-			     "Can't set timing to %s, exiting...", cp);
-		return false;
-	}
+        if (!(mode & cap)) {
+                oncore_log_f(instance, LOG_ERR,
+                             "Can't set timing to %s, exiting...", cp);
+                return false;
+        }
 
-	if (!(mode1 & cap)) {
-		oncore_log_f(instance, LOG_NOTICE,
-			     "Can't set %s, this will increase jitter.",
-			     cp);
-		mode1 = 0;
-	}
+        if (!(mode1 & cap)) {
+                oncore_log_f(instance, LOG_NOTICE,
+                             "Can't set %s, this will increase jitter.",
+                             cp);
+                mode1 = 0;
+        }
 
-	/* only set what is legal */
+        // only set what is legal
 
-	instance->pps_p.mode = (mode | mode1 | PPS_TSFMT_TSPEC) & cap;
+        instance->pps_p.mode = (mode | mode1 | PPS_TSFMT_TSPEC) & cap;
 
-	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
-		oncore_log_f(instance, LOG_ERR, "ONCORE: time_pps_setparams fails %s", strerror(errno));
-		return false;	/* exit, can't do time_pps_setparans on PPS file */
-	}
+        if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
+                oncore_log_f(instance, LOG_ERR, "ONCORE: time_pps_setparams fails %s", strerror(errno));
+                return false;   // exit, can't do time_pps_setparans on PPS file
+        }
 
-	/* If HARDPPS is on, we tell kernel */
+        // If HARDPPS is on, we tell kernel
 
-	if (instance->hardpps) {
-		int	i;
+        if (instance->hardpps) {
+                int     i;
 
-		oncore_log(instance, LOG_INFO, "HARDPPS Set.");
+                oncore_log(instance, LOG_INFO, "HARDPPS Set.");
 
-		if (instance->assert)
-			i = PPS_CAPTUREASSERT;
-		else
-			i = PPS_CAPTURECLEAR;
+                if (instance->assert)
+                        i = PPS_CAPTUREASSERT;
+                else
+                        i = PPS_CAPTURECLEAR;
 
-		/* we know that 'i' is legal from above */
+                // we know that 'i' is legal from above
 
-		if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
-		    PPS_TSFMT_TSPEC) < 0) {
-			oncore_log_f(instance, LOG_ERR, "time_pps_kcbind failed: %s", strerror(errno));
-			oncore_log(instance, LOG_ERR, "HARDPPS failed, abort...");
-			return false;
-		}
+                if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
+                    PPS_TSFMT_TSPEC) < 0) {
+                        oncore_log_f(instance, LOG_ERR, "time_pps_kcbind failed: %s", strerror(errno));
+                        oncore_log(instance, LOG_ERR, "HARDPPS failed, abort...");
+                        return false;
+                }
 
-		clock_ctl.hardpps_enable = true;
-	}
-	return true;
+                clock_ctl.hardpps_enable = true;
+        }
+        return true;
 }
 
 
@@ -921,150 +921,150 @@ oncore_ppsapi(
 #ifdef ENABLE_ONCORE_SHMEM
 static void
 oncore_init_shmem(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	int fd;
-	uint8_t *cp, *cp1, *buf, *shmem_old;
-	struct msg_desc *mp;
-	struct stat sbuf;
-	size_t i, n, n1, shmem_length, shmem_old_size;
+        int fd;
+        uint8_t *cp, *cp1, *buf, *shmem_old;
+        struct msg_desc *mp;
+        struct stat sbuf;
+        size_t i, n, n1, shmem_length, shmem_old_size;
 
-	/*
-	* The first thing we do is see if there is an instance->shmem_fname file (still)
-	* out there from a previous run.  If so, we copy it in and use it to initialize
-	* shmem (so we won't lose our almanac if we need it).
-	*/
+        /*
+        * The first thing we do is see if there is an instance->shmem_fname file (still)
+        * out there from a previous run.  If so, we copy it in and use it to initialize
+        * shmem (so we won't lose our almanac if we need it).
+        */
 
-	shmem_old = 0;
-	shmem_old_size = 0;
-	if ((fd = open(instance->shmem_fname, O_RDONLY)) < 0)
-		oncore_log(instance, LOG_WARNING, "ONCORE: Can't open SHMEM file");
-	else {
-		fstat(fd, &sbuf);
-		shmem_old_size = sbuf.st_size;
-		if (shmem_old_size != 0) {
-			shmem_old = emalloc((unsigned) sbuf.st_size);
-			read(fd, shmem_old, shmem_old_size);
-		}
-		close(fd);
-	}
+        shmem_old = 0;
+        shmem_old_size = 0;
+        if ((fd = open(instance->shmem_fname, O_RDONLY)) < 0)
+                oncore_log(instance, LOG_WARNING, "ONCORE: Can't open SHMEM file");
+        else {
+                fstat(fd, &sbuf);
+                shmem_old_size = sbuf.st_size;
+                if (shmem_old_size != 0) {
+                        shmem_old = emalloc((unsigned) sbuf.st_size);
+                        read(fd, shmem_old, shmem_old_size);
+                }
+                close(fd);
+        }
 
-	/* OK, we now create the NEW SHMEM. */
+        // OK, we now create the NEW SHMEM.
 
-	if ((instance->shmemfd = open(instance->shmem_fname, O_RDWR|O_CREAT|O_TRUNC, 0644)) < 0) {
-		oncore_log(instance, LOG_WARNING, "ONCORE: Can't open shmem");
-		if (shmem_old)
-			free(shmem_old);
+        if ((instance->shmemfd = open(instance->shmem_fname, O_RDWR|O_CREAT|O_TRUNC, 0644)) < 0) {
+                oncore_log(instance, LOG_WARNING, "ONCORE: Can't open shmem");
+                if (shmem_old)
+                        free(shmem_old);
 
-		return;
-	}
+                return;
+        }
 
-	/* see how big it needs to be */
+        // see how big it needs to be
 
-	n = 1;
-	for (mp=oncore_messages; mp->flag[0]; mp++) {
-		mp->shmem = n;
-		/* Allocate space for multiplexed almanac, and 0D/2D/3D @@Ea records */
-		if (!strcmp(mp->flag, "Cb")) {
-			instance->shmem_Cb = n;
-			n += (mp->len + 3) * 34;
-		}
-		if (!strcmp(mp->flag, "Ba")) {
-			instance->shmem_Ba = n;
-			n += (mp->len + 3) * 3;
-		}
-		if (!strcmp(mp->flag, "Ea")) {
-			instance->shmem_Ea = n;
-			n += (mp->len + 3) * 3;
-		}
-		if (!strcmp(mp->flag, "Ha")) {
-			instance->shmem_Ha = n;
-			n += (mp->len + 3) * 3;
-		}
-		n += (mp->len + 3);
-	}
-	shmem_length = n + 2;
+        n = 1;
+        for (mp=oncore_messages; mp->flag[0]; mp++) {
+                mp->shmem = n;
+                // Allocate space for multiplexed almanac, and 0D/2D/3D @@Ea records
+                if (!strcmp(mp->flag, "Cb")) {
+                        instance->shmem_Cb = n;
+                        n += (mp->len + 3) * 34;
+                }
+                if (!strcmp(mp->flag, "Ba")) {
+                        instance->shmem_Ba = n;
+                        n += (mp->len + 3) * 3;
+                }
+                if (!strcmp(mp->flag, "Ea")) {
+                        instance->shmem_Ea = n;
+                        n += (mp->len + 3) * 3;
+                }
+                if (!strcmp(mp->flag, "Ha")) {
+                        instance->shmem_Ha = n;
+                        n += (mp->len + 3) * 3;
+                }
+                n += (mp->len + 3);
+        }
+        shmem_length = n + 2;
 
-	buf = emalloc_zero(shmem_length);
+        buf = emalloc_zero(shmem_length);
 
-	/* next build the new SHMEM buffer in memory */
+        // next build the new SHMEM buffer in memory
 
-	for (mp=oncore_messages; mp->flag[0]; mp++) {
-		int l = mp->shmem;
-		buf[l + 0] = mp->len >> 8;
-		buf[l + 1] = mp->len & 0xff;
-		buf[l + 2] = 0;
-		buf[l + 3] = '@';
-		buf[l + 4] = '@';
-		buf[l + 5] = mp->flag[0];
-		buf[l + 6] = mp->flag[1];
-		if (!strcmp(mp->flag, "Cb") || !strcmp(mp->flag, "Ba") || !strcmp(mp->flag, "Ea") || !strcmp(mp->flag, "Ha")) {
-			if (!strcmp(mp->flag, "Cb"))
-				n = 35;
-			else
-				n = 4;
-			for (i=1; i<n; i++) {
-				buf[l + i * (mp->len+3) + 0] = mp->len >> 8;
-				buf[l + i * (mp->len+3) + 1] = mp->len & 0xff;
-				buf[l + i * (mp->len+3) + 2] = 0;
-				buf[l + i * (mp->len+3) + 3] = '@';
-				buf[l + i * (mp->len+3) + 4] = '@';
-				buf[l + i * (mp->len+3) + 5] = mp->flag[0];
-				buf[l + i * (mp->len+3) + 6] = mp->flag[1];
-			}
-		}
-	}
+        for (mp=oncore_messages; mp->flag[0]; mp++) {
+                int l = mp->shmem;
+                buf[l + 0] = mp->len >> 8;
+                buf[l + 1] = mp->len & 0xff;
+                buf[l + 2] = 0;
+                buf[l + 3] = '@';
+                buf[l + 4] = '@';
+                buf[l + 5] = mp->flag[0];
+                buf[l + 6] = mp->flag[1];
+                if (!strcmp(mp->flag, "Cb") || !strcmp(mp->flag, "Ba") || !strcmp(mp->flag, "Ea") || !strcmp(mp->flag, "Ha")) {
+                        if (!strcmp(mp->flag, "Cb"))
+                                n = 35;
+                        else
+                                n = 4;
+                        for (i=1; i<n; i++) {
+                                buf[l + i * (mp->len+3) + 0] = mp->len >> 8;
+                                buf[l + i * (mp->len+3) + 1] = mp->len & 0xff;
+                                buf[l + i * (mp->len+3) + 2] = 0;
+                                buf[l + i * (mp->len+3) + 3] = '@';
+                                buf[l + i * (mp->len+3) + 4] = '@';
+                                buf[l + i * (mp->len+3) + 5] = mp->flag[0];
+                                buf[l + i * (mp->len+3) + 6] = mp->flag[1];
+                        }
+                }
+        }
 
-	/* we now walk through the two buffers (shmem_old and buf, soon to become shmem)
-	 * copying the data in shmem_old to buf.
-	 * When we are done we write it out and free both buffers.
-	 * If the structure sizes don't agree, I will not copy.
-	 * This could be due to an addition/deletion or a problem with the disk file.
-	 */
+        /* we now walk through the two buffers (shmem_old and buf, soon to become shmem)
+         * copying the data in shmem_old to buf.
+         * When we are done we write it out and free both buffers.
+         * If the structure sizes don't agree, I will not copy.
+         * This could be due to an addition/deletion or a problem with the disk file.
+         */
 
-	if (shmem_old) {
-		if (shmem_old_size == shmem_length) {
-			for (cp=buf+4, cp1=shmem_old+4; (n = 256*(*(cp-3)) + *(cp-2));	cp+=(n+3), cp1+=(n+3)) {
-				n1 = 256*(*(cp1-3)) + *(cp1-2);
-				if (n == 0 || n1 != n || strncmp((char *) cp, (char *) cp1, 4))
-					break;
+        if (shmem_old) {
+                if (shmem_old_size == shmem_length) {
+                        for (cp=buf+4, cp1=shmem_old+4; (n = 256*(*(cp-3)) + *(cp-2));  cp+=(n+3), cp1+=(n+3)) {
+                                n1 = 256*(*(cp1-3)) + *(cp1-2);
+                                if (n == 0 || n1 != n || strncmp((char *) cp, (char *) cp1, 4))
+                                        break;
 
-				memcpy(cp, cp1, (size_t) n);
-			}
-		}
-		free(shmem_old);
-	}
+                                memcpy(cp, cp1, (size_t) n);
+                        }
+                }
+                free(shmem_old);
+        }
 
-	i = write(instance->shmemfd, buf, shmem_length);
-	free(buf);
+        i = write(instance->shmemfd, buf, shmem_length);
+        free(buf);
 
-	if (i != shmem_length) {
-		oncore_log(instance, LOG_ERR, "ONCORE: error writing shmem");
-		close(instance->shmemfd);
-		return;
-	}
+        if (i != shmem_length) {
+                oncore_log(instance, LOG_ERR, "ONCORE: error writing shmem");
+                close(instance->shmemfd);
+                return;
+        }
 
-	instance->shmem = (uint8_t *) mmap(0, shmem_length,
-		PROT_READ | PROT_WRITE,
+        instance->shmem = (uint8_t *) mmap(0, shmem_length,
+                PROT_READ | PROT_WRITE,
 #ifdef MAP_HASSEMAPHORE
-		/* In API and man pages for FreeBSD and NetBSD
-		   But unused in kernel.  HGM, 2018-Dec.  */
-		MAP_HASSEMAPHORE |
+                /* In API and man pages for FreeBSD and NetBSD
+                   But unused in kernel.  HGM, 2018-Dec.  */
+                MAP_HASSEMAPHORE |
 #endif
-		MAP_SHARED, instance->shmemfd, (off_t)0);
+                MAP_SHARED, instance->shmemfd, (off_t)0);
 
-	if (instance->shmem == (uint8_t *)MAP_FAILED) {
-		instance->shmem = 0;
-		close(instance->shmemfd);
-		return;
-	}
+        if (instance->shmem == (uint8_t *)MAP_FAILED) {
+                instance->shmem = 0;
+                close(instance->shmemfd);
+                return;
+        }
 
-	oncore_log_f(instance, LOG_NOTICE,
-		     "SHMEM (size = %ld) is CONFIGURED and available as %s",
-		     (unsigned long) shmem_length, instance->shmem_fname);
+        oncore_log_f(instance, LOG_NOTICE,
+                     "SHMEM (size = %ld) is CONFIGURED and available as %s",
+                     (unsigned long) shmem_length, instance->shmem_fname);
 }
-#endif /* ENABLE_ONCORE_SHMEM */
+#endif  // ENABLE_ONCORE_SHMEM
 
 
 
@@ -1074,8 +1074,8 @@ oncore_init_shmem(
 
 static void
 oncore_read_config(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
 /*
  * First we try to open the configuration file
@@ -1091,16 +1091,16 @@ oncore_read_config(
  *
  * Five Choices for MODE
  *    (0) ONCORE is preinitialized, don't do anything to change it.
- *	    nb, DON'T set 0D mode, DON'T set Delay, position...
+ *          nb, DON'T set 0D mode, DON'T set Delay, position...
  *    (1) NO RESET, Read Position, delays from data file, lock it in, go to 0D mode.
  *    (2) NO RESET, Read Delays from data file, do SITE SURVEY to get position,
- *		    lock this in, go to 0D mode.
+ *                  lock this in, go to 0D mode.
  *    (3) HARD RESET, Read Position, delays from data file, lock it in, go to 0D mode.
  *    (4) HARD RESET, Read Delays from data file, do SITE SURVEY to get position,
- *		    lock this in, go to 0D mode.
+ *                  lock this in, go to 0D mode.
  *     NB. If a POSITION is specified in the config file with mode=(2,4) [SITE SURVEY]
- *	   then this position is set as the INITIAL position of the ONCORE.
- *	   This can reduce the time to first fix.
+ *         then this position is set as the INITIAL position of the ONCORE.
+ *         This can reduce the time to first fix.
  * -------------------------------------------------------------------------------
  * Note that an Oncore UT without a battery backup retains NO information if it is
  *   power cycled, with a Battery Backup it remembers the almanac, etc.
@@ -1118,330 +1118,330 @@ oncore_read_config(
  *
  * Read input file.
  *
- *	# is comment to end of line
- *	= allowed between 1st and 2nd fields.
+ *      # is comment to end of line
+ *      = allowed between 1st and 2nd fields.
  *
- *	Expect to see one line with 'MODE' as first field, followed by an integer
- *	   in the range 0-4 (default = 4).
+ *      Expect to see one line with 'MODE' as first field, followed by an integer
+ *         in the range 0-4 (default = 4).
  *
- *	Expect to see two lines with 'LONG', 'LAT' followed by 1-3 fields.
- *	All numbers are floating point.
- *		DDD.ddd
- *		DDD  MMM.mmm
- *		DDD  MMM  SSS.sss
+ *      Expect to see two lines with 'LONG', 'LAT' followed by 1-3 fields.
+ *      All numbers are floating point.
+ *              DDD.ddd
+ *              DDD  MMM.mmm
+ *              DDD  MMM  SSS.sss
  *
- *	Expect to see one line with 'HT' as first field,
- *	   followed by 1-2 fields.  First is a number, the second is 'FT' or 'M'
- *	   for feet or meters.	HT is the height above the GPS ellipsoid.
- *	   If the receiver reports height in both GPS and MSL, then we will report
- *	   the difference GPS-MSL on the clockstats file.
+ *      Expect to see one line with 'HT' as first field,
+ *         followed by 1-2 fields.  First is a number, the second is 'FT' or 'M'
+ *         for feet or meters.  HT is the height above the GPS ellipsoid.
+ *         If the receiver reports height in both GPS and MSL, then we will report
+ *         the difference GPS-MSL on the clockstats file.
  *
- *	There is an optional line, starting with DELAY, followed
- *	   by 1 or two fields.	The first is a number (a time) the second is
- *	   'MS', 'US' or 'NS' for milliseconds, microseconds or nanoseconds.
- *	    DELAY  is cable delay, typically a few tens of ns.
+ *      There is an optional line, starting with DELAY, followed
+ *         by 1 or two fields.  The first is a number (a time) the second is
+ *         'MS', 'US' or 'NS' for milliseconds, microseconds or nanoseconds.
+ *          DELAY  is cable delay, typically a few tens of ns.
  *
- *	There is an optional line, starting with OFFSET, followed
- *	   by 1 or two fields.	The first is a number (a time) the second is
- *	   'MS', 'US' or 'NS' for milliseconds, microseconds or nanoseconds.
- *	   OFFSET is the offset of the PPS pulse from 0. (only fully implemented
- *		with the PPSAPI, we need to be able to tell the Kernel about this
- *		offset if the Kernel PLL is in use, but can only do this presently
- *		when using the PPSAPI interface.  If not using the Kernel PLL,
- *		then there is no problem.
+ *      There is an optional line, starting with OFFSET, followed
+ *         by 1 or two fields.  The first is a number (a time) the second is
+ *         'MS', 'US' or 'NS' for milliseconds, microseconds or nanoseconds.
+ *         OFFSET is the offset of the PPS pulse from 0. (only fully implemented
+ *              with the PPSAPI, we need to be able to tell the Kernel about this
+ *              offset if the Kernel PLL is in use, but can only do this presently
+ *              when using the PPSAPI interface.  If not using the Kernel PLL,
+ *              then there is no problem.
  *
- *	There is an optional line, with either ASSERT or CLEAR on it, which
- *	   determine which transition of the PPS signal is used for timing by the
- *	   PPSAPI.  If neither is present, then ASSERT is assumed.
- *	   ASSERT/CLEAR can also be set with FLAG2 of the ntp.conf input.
- *	   For Flag2, ASSERT=0, and hence is default.
+ *      There is an optional line, with either ASSERT or CLEAR on it, which
+ *         determine which transition of the PPS signal is used for timing by the
+ *         PPSAPI.  If neither is present, then ASSERT is assumed.
+ *         ASSERT/CLEAR can also be set with FLAG2 of the ntp.conf input.
+ *         For Flag2, ASSERT=0, and hence is default.
  *
- *	There is an optional line, with HARDPPS on it.	Including this line causes
- *	     the PPS signal to control the kernel PLL.
- *	   HARDPPS can also be set with FLAG3 of the ntp.conf input.
- *	   For Flag3, 0 is disabled, and the default.
+ *      There is an optional line, with HARDPPS on it.  Including this line causes
+ *           the PPS signal to control the kernel PLL.
+ *         HARDPPS can also be set with FLAG3 of the ntp.conf input.
+ *         For Flag3, 0 is disabled, and the default.
  *
- *	There are three options that have to do with using the shared memory option.
- *	   First, to enable the option there must be a SHMEM line with a file name.
- *	   The file name is the file associated with the shared memory.
+ *      There are three options that have to do with using the shared memory option.
+ *         First, to enable the option there must be a SHMEM line with a file name.
+ *         The file name is the file associated with the shared memory.
  *
- *	In shared memory, there is one 'record' for each returned variable.
- *	For the @@Ea data there are three 'records' containing position data.
- *	   There will always be data in the record corresponding to the '0D' @@Ea record,
- *	   and the user has a choice of filling the '3D' record by specifying POSN3D,
- *	   or the '2D' record by specifying POSN2D.  In either case the '2D' or '3D'
- *	   record is filled once every 15s.
+ *      In shared memory, there is one 'record' for each returned variable.
+ *      For the @@Ea data there are three 'records' containing position data.
+ *         There will always be data in the record corresponding to the '0D' @@Ea record,
+ *         and the user has a choice of filling the '3D' record by specifying POSN3D,
+ *         or the '2D' record by specifying POSN2D.  In either case the '2D' or '3D'
+ *         record is filled once every 15s.
  *
- *	Two additional variables that can be set are CHAN and TRAIM.  These should be
- *	   set correctly by the code examining the @@Cj record, but we bring them out here
- *	   to allow the user to override either the # of channels, or the existence of TRAIM.
- *	   CHAN expects to be followed by in integer: 6, 8, or 12. TRAIM expects to be
- *	   followed by YES or NO.
+ *      Two additional variables that can be set are CHAN and TRAIM.  These should be
+ *         set correctly by the code examining the @@Cj record, but we bring them out here
+ *         to allow the user to override either the # of channels, or the existence of TRAIM.
+ *         CHAN expects to be followed by in integer: 6, 8, or 12. TRAIM expects to be
+ *         followed by YES or NO.
  *
- *	There is an optional line with MASK on it followed by one integer field in the
- *	   range 0 to 89. This sets the satellite mask angle and will determine the minimum
- *	   elevation angle for satellites to be tracked by the receiver. The default value
- *	   is 10 deg for the VP and 0 deg for all other receivers.
+ *      There is an optional line with MASK on it followed by one integer field in the
+ *         range 0 to 89. This sets the satellite mask angle and will determine the minimum
+ *         elevation angle for satellites to be tracked by the receiver. The default value
+ *         is 10 deg for the VP and 0 deg for all other receivers.
  *
- *	There is an optional line with PPSCONTROL on it (only valid for M12 or M12+T
- *	   receivers, the option is read, but ignored for all others)
- *	   and it is followed by:
- *		ON	   Turn PPS on.  This is the default and the default for other
- *			       oncore receivers.  The PPS is on even if not tracking
- *			       any satellites.
- *		SATELLITE  Turns PPS on if tracking at least 1 satellite, else off.
- *		TRAIM	   Turns PPS on or off controlled by TRAIM.
- *	  The OFF option is NOT implemented, since the Oncore driver will not work
- *	     without the PPS signal.
+ *      There is an optional line with PPSCONTROL on it (only valid for M12 or M12+T
+ *         receivers, the option is read, but ignored for all others)
+ *         and it is followed by:
+ *              ON         Turn PPS on.  This is the default and the default for other
+ *                             oncore receivers.  The PPS is on even if not tracking
+ *                             any satellites.
+ *              SATELLITE  Turns PPS on if tracking at least 1 satellite, else off.
+ *              TRAIM      Turns PPS on or off controlled by TRAIM.
+ *        The OFF option is NOT implemented, since the Oncore driver will not work
+ *           without the PPS signal.
  *
  * So acceptable input would be
- *	# these are my coordinates (RWC)
- *	LON  -106 34.610
- *	LAT    35 08.999
- *	HT	1589	# could equally well say HT 5215 FT
- *	DELAY  60 ns
+ *      # these are my coordinates (RWC)
+ *      LON  -106 34.610
+ *      LAT    35 08.999
+ *      HT      1589    # could equally well say HT 5215 FT
+ *      DELAY  60 ns
  */
 
-	FILE	*fd;
-	char	*cc, *ca, line[100], units[2], device[64];
-	const char	*dirs[] = { "/etc/ntp", "/etc", 0 };
-	const char *cp, **cpp;
-	int	i, sign, lat_flg, long_flg, ht_flg, mode, mask;
-	double	f1, f2, f3;
+        FILE    *fd;
+        char    *cc, *ca, line[100], units[2], device[64];
+        const char      *dirs[] = { "/etc/ntp", "/etc", 0 };
+        const char *cp, **cpp;
+        int     i, sign, lat_flg, long_flg, ht_flg, mode, mask;
+        double  f1, f2, f3;
 
-	fd = NULL;	/* just to shutup gcc complaint */
-	for (cpp=dirs; *cpp; cpp++) {
-		cp = *cpp;
-		snprintf(device, sizeof(device), "%s/ntp.oncore.%d",
-			 cp, instance->unit);  /* try "ntp.oncore.0 */
-		if ((fd=fopen(device, "r"))) {
-			break;
-		}
-		snprintf(device, sizeof(device), "%s/ntp.oncore%d",
-			 cp, instance->unit);  /* try "ntp.oncore0" */
-		if ((fd=fopen(device, "r"))) {
-			break;
-		}
-		snprintf(device, sizeof(device), "%s/ntp.oncore", cp);
-		if ((fd=fopen(device, "r"))) {   /* last try "ntp.oncore" */
-			break;
-		}
-	}
+        fd = NULL;      // just to shutup gcc complaint
+        for (cpp=dirs; *cpp; cpp++) {
+                cp = *cpp;
+                snprintf(device, sizeof(device), "%s/ntp.oncore.%d",
+                         cp, instance->unit);  // try "ntp.oncore.0
+                if ((fd=fopen(device, "r"))) {
+                        break;
+                }
+                snprintf(device, sizeof(device), "%s/ntp.oncore%d",
+                         cp, instance->unit);  // try "ntp.oncore0"
+                if ((fd=fopen(device, "r"))) {
+                        break;
+                }
+                snprintf(device, sizeof(device), "%s/ntp.oncore", cp);
+                if ((fd=fopen(device, "r"))) {   // last try "ntp.oncore"
+                        break;
+                }
+        }
 
-	if (!fd) {	/* no inputfile, default to the works ... */
-		instance->init_type = 4;
-		return;
-	}
+        if (!fd) {      // no inputfile, default to the works ...
+                instance->init_type = 4;
+                return;
+        }
 
-	mode = mask = 0;
-	lat_flg = long_flg = ht_flg = 0;
-	while (fgets(line, 100, fd)) {
-		char *cpw;
+        mode = mask = 0;
+        lat_flg = long_flg = ht_flg = 0;
+        while (fgets(line, 100, fd)) {
+                char *cpw;
 
-		/* Remove comments */
-		if ((cpw = strchr(line, '#'))) {
-			*cpw = '\0';
-		}
+                // Remove comments
+                if ((cpw = strchr(line, '#'))) {
+                        *cpw = '\0';
+                }
 
-		/* Remove trailing space */
-		for (i = (int)strlen(line);
-		     i > 0 && isascii((unsigned char)line[i - 1]) && isspace((unsigned char)line[i - 1]);
-			) {
-			line[--i] = '\0';
-		}
+                // Remove trailing space
+                for (i = (int)strlen(line);
+                     i > 0 && isascii((unsigned char)line[i - 1]) && isspace((unsigned char)line[i - 1]);
+                        ) {
+                        line[--i] = '\0';
+                }
 
-		/* Remove leading space */
-		for (cc = line; *cc && isascii((unsigned char)*cc) && isspace((unsigned char)*cc); cc++) {
-			continue;
-		}
+                // Remove leading space
+                for (cc = line; *cc && isascii((unsigned char)*cc) && isspace((unsigned char)*cc); cc++) {
+                        continue;
+                }
 
-		/* Stop if nothing left */
-		if (!*cc) {
-			continue;
-		}
+                // Stop if nothing left
+                if (!*cc) {
+                        continue;
+                }
 
-		/* Uppercase the command and find the arg */
-		for (ca = cc; *ca; ca++) {
-			if (isascii((unsigned char)*ca)) {
-				if (islower((unsigned char)*ca)) {
-					*ca = toupper((unsigned char)*ca);
-				} else if (isspace((unsigned char)*ca) || (*ca == '=')) {
-					break;
-				}
-			}
-		}
+                // Uppercase the command and find the arg
+                for (ca = cc; *ca; ca++) {
+                        if (isascii((unsigned char)*ca)) {
+                                if (islower((unsigned char)*ca)) {
+                                        *ca = toupper((unsigned char)*ca);
+                                } else if (isspace((unsigned char)*ca) || (*ca == '=')) {
+                                        break;
+                                }
+                        }
+                }
 
-		/* Remove space (and possible =) leading the arg */
-		for (; *ca && isascii((unsigned char)*ca) && (isspace((unsigned char)*ca) || (*ca == '=')); ca++) {
-			continue;
-		}
+                // Remove space (and possible =) leading the arg
+                for (; *ca && isascii((unsigned char)*ca) && (isspace((unsigned char)*ca) || (*ca == '=')); ca++) {
+                        continue;
+                }
 
-		if (!strncmp(cc, "STATUS", (size_t) 6) || !strncmp(cc, "SHMEM", (size_t) 5)) {
-			instance->shmem_fname = estrdup(ca);
-			continue;
-		}
+                if (!strncmp(cc, "STATUS", (size_t) 6) || !strncmp(cc, "SHMEM", (size_t) 5)) {
+                        instance->shmem_fname = estrdup(ca);
+                        continue;
+                }
 
-		/* Uppercase argument as well */
-		for (cpw = ca; *cpw; cpw++) {
-			if (isascii((unsigned char)*cpw) && islower((unsigned char)*cpw)) {
-				*cpw = toupper((unsigned char)*cpw);
-			}
-		}
+                // Uppercase argument as well
+                for (cpw = ca; *cpw; cpw++) {
+                        if (isascii((unsigned char)*cpw) && islower((unsigned char)*cpw)) {
+                                *cpw = toupper((unsigned char)*cpw);
+                        }
+                }
 
-		if (!strncmp(cc, "LAT", (size_t) 3)) {
-			f1 = f2 = f3 = 0;
-			if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3)) {
+                if (!strncmp(cc, "LAT", (size_t) 3)) {
+                        f1 = f2 = f3 = 0;
+                        if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3)) {
                                 continue;
-			}
-			sign = 1;
-			if (f1 < 0) {
-				f1 = -f1;
-				sign = -1;
-			}
-			instance->ss_lat = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1)); /*milliseconds*/
-			lat_flg++;
-		} else if (!strncmp(cc, "LON", (size_t) 3)) {
-			f1 = f2 = f3 = 0;
-			if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3)) {
+                        }
+                        sign = 1;
+                        if (f1 < 0) {
+                                f1 = -f1;
+                                sign = -1;
+                        }
+                        instance->ss_lat = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1));  // milliseconds
+                        lat_flg++;
+                } else if (!strncmp(cc, "LON", (size_t) 3)) {
+                        f1 = f2 = f3 = 0;
+                        if ( 3 != sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3)) {
                                 continue;
-			}
-			sign = 1;
-			if (f1 < 0) {
-				f1 = -f1;
-				sign = -1;
-			}
-			instance->ss_long = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1)); /*milliseconds*/
-			long_flg++;
-		} else if (!strncmp(cc, "HT", (size_t) 2)) {
-			f1 = 0;
-			units[0] = '\0';
-			if ( 2 != sscanf(ca, "%lf %1s", &f1, units)) {
+                        }
+                        sign = 1;
+                        if (f1 < 0) {
+                                f1 = -f1;
+                                sign = -1;
+                        }
+                        instance->ss_long = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1));  // milliseconds
+                        long_flg++;
+                } else if (!strncmp(cc, "HT", (size_t) 2)) {
+                        f1 = 0;
+                        units[0] = '\0';
+                        if ( 2 != sscanf(ca, "%lf %1s", &f1, units)) {
                                 continue;
-			}
-			if (units[0] == 'F') {
-				f1 = 0.3048 * f1;
-			}
-			instance->ss_ht = 100 * f1;    /* cm */
-			ht_flg++;
-		} else if (!strncmp(cc, "DELAY", (size_t) 5)) {
-			f1 = 0;
-			units[0] = '\0';
-			if ( 2 != sscanf(ca, "%lf %1s", &f1, units)) {
+                        }
+                        if (units[0] == 'F') {
+                                f1 = 0.3048 * f1;
+                        }
+                        instance->ss_ht = 100 * f1;    // cm
+                        ht_flg++;
+                } else if (!strncmp(cc, "DELAY", (size_t) 5)) {
+                        f1 = 0;
+                        units[0] = '\0';
+                        if ( 2 != sscanf(ca, "%lf %1s", &f1, units)) {
                                 continue;
-			}
-			if (units[0] == 'N') {
-				;
-			} else if (units[0] == 'U') {
-				f1 = 1000 * f1;
-			} else if (units[0] == 'M') {
-				f1 = 1000000 * f1;
-			} else {
-				f1 = 1000000000 * f1;
-			}
-			if (f1 < 0 || f1 > 1.e9) {
-				f1 = 0;
-			}
-			if (f1 < 0 || f1 > 999999) {
-				oncore_log_f(instance, LOG_WARNING,
-					     "PPS Cable delay of %fns out of Range, ignored",
-					     f1);
-			} else {
-				instance->delay = f1;		/* delay in ns */
-			}
-		} else if (!strncmp(cc, "OFFSET", (size_t) 6)) {
-			f1 = 0;
-			units[0] = '\0';
-			if ( 2 != sscanf(ca, "%lf %1s", &f1, units)) {
+                        }
+                        if (units[0] == 'N') {
+                                ;
+                        } else if (units[0] == 'U') {
+                                f1 = 1000 * f1;
+                        } else if (units[0] == 'M') {
+                                f1 = 1000000 * f1;
+                        } else {
+                                f1 = 1000000000 * f1;
+                        }
+                        if (f1 < 0 || f1 > 1.e9) {
+                                f1 = 0;
+                        }
+                        if (f1 < 0 || f1 > 999999) {
+                                oncore_log_f(instance, LOG_WARNING,
+                                             "PPS Cable delay of %fns out of Range, ignored",
+                                             f1);
+                        } else {
+                                instance->delay = f1;           // delay in ns
+                        }
+                } else if (!strncmp(cc, "OFFSET", (size_t) 6)) {
+                        f1 = 0;
+                        units[0] = '\0';
+                        if ( 2 != sscanf(ca, "%lf %1s", &f1, units)) {
                                 continue;
-			}
-			if (units[0] == 'N') {
-				;
-			} else if (units[0] == 'U') {
-				f1 = 1000 * f1;
-			} else if (units[0] == 'M') {
-				f1 = 1000000 * f1;
-			} else {
-				f1 = 1000000000 * f1;
-			}
-			if (f1 < 0 || f1 > 1.e9) {
-				f1 = 0;
-			}
-			if (f1 < 0 || f1 > 999999999.) {
-				oncore_log_f(instance, LOG_WARNING,
-					     "PPS Offset of %fns out of Range, ignored",
-					     f1);
-			} else {
-				instance->offset = f1;		/* offset in ns */
-			}
-		} else if (!strncmp(cc, "MODE", (size_t) 4)) {
-			if ( 1 != sscanf(ca, "%d", &mode)) {
+                        }
+                        if (units[0] == 'N') {
+                                ;
+                        } else if (units[0] == 'U') {
+                                f1 = 1000 * f1;
+                        } else if (units[0] == 'M') {
+                                f1 = 1000000 * f1;
+                        } else {
+                                f1 = 1000000000 * f1;
+                        }
+                        if (f1 < 0 || f1 > 1.e9) {
+                                f1 = 0;
+                        }
+                        if (f1 < 0 || f1 > 999999999.) {
+                                oncore_log_f(instance, LOG_WARNING,
+                                             "PPS Offset of %fns out of Range, ignored",
+                                             f1);
+                        } else {
+                                instance->offset = f1;          // offset in ns
+                        }
+                } else if (!strncmp(cc, "MODE", (size_t) 4)) {
+                        if ( 1 != sscanf(ca, "%d", &mode)) {
                                 continue;
-			}
-			if (mode < 0 || mode > 4) {
-				mode = 4;
-			}
-		} else if (!strncmp(cc, "ASSERT", (size_t) 6)) {
-			instance->assert = 1;
-		} else if (!strncmp(cc, "CLEAR", (size_t) 5)) {
-			instance->assert = 0;
-		} else if (!strncmp(cc, "HARDPPS", (size_t) 7)) {
-			instance->hardpps = 1;
-		} else if (!strncmp(cc, "POSN2D", (size_t) 6)) {
-			instance->shmem_Posn = 2;
-		} else if (!strncmp(cc, "POSN3D", (size_t) 6)) {
-			instance->shmem_Posn = 3;
-		} else if (!strncmp(cc, "CHAN", (size_t) 4)) {
-			if ( 1 != sscanf(ca, "%d", &i)) {
+                        }
+                        if (mode < 0 || mode > 4) {
+                                mode = 4;
+                        }
+                } else if (!strncmp(cc, "ASSERT", (size_t) 6)) {
+                        instance->assert = 1;
+                } else if (!strncmp(cc, "CLEAR", (size_t) 5)) {
+                        instance->assert = 0;
+                } else if (!strncmp(cc, "HARDPPS", (size_t) 7)) {
+                        instance->hardpps = 1;
+                } else if (!strncmp(cc, "POSN2D", (size_t) 6)) {
+                        instance->shmem_Posn = 2;
+                } else if (!strncmp(cc, "POSN3D", (size_t) 6)) {
+                        instance->shmem_Posn = 3;
+                } else if (!strncmp(cc, "CHAN", (size_t) 4)) {
+                        if ( 1 != sscanf(ca, "%d", &i)) {
                                 continue;
-			}
-			if ((i == 6) || (i == 8) || (i == 12))
-				instance->chan_in = i;
-		} else if (!strncmp(cc, "TRAIM", (size_t) 5)) {
-			instance->traim_in = 1; 	/* so TRAIM alone is YES */
-			if (!strcmp(ca, "NO") || !strcmp(ca, "OFF"))    /* Yes/No, On/Off */
-				instance->traim_in = 0;
-		} else if (!strncmp(cc, "MASK", (size_t) 4)) {
-			if ( 1 != sscanf(ca, "%d", &mask) ) {
+                        }
+                        if ((i == 6) || (i == 8) || (i == 12))
+                                instance->chan_in = i;
+                } else if (!strncmp(cc, "TRAIM", (size_t) 5)) {
+                        instance->traim_in = 1;         // so TRAIM alone is YES
+                        if (!strcmp(ca, "NO") || !strcmp(ca, "OFF"))    // Yes/No, On/Off
+                                instance->traim_in = 0;
+                } else if (!strncmp(cc, "MASK", (size_t) 4)) {
+                        if ( 1 != sscanf(ca, "%d", &mask) ) {
                                 continue;
-			}
-			if (mask > -1 && mask < 90)
-				instance->Ag = mask;			/* Satellite mask angle */
-		} else if (!strncmp(cc,"PPSCONTROL",10)) {              /* pps control M12 only */
-			if (!strcmp(ca,"ON") || !strcmp(ca, "CONTINUOUS")) {
-				instance->pps_control = 1;		/* PPS always on */
-			} else if (!strcmp(ca,"SATELLITE")) {
-				instance->pps_control = 2;		/* PPS on when satellite is available */
-			} else if (!strcmp(ca,"TRAIM")) {
-				instance->pps_control = 3;		/* PPS on when TRAIM status is OK */
-			} else {
-				oncore_log_f(instance, LOG_WARNING,
-				             "Unknown value \"%s\" for PPSCONTROL, ignored",
-					     cc);
-			}
-		}
-	}
-	fclose(fd);
+                        }
+                        if (mask > -1 && mask < 90)
+                                instance->Ag = mask;                    // Satellite mask angle
+                } else if (!strncmp(cc,"PPSCONTROL",10)) {              // pps control M12 only
+                        if (!strcmp(ca,"ON") || !strcmp(ca, "CONTINUOUS")) {
+                                instance->pps_control = 1;              // PPS always on
+                        } else if (!strcmp(ca,"SATELLITE")) {
+                                instance->pps_control = 2;              // PPS on when satellite is available
+                        } else if (!strcmp(ca,"TRAIM")) {
+                                instance->pps_control = 3;              // PPS on when TRAIM status is OK
+                        } else {
+                                oncore_log_f(instance, LOG_WARNING,
+                                             "Unknown value \"%s\" for PPSCONTROL, ignored",
+                                             cc);
+                        }
+                }
+        }
+        fclose(fd);
 
-	/*
-	 *    OK, have read all of data file, and extracted the good stuff.
-	 *    If lat/long/ht specified they ALL must be specified for mode = (1,3).
-	 */
+        /*
+         *    OK, have read all of data file, and extracted the good stuff.
+         *    If lat/long/ht specified they ALL must be specified for mode = (1,3).
+         */
 
-	instance->posn_set = 1;
-	if (!( lat_flg && long_flg && ht_flg )) {
-		oncore_log_f(instance, LOG_WARNING,
-			     "ONCORE: incomplete data on %s", device);
-		instance->posn_set = 0;
-		if (mode == 1 || mode == 3) {
-			oncore_log_f(instance, LOG_WARNING,
-				     "Input Mode = %d, but no/incomplete position, mode set to %d",
-				     mode, mode+1);
-			mode++;
-		}
-	}
-	instance->init_type = mode;
+        instance->posn_set = 1;
+        if (!( lat_flg && long_flg && ht_flg )) {
+                oncore_log_f(instance, LOG_WARNING,
+                             "ONCORE: incomplete data on %s", device);
+                instance->posn_set = 0;
+                if (mode == 1 || mode == 3) {
+                        oncore_log_f(instance, LOG_WARNING,
+                                     "Input Mode = %d, but no/incomplete position, mode set to %d",
+                                     mode, mode+1);
+                        mode++;
+                }
+        }
+        instance->init_type = mode;
 
-	oncore_log_f(instance, LOG_INFO, "Input mode = %d", mode);
+        oncore_log_f(instance, LOG_INFO, "Input mode = %d", mode);
 }
 
 
@@ -1452,48 +1452,48 @@ oncore_read_config(
 
 static void
 oncore_receive(
-	struct recvbuf *rbufp
-	)
+        struct recvbuf *rbufp
+        )
 {
-	size_t i;
-	uint8_t *p;
-	struct peer *peer;
-	struct instance *instance;
+        size_t i;
+        uint8_t *p;
+        struct peer *peer;
+        struct instance *instance;
 
-	peer = rbufp->recv_peer;
-	instance = peer->procptr->unitptr;
-	p = (uint8_t *) &rbufp->recv_buffer;
+        peer = rbufp->recv_peer;
+        instance = peer->procptr->unitptr;
+        p = (uint8_t *) &rbufp->recv_buffer;
 
 #ifdef ONCORE_VERBOSE_RECEIVE
-	if (debug > 4) { /* SPECIAL DEBUG */
-		int i;
-		char	Msg[120], Msg2[10];
+        if (debug > 4) {  // SPECIAL DEBUG
+                int i;
+                char    Msg[120], Msg2[10];
 
-		oncore_log_f(instance, LOG_DEBUG,
-			     ">>> %d bytes available",
-			     rbufp->recv_length);
-		strlcpy(Msg, ">>>", sizeof(Msg));
-		for (i = 0; i < rbufp->recv_length; i++) {
-			snprintf(Msg2, sizeof(Msg2), "%02x ", p[i]);
-			strlcat(Msg, Msg2, sizeof(Msg));
-		}
-		oncore_log(instance, LOG_DEBUG, Msg);
+                oncore_log_f(instance, LOG_DEBUG,
+                             ">>> %d bytes available",
+                             rbufp->recv_length);
+                strlcpy(Msg, ">>>", sizeof(Msg));
+                for (i = 0; i < rbufp->recv_length; i++) {
+                        snprintf(Msg2, sizeof(Msg2), "%02x ", p[i]);
+                        strlcat(Msg, Msg2, sizeof(Msg));
+                }
+                oncore_log(instance, LOG_DEBUG, Msg);
 
-		strlcpy(Msg, ">>>", sizeof(Msg));
-		for (i = 0; i < rbufp->recv_length; i++) {
-			snprintf(Msg2, sizeof(Msg2), "%03o ", p[i]);
-			strlcat(Msg, Msg2, sizeof(Msg));
-		}
-		oncore_log(instance, LOG_DEBUG, Msg);
-	}
+                strlcpy(Msg, ">>>", sizeof(Msg));
+                for (i = 0; i < rbufp->recv_length; i++) {
+                        snprintf(Msg2, sizeof(Msg2), "%03o ", p[i]);
+                        strlcat(Msg, Msg2, sizeof(Msg));
+                }
+                oncore_log(instance, LOG_DEBUG, Msg);
+        }
 #endif
 
-	i = rbufp->recv_length;
-	if (rcvbuf+rcvptr+i > &rcvbuf[sizeof(rcvbuf)-1])
-		i = sizeof(rcvbuf) - rcvptr;	/* and some char will be lost */
-	memcpy(rcvbuf+rcvptr, p, i);
-	rcvptr += i;
-	oncore_consume(instance);
+        i = rbufp->recv_length;
+        if (rcvbuf+rcvptr+i > &rcvbuf[sizeof(rcvbuf)-1])
+                i = sizeof(rcvbuf) - rcvptr;    // and some char will be lost
+        memcpy(rcvbuf+rcvptr, p, i);
+        rcvptr += i;
+        oncore_consume(instance);
 }
 
 
@@ -1504,401 +1504,404 @@ oncore_receive(
 
 static void
 oncore_consume(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	unsigned i, m, l;
+        unsigned i, m, l;
 
-	while (rcvptr >= 7) {
-		if (rcvbuf[0] != '@' || rcvbuf[1] != '@') {
-			/* We're not in sync, lets try to get there */
-			for (i=1; i < rcvptr-1; i++) {
-				if (rcvbuf[i] == '@' && rcvbuf[i+1] == '@')
-					break;
-			}
+        while (rcvptr >= 7) {
+                if (rcvbuf[0] != '@' || rcvbuf[1] != '@') {
+                        // We're not in sync, lets try to get there
+                        for (i=1; i < rcvptr-1; i++) {
+                                if (rcvbuf[i] == '@' && rcvbuf[i+1] == '@')
+                                        break;
+                        }
 #ifdef ONCORE_VERBOSE_CONSUME
-			if (debug > 4) /* SPECIAL DEBUG */
-				oncore_log_f(instance, LOG_DEBUG,
-					     ">>> skipping %d chars",
-					     i);
+                        if (debug > 4)  // SPECIAL DEBUG
+                                oncore_log_f(instance, LOG_DEBUG,
+                                             ">>> skipping %d chars",
+                                             i);
 #endif
-			if (i != rcvptr)
-				memcpy(rcvbuf, rcvbuf+i, (size_t)(rcvptr-i));
-			rcvptr -= i;
-			continue;
-		}
+                        if (i != rcvptr)
+                                memcpy(rcvbuf, rcvbuf+i, (size_t)(rcvptr-i));
+                        rcvptr -= i;
+                        continue;
+                }
 
-		/* Ok, we have a header now */
-		l = sizeof(oncore_messages)/sizeof(oncore_messages[0]) -1;
-		for(m = 0; m < l; m++) {
-			if (!strncmp(oncore_messages[m].flag, (char *)(rcvbuf+2), (size_t) 2))
-				break;
-		}
-		if (m == l) {
+                // Ok, we have a header now
+                l = sizeof(oncore_messages)/sizeof(oncore_messages[0]) -1;
+                for(m = 0; m < l; m++) {
+                        if (!strncmp(oncore_messages[m].flag, (char *)(rcvbuf+2), (size_t) 2))
+                                break;
+                }
+                if (m == l) {
 #ifdef ONCORE_VERBOSE_CONSUME
-			if (debug > 4) /* SPECIAL DEBUG */
-				oncore_log_f(instance, LOG_DEBUG,
-					     ">>> Unknown MSG, skipping 4 (%c%c)",
-					     rcvbuf[2], rcvbuf[3]);
+                        if (debug > 4)  // SPECIAL DEBUG
+                                oncore_log_f(instance, LOG_DEBUG,
+                                             ">>> Unknown MSG, skipping 4 (%c%c)",
+                                             rcvbuf[2], rcvbuf[3]);
 #endif
-			memcpy(rcvbuf, rcvbuf+4, (size_t) 4);
-			rcvptr -= 4;
-			continue;
-		}
+                        memcpy(rcvbuf, rcvbuf+4, (size_t) 4);
+                        rcvptr -= 4;
+                        continue;
+                }
 
-		l = (unsigned int)oncore_messages[m].len;
+                l = (unsigned int)oncore_messages[m].len;
 #ifdef ONCORE_VERBOSE_CONSUME
-		if (debug > 3) /* SPECIAL DEBUG */
-			oncore_log_f(instance, LOG_DEBUG,
-				     "GOT: %c%c  %d of %d entry %d",
-				     instance->unit, rcvbuf[2],
-				     rcvbuf[3], rcvptr, l, m);
+                if (debug > 3)  // SPECIAL DEBUG
+                        oncore_log_f(instance, LOG_DEBUG,
+                                     "GOT: %c%c  %d of %d entry %d",
+                                     instance->unit, rcvbuf[2],
+                                     rcvbuf[3], rcvptr, l, m);
 #endif
-		/* Got the entire message ? */
+                // Got the entire message ?
 
-		if (rcvptr < l) {
-			return;
-		}
+                if (rcvptr < l) {
+                        return;
+                }
 
-		/* are we at the end of message? should be <Cksum><CR><LF> */
+                // are we at the end of message? should be <Cksum><CR><LF>
 
-		if (rcvbuf[l-2] != '\r' || rcvbuf[l-1] != '\n') {
+                if (rcvbuf[l-2] != '\r' || rcvbuf[l-1] != '\n') {
 #ifdef ONCORE_VERBOSE_CONSUME
-			if (debug) /* SPECIAL DEBUG */
-				oncore_log(instance, LOG_DEBUG, "NO <CR><LF> at end of message");
+                        if (debug)  // SPECIAL DEBUG
+                                oncore_log(instance, LOG_DEBUG, "NO <CR><LF> at end of message");
 #endif
-		} else {	/* check the CheckSum */
-			if (oncore_checksum_ok(rcvbuf, (int)l)) {
-				if (instance->shmem != NULL) {
-					instance->shmem[oncore_messages[m].shmem + 2]++;
-					memcpy(instance->shmem + oncore_messages[m].shmem + 3,
-					    rcvbuf, (size_t) l);
-				}
-				oncore_msg_any(instance, rcvbuf,
+                } else {        // check the CheckSum
+                        if (oncore_checksum_ok(rcvbuf, (int)l)) {
+                                if (instance->shmem != NULL) {
+                                        instance->shmem[oncore_messages[m].shmem + 2]++;
+                                        memcpy(instance->shmem + oncore_messages[m].shmem + 3,
+                                            rcvbuf, (size_t) l);
+                                }
+                                oncore_msg_any(instance, rcvbuf,
                                                (size_t)(l-3), (int)m);
-				if (oncore_messages[m].handler)
-					oncore_messages[m].handler(instance, rcvbuf, (size_t) (l-3));
-			}
+                                if (oncore_messages[m].handler)
+                                        oncore_messages[m].handler(instance, rcvbuf, (size_t) (l-3));
+                        }
 #ifdef ONCORE_VERBOSE_CONSUME
-			else if (debug) { /* SPECIAL DEBUG */
-				char	Msg[120], Msg2[10];
+                        else if (debug) {  // SPECIAL DEBUG
+                                char    Msg[120], Msg2[10];
 
-				oncore_log(instance, LOG_ERR, "Checksum mismatch!");
-				snprintf(Msg, sizeof(Msg), "@@%c%c ", rcvbuf[2], rcvbuf[3]);
-				for (i = 4; i < l; i++) {
-					snprintf(Msg2, sizeof(Msg2),
-						 "%03o ", rcvbuf[i]);
-					strlcat(Msg, Msg2, sizeof(Msg));
-				}
-				oncore_log(instance, LOG_DEBUG, Msg);
-			}
+                                oncore_log(instance, LOG_ERR, "Checksum mismatch!");
+                                snprintf(Msg, sizeof(Msg), "@@%c%c ", rcvbuf[2], rcvbuf[3]);
+                                for (i = 4; i < l; i++) {
+                                        snprintf(Msg2, sizeof(Msg2),
+                                                 "%03o ", rcvbuf[i]);
+                                        strlcat(Msg, Msg2, sizeof(Msg));
+                                }
+                                oncore_log(instance, LOG_DEBUG, Msg);
+                        }
 #endif
-		}
+                }
 
-		if (l != rcvptr)
-			memcpy(rcvbuf, rcvbuf+l, (size_t) (rcvptr-l));
-		rcvptr -= l;
-	}
+                if (l != rcvptr)
+                        memcpy(rcvbuf, rcvbuf+l, (size_t) (rcvptr-l));
+                rcvptr -= l;
+        }
 }
 
 
 
 static void
 oncore_get_timestamp(
-	struct instance *instance,
-	long dt1,	/* tick offset THIS time step */
-	long dt2	/* tick offset NEXT time step */
-	)
+        struct instance *instance,
+        long dt1,       // tick offset THIS time step
+        long dt2        // tick offset NEXT time step
+        )
 {
-	int	Rsm;
-	unsigned long	j;
-	l_fp ts, ts_tmp;
-	double dmy;
-	struct timespec *tsp = 0;
+        int     Rsm;
+        unsigned long   j;
+        l_fp ts, ts_tmp;
+        double dmy;
+        struct timespec *tsp = 0;
 
-	UNUSED_ARG(dt1);
+        UNUSED_ARG(dt1);
 
-	int	current_mode;
-	pps_params_t current_params;
-	struct timespec timeout;
-	struct peer *peer;
-	pps_info_t pps_i;
-	char Msg[160];
+        int     current_mode;
+        pps_params_t current_params;
+        struct timespec timeout;
+        struct peer *peer;
+        pps_info_t pps_i;
+        char Msg[160];
 
-	peer = instance->peer;
-	strlcpy(Msg, "bug-coverity-uninitialized", sizeof(Msg));
+        peer = instance->peer;
+        strlcpy(Msg, "bug-coverity-uninitialized", sizeof(Msg));
 
 #if 1
-	/* If we are in SiteSurvey mode, then we are in 3D mode, and we fall through.
-	 * If we have Finished the SiteSurvey, then we fall through for the 14/15
-	 *  times we get here in 0D mode (the 1/15 is in 3D for SHMEM).
-	 * This gives good time, which gets better when the SS is done.
-	 */
+        /* If we are in SiteSurvey mode, then we are in 3D mode, and we fall through.
+         * If we have Finished the SiteSurvey, then we fall through for the 14/15
+         *  times we get here in 0D mode (the 1/15 is in 3D for SHMEM).
+         * This gives good time, which gets better when the SS is done.
+         */
 
-	if ((instance->site_survey == ONCORE_SS_DONE) && (instance->mode != MODE_0D)) {
+        if ((instance->site_survey == ONCORE_SS_DONE) && (instance->mode != MODE_0D)) {
 #else
-	/* old check, only fall through for SS_DONE and 0D mode, 2h45m wait for ticks */
+        // old check, only fall through for SS_DONE and 0D mode, 2h45m wait for ticks
 
-	if ((instance->site_survey != ONCORE_SS_DONE) || (instance->mode != MODE_0D)) {
+        if ((instance->site_survey != ONCORE_SS_DONE) || (instance->mode != MODE_0D)) {
 #endif
-		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
-		return;
-	}
+                peer->cfg.flags &= ~FLAG_PPS;   // problem - clear PPS FLAG
+                return;
+        }
 
-	/* Don't do anything without an almanac to define the GPS->UTC delta */
+        // Don't do anything without an almanac to define the GPS->UTC delta
 
-	if (instance->rsm.bad_almanac) {
-		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
-		return;
-	}
+        if (instance->rsm.bad_almanac) {
+                peer->cfg.flags &= ~FLAG_PPS;   // problem - clear PPS FLAG
+                return;
+        }
 
-	/* Once the Almanac is valid, the M12+T does not produce valid UTC
-	 * immediately.
-	 * Wait for UTC offset decode valid, then wait one message more
-	 * so we are not off by 13 seconds after  reset.
-	 */
+        /* Once the Almanac is valid, the M12+T does not produce valid UTC
+         * immediately.
+         * Wait for UTC offset decode valid, then wait one message more
+         * so we are not off by 13 seconds after  reset.
+         */
 
-	if (instance->count5) {
-		instance->count5--;
-		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
-		return;
-	}
+        if (instance->count5) {
+                instance->count5--;
+                peer->cfg.flags &= ~FLAG_PPS;   // problem - clear PPS FLAG
+                return;
+        }
 
-	j = instance->ev_serial;
-	timeout.tv_sec = 0;
-	timeout.tv_nsec = 0;
-	if (time_pps_fetch(instance->pps_h, PPS_TSFMT_TSPEC, &pps_i,
-	    &timeout) < 0) {
-		oncore_log_f(instance, LOG_ERR,
-			     "time_pps_fetch failed %s", strerror(errno));
-		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
-		return;
-	}
+        j = instance->ev_serial;
+        timeout.tv_sec = 0;
+        timeout.tv_nsec = 0;
+        if (time_pps_fetch(instance->pps_h, PPS_TSFMT_TSPEC, &pps_i,
+            &timeout) < 0) {
+                oncore_log_f(instance, LOG_ERR,
+                             "time_pps_fetch failed %s", strerror(errno));
+                peer->cfg.flags &= ~FLAG_PPS;   // problem - clear PPS FLAG
+                return;
+        }
 
-	if (instance->assert) {
-		tsp = &pps_i.assert_timestamp;
+        if (instance->assert) {
+                tsp = &pps_i.assert_timestamp;
 
 #ifdef ONCORE_VERBOSE_GET_TIMESTAMP
-		if (debug > 2) { /* SPECIAL DEBUG */
-			unsigned long i;
+                if (debug > 2) {  // SPECIAL DEBUG
+                        unsigned long i;
 
-			i = (unsigned long) pps_i.assert_sequence;
-			oncore_log_f(instance, LOG_DEBUG,
-				     "serial/j (%lu, %lu) %ld.%09ld", i,
-				     j, (long)tsp->tv_sec,
-				     tsp->tv_nsec);
-		}
+                        i = (unsigned long) pps_i.assert_sequence;
+                        oncore_log_f(instance, LOG_DEBUG,
+                                     "serial/j (%lu, %lu) %ld.%09ld", i,
+                                     j, (long)tsp->tv_sec,
+                                     tsp->tv_nsec);
+                }
 #endif
 
-		if (pps_i.assert_sequence == j) {
-			oncore_log(instance, LOG_NOTICE, "ONCORE: oncore_get_timestamp, error serial pps");
-			peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
-			return;
-		}
+                if (pps_i.assert_sequence == j) {
+                        oncore_log(instance, LOG_NOTICE, "ONCORE: oncore_get_timestamp, error serial pps");
+                        peer->cfg.flags &= ~FLAG_PPS;   // problem - clear PPS FLAG
+                        return;
+                }
 
-		instance->ev_serial = pps_i.assert_sequence;
-	} else {
-		tsp = &pps_i.clear_timestamp;
+                instance->ev_serial = pps_i.assert_sequence;
+        } else {
+                tsp = &pps_i.clear_timestamp;
 
 #if 0
-		if (debug > 2) { /* SPECIAL DEBUG */
-			unsigned long i;
+                if (debug > 2) {  // SPECIAL DEBUG
+                        unsigned long i;
 
-			i = (unsigned long) pps_i.clear_sequence;
-			oncore_log_f(instance, LOG_DEBUG,
-				     "serial/j (%lu, %lu) %ld.%09ld", i,
-				     j, (long)tsp->tv_sec,
-				     tsp->tv_nsec);
-		}
+                        i = (unsigned long) pps_i.clear_sequence;
+                        oncore_log_f(instance, LOG_DEBUG,
+                                     "serial/j (%lu, %lu) %ld.%09ld", i,
+                                     j, (long)tsp->tv_sec,
+                                     tsp->tv_nsec);
+                }
 #endif
 
-		if (pps_i.clear_sequence == j) {
-			oncore_log(instance, LOG_ERR, "oncore_get_timestamp, error serial pps");
-			peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
-			return;
-		}
-		instance->ev_serial = pps_i.clear_sequence;
-	}
+                if (pps_i.clear_sequence == j) {
+                        oncore_log(instance, LOG_ERR, "oncore_get_timestamp, error serial pps");
+                        peer->cfg.flags &= ~FLAG_PPS;   // problem - clear PPS FLAG
+                        return;
+                }
+                instance->ev_serial = pps_i.clear_sequence;
+        }
 
-	/* add in saw_tooth and offset, these will be ZERO if no TRAIM */
-	/* they will be IGNORED if the PPSAPI can't do PPS_OFFSET/ASSERT/CLEAR */
-	/* we just try to add them in and don't test for that here */
+        // add in saw_tooth and offset, these will be ZERO if no TRAIM
+        // they will be IGNORED if the PPSAPI can't do PPS_OFFSET/ASSERT/CLEAR
+        // we just try to add them in and don't test for that here
 
-	/* saw_tooth not really necessary if using TIMEVAL */
-	/* since its only precise to us, but do it anyway. */
+        // saw_tooth not really necessary if using TIMEVAL
+        // since its only precise to us, but do it anyway.
 
-	/* offset in ns, and is positive (late), we subtract */
-	/* to put the PPS time transition back where it belongs */
+        // offset in ns, and is positive (late), we subtract
+        // to put the PPS time transition back where it belongs
 
-	/* must hand the offset for the NEXT sec off to the Kernel to do */
-	/* the addition, so that the Kernel PLL sees the offset too */
+        // must hand the offset for the NEXT sec off to the Kernel to do
+        // the addition, so that the Kernel PLL sees the offset too
 
-	if (instance->assert)
-		instance->pps_p.assert_offset.tv_nsec = -dt2;
-	else
-		instance->pps_p.clear_offset.tv_nsec  = -dt2;
+        if (instance->assert)
+                instance->pps_p.assert_offset.tv_nsec = -dt2;
+        else
+                instance->pps_p.clear_offset.tv_nsec  = -dt2;
 
-	/* The following code is necessary, and not just a time_pps_setparams,
-	 * using the saved instance->pps_p, since some other process on the
-	 * machine may have diddled with the mode bits (say adding something
-	 * that it needs).  We take what is there and ADD what we need.
-	 * [[ The results from the time_pps_getcap is unlikely to change so
-	 *    we could probably just save it, but I choose to do the call ]]
-	 * Unfortunately, there is only ONE set of mode bits in the kernel per
-	 * interface, and not one set for each open handle.
-	 *
-	 * There is still a race condition here where we might mess up someone
-	 * elses mode, but if he is being careful too, he should survive.
-	 */
+        /* The following code is necessary, and not just a time_pps_setparams,
+         * using the saved instance->pps_p, since some other process on the
+         * machine may have diddled with the mode bits (say adding something
+         * that it needs).  We take what is there and ADD what we need.
+         * [[ The results from the time_pps_getcap is unlikely to change so
+         *    we could probably just save it, but I choose to do the call ]]
+         * Unfortunately, there is only ONE set of mode bits in the kernel per
+         * interface, and not one set for each open handle.
+         *
+         * There is still a race condition here where we might mess up someone
+         * elses mode, but if he is being careful too, he should survive.
+         */
 
-	if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
-		oncore_log_f(instance, LOG_ERR,
-			     "time_pps_getcap failed: %s", strerror(errno));
-		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
-		return;
-	}
+        if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
+                oncore_log_f(instance, LOG_ERR,
+                             "time_pps_getcap failed: %s", strerror(errno));
+                peer->cfg.flags &= ~FLAG_PPS;   // problem - clear PPS FLAG
+                return;
+        }
 
-	if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
-		oncore_log_f(instance, LOG_ERR,
-			     "time_pps_getparams failed: %s", strerror(errno));
-		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
-		return;
-	}
+        if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
+                oncore_log_f(instance, LOG_ERR,
+                             "time_pps_getparams failed: %s", strerror(errno));
+                peer->cfg.flags &= ~FLAG_PPS;   // problem - clear PPS FLAG
+                return;
+        }
 
-		/* or current and mine */
-	current_params.mode |= instance->pps_p.mode;
-		/* but only set what's legal */
-	current_params.mode &= current_mode;
+                // or current and mine
+        current_params.mode |= instance->pps_p.mode;
+                // but only set what's legal
+        current_params.mode &= current_mode;
 
-	current_params.assert_offset.tv_sec = 0;
-	current_params.assert_offset.tv_nsec = -dt2;
-	current_params.clear_offset.tv_sec = 0;
-	current_params.clear_offset.tv_nsec = -dt2;
+        current_params.assert_offset.tv_sec = 0;
+        current_params.assert_offset.tv_nsec = -dt2;
+        current_params.clear_offset.tv_sec = 0;
+        current_params.clear_offset.tv_nsec = -dt2;
 
-	if (time_pps_setparams(instance->pps_h, &current_params))
-		oncore_log(instance, LOG_ERR, "ONCORE: Error doing time_pps_setparams");
+        if (time_pps_setparams(instance->pps_h, &current_params))
+                oncore_log(instance, LOG_ERR, "ONCORE: Error doing time_pps_setparams");
 
-	/* have time from UNIX origin, convert to NTP origin. */
-	ts = tspec_stamp_to_lfp(*tsp);
-	instance->pp->lastrec = ts;
+        // have time from UNIX origin, convert to NTP origin.
+        ts = tspec_stamp_to_lfp(*tsp);
+        instance->pp->lastrec = ts;
 
-	/* print out information about this timestamp (long line) */
+        // print out information about this timestamp (long line)
 
-	ts_tmp = ts;
-	setlfpuint(ts_tmp, 0);	/* zero integer part */
-	dmy = lfptod(ts_tmp);	/* convert fractional part to a double */
-	j = 1.0e9*dmy;		/* then to integer ns */
+        ts_tmp = ts;
+        setlfpuint(ts_tmp, 0);  // zero integer part
+        dmy = lfptod(ts_tmp);   // convert fractional part to a double
+        j = 1.0e9*dmy;          // then to integer ns
 
-	Rsm = 0;
-	if (instance->chan == 6)
-		Rsm = instance->BEHa[64];
-	else if (instance->chan == 8)
-		Rsm = instance->BEHa[72];
-	else if (instance->chan == 12)
-		Rsm = ((instance->BEHa[129]<<8) | instance->BEHa[130]);
+        Rsm = 0;
+        if (instance->chan == 6)
+                Rsm = instance->BEHa[64];
+        else if (instance->chan == 8)
+                Rsm = instance->BEHa[72];
+        else if (instance->chan == 12)
+                Rsm = ((instance->BEHa[129]<<8) | instance->BEHa[130]);
 
-	if (instance->chan == 6 || instance->chan == 8) {
-		char	f1[5], f2[5], f3[8], f4[5];
-		if (instance->traim) {
-			snprintf(f1, sizeof(f1), "%d",
-				 instance->BEHn[21]);
-			snprintf(f2, sizeof(f2), "%d",
-				 instance->BEHn[22]);
-			snprintf(f3, sizeof(f3), "%2d",
-				 instance->BEHn[23] * 256 +
-				     instance->BEHn[24]);
-			snprintf(f4, sizeof(f4), "%3d",
-				 (int8_t)instance->BEHn[25]);
-		} else {
-			strlcpy(f1, "x", sizeof(f1));
-			strlcpy(f2, "x", sizeof(f2));
-			strlcpy(f3, "xx", sizeof(f3));
-			strlcpy(f4, "xxx", sizeof(f4));
-		}
-		snprintf(Msg, sizeof(Msg),	/* MAX length 128, currently at 127 */
+        if (instance->chan == 6 || instance->chan == 8) {
+                char    f1[5], f2[5], f3[8], f4[5];
+                if (instance->traim) {
+                        snprintf(f1, sizeof(f1), "%d",
+                                 instance->BEHn[21]);
+                        snprintf(f2, sizeof(f2), "%d",
+                                 instance->BEHn[22]);
+                        snprintf(f3, sizeof(f3), "%2d",
+                                 instance->BEHn[23] * 256 +
+                                     instance->BEHn[24]);
+                        snprintf(f4, sizeof(f4), "%3d",
+                                 (int8_t)instance->BEHn[25]);
+                } else {
+                        strlcpy(f1, "x", sizeof(f1));
+                        strlcpy(f2, "x", sizeof(f2));
+                        strlcpy(f3, "xx", sizeof(f3));
+                        strlcpy(f4, "xxx", sizeof(f4));
+                }
+                // MAX length 128, currently at 127
+                snprintf(Msg, sizeof(Msg),
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d",
-		    lfpuint(ts), j,
-		    instance->pp->year, instance->pp->yday,
-		    instance->pp->hour, instance->pp->minute,
+                    lfpuint(ts), j,
+                    instance->pp->year, instance->pp->yday,
+                    instance->pp->hour, instance->pp->minute,
                     instance->pp->second,
-		    (long) tsp->tv_sec % 60,
-		    (unsigned)Rsm,
+                    (long) tsp->tv_sec % 60,
+                    (unsigned)Rsm,
                     0.1*(256*instance->BEHa[35]+instance->BEHa[36]),
-		    /*rsat	dop */
-		    instance->BEHa[38], instance->BEHa[39], instance->traim,
+                    // rsat      dop
+                    instance->BEHa[38], instance->BEHa[39], instance->traim,
                     f1, f2,
-		    /*	nsat visible,	  nsat tracked,     traim,traim,traim */
-		    f3, f4,
-		    /* sigma neg-sawtooth */
-	  /*sat*/   instance->BEHa[41], instance->BEHa[45],
+                    // nsat visible,     nsat tracked,     traim,traim,traim
+                    f3, f4,
+                    // sigma neg-sawtooth
+                    instance->BEHa[41], instance->BEHa[45],
                     instance->BEHa[49], instance->BEHa[53],
-		    instance->BEHa[57], instance->BEHa[61],
+                    instance->BEHa[57], instance->BEHa[61],
                     instance->BEHa[65], instance->BEHa[69]
-		    );		/* will be 0 for 6 chan */
-	} else if (instance->chan == 12) {
-		char	f1[5], f2[5], f3[8], f4[5];
-		if (instance->traim) {
-			snprintf(f1, sizeof(f1), "%d",
-				 instance->BEHn[6]);
-			snprintf(f2, sizeof(f2), "%d",
-				 instance->BEHn[7]);
-			snprintf(f3, sizeof(f3), "%d",
-				 instance->BEHn[12] * 256 +
-				     instance->BEHn[13]);
-			snprintf(f4, sizeof(f4), "%3d",
-				 (int8_t)instance->BEHn[14]);
-		} else {
-			strlcpy(f1, "x", sizeof(f1));
-			strlcpy(f2, "x", sizeof(f2));
-			strlcpy(f3, "xx", sizeof(f3));
-			strlcpy(f4, "xxx", sizeof(f4));
-		}
-		snprintf(Msg, sizeof(Msg),
- "%u.%09lu %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d%d%d%d%d",
-		    lfpuint(ts), j,
-		    instance->pp->year, instance->pp->yday,
-		    instance->pp->hour, instance->pp->minute,
+                    );          // will be 0 for 6 chan
+        } else if (instance->chan == 12) {
+                char    f1[5], f2[5], f3[8], f4[5];
+                if (instance->traim) {
+                        snprintf(f1, sizeof(f1), "%d",
+                                 instance->BEHn[6]);
+                        snprintf(f2, sizeof(f2), "%d",
+                                 instance->BEHn[7]);
+                        snprintf(f3, sizeof(f3), "%d",
+                                 instance->BEHn[12] * 256 +
+                                     instance->BEHn[13]);
+                        snprintf(f4, sizeof(f4), "%3d",
+                                 (int8_t)instance->BEHn[14]);
+                } else {
+                        strlcpy(f1, "x", sizeof(f1));
+                        strlcpy(f2, "x", sizeof(f2));
+                        strlcpy(f3, "xx", sizeof(f3));
+                        strlcpy(f4, "xxx", sizeof(f4));
+                }
+                snprintf(Msg, sizeof(Msg),
+                    "%u.%09lu %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f "
+                    "nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s "
+                    "sat %d%d%d%d%d%d%d%d%d%d%d%d",
+                    lfpuint(ts), j,
+                    instance->pp->year, instance->pp->yday,
+                    instance->pp->hour, instance->pp->minute,
                     instance->pp->second,
-		    (long) tsp->tv_sec % 60,
-		    (unsigned)Rsm,
+                    (long) tsp->tv_sec % 60,
+                    (unsigned)Rsm,
                     0.1*(256*instance->BEHa[53]+instance->BEHa[54]),
-		    /*rsat	dop */
-		    instance->BEHa[55], instance->BEHa[56],
+                    // rsat      dop
+                    instance->BEHa[55], instance->BEHa[56],
                     instance->traim, f1, f2,
-		    /*	nsat visible,	  nsat tracked	 traim,traim,traim */
-		    f3, f4,
-		    /* sigma neg-sawtooth */
-	  /*sat*/   instance->BEHa[58], instance->BEHa[64],
+                    // nsat visible,     nsat tracked   traim,traim,traim
+                    f3, f4,
+                    // sigma neg-sawtooth
+                    instance->BEHa[58], instance->BEHa[64],
                     instance->BEHa[70], instance->BEHa[76],
-		    instance->BEHa[82], instance->BEHa[88],
+                    instance->BEHa[82], instance->BEHa[88],
                     instance->BEHa[94], instance->BEHa[100],
-		    instance->BEHa[106], instance->BEHa[112],
+                    instance->BEHa[106], instance->BEHa[112],
                     instance->BEHa[118], instance->BEHa[124]
-		    );
-	}
+                    );
+        }
 
-	/* and some things I don't understand (magic ntp things) */
+        // and some things I don't understand (magic ntp things)
 
-	if (!refclock_process(instance->pp)) {
-		refclock_report(instance->peer, CEVNT_BADTIME);
-		peer->cfg.flags &= ~FLAG_PPS;	/* problem - clear PPS FLAG */
-		return;
-	}
+        if (!refclock_process(instance->pp)) {
+                refclock_report(instance->peer, CEVNT_BADTIME);
+                peer->cfg.flags &= ~FLAG_PPS;   // problem - clear PPS FLAG
+                return;
+        }
 
-	oncore_log(instance, LOG_INFO, Msg);	 /* this is long message above */
-	instance->pollcnt = 2;
+        oncore_log(instance, LOG_INFO, Msg);     // this is long message above
+        instance->pollcnt = 2;
 
-	if (instance->polled) {
-		instance->polled = 0;
-	     /* instance->pp->dispersion = instance->pp->skew = 0;	*/
-		instance->pp->lastref = instance->pp->lastrec;
-		refclock_receive(instance->peer);
-	}
-	peer->cfg.flags |= FLAG_PPS;
+        if (instance->polled) {
+                instance->polled = 0;
+             // instance->pp->dispersion = instance->pp->skew = 0;
+                instance->pp->lastref = instance->pp->lastrec;
+                refclock_receive(instance->peer);
+        }
+        peer->cfg.flags |= FLAG_PPS;
 }
 
 
-/*************** oncore_msg_XX routines start here *******************/
+// ************** oncore_msg_XX routines start here ******************
 
 
 /*
@@ -1907,102 +1910,102 @@ oncore_get_timestamp(
 
 static void
 oncore_msg_any(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len,
-	int idx
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len,
+        int idx
+        )
 {
 #ifndef ONCORE_VERBOSE_MSG_ANY
-	UNUSED_ARG(instance);
-	UNUSED_ARG(buf);
-	UNUSED_ARG(len);
-	UNUSED_ARG(idx);
+        UNUSED_ARG(instance);
+        UNUSED_ARG(buf);
+        UNUSED_ARG(len);
+        UNUSED_ARG(idx);
 #else
-	const char *fmt = oncore_messages[idx].fmt;
-	const char *p;
-	char *q;
-	char *qlim;
-	struct timespec ts;
-	char	Msg[120], Msg2[10];
+        const char *fmt = oncore_messages[idx].fmt;
+        const char *p;
+        char *q;
+        char *qlim;
+        struct timespec ts;
+        char    Msg[120], Msg2[10];
 
-	if (debug > 3) { /* SPECIAL DEBUG */
-		(void) clock_gettime(CLOCK_REALTIME, &ts);
-		oncore_log(instance, LOG_DEBUG, "%ld.%09ld",
-			   (long)tv.tv_sec, tv.tv_nsec);
+        if (debug > 3) {  // SPECIAL DEBUG
+                (void) clock_gettime(CLOCK_REALTIME, &ts);
+                oncore_log(instance, LOG_DEBUG, "%ld.%09ld",
+                           (long)tv.tv_sec, tv.tv_nsec);
 
-		if (!*fmt) {
-			snprintf(Msg, sizeof(Msg), ">>@@%c%c ", buf[2],
-				 buf[3]);
-			for(int i = 2; i < len && i < 2400 ; i++) {
-				snprintf(Msg2, sizeof(Msg2), "%02x",
-					 buf[i]);
-				strlcat(Msg, Msg2, sizeof(Msg));
-			}
-			oncore_log(instance, LOG_DEBUG, Msg);
-			return;
-		} else {
-			strlcpy(Msg, "##", sizeof(Msg));
-			qlim = Msg + sizeof(Msg) - 3;
-			for (p = fmt, q = Msg + 2; q < qlim && *p; ) {
-				*q++ = *p++;
-				*q++ = '_';
-			}
-			*q = '\0';
-			oncore_log(instance, LOG_DEBUG, Msg);
-			snprintf(Msg, sizeof(Msg), "%c%c", buf[2],
-				 buf[3]);
-			i = 4;
-			for (p = fmt; *p; p++) {
-				snprintf(Msg2, "%02x", buf[i++]);
-				strlcat(Msg, Msg2, sizeof(Msg));
-			}
-			oncore_log(instance, LOG_DEBUG, Msg);
-		}
-	}
+                if (!*fmt) {
+                        snprintf(Msg, sizeof(Msg), ">>@@%c%c ", buf[2],
+                                 buf[3]);
+                        for(int i = 2; i < len && i < 2400 ; i++) {
+                                snprintf(Msg2, sizeof(Msg2), "%02x",
+                                         buf[i]);
+                                strlcat(Msg, Msg2, sizeof(Msg));
+                        }
+                        oncore_log(instance, LOG_DEBUG, Msg);
+                        return;
+                } else {
+                        strlcpy(Msg, "##", sizeof(Msg));
+                        qlim = Msg + sizeof(Msg) - 3;
+                        for (p = fmt, q = Msg + 2; q < qlim && *p; ) {
+                                *q++ = *p++;
+                                *q++ = '_';
+                        }
+                        *q = '\0';
+                        oncore_log(instance, LOG_DEBUG, Msg);
+                        snprintf(Msg, sizeof(Msg), "%c%c", buf[2],
+                                 buf[3]);
+                        i = 4;
+                        for (p = fmt; *p; p++) {
+                                snprintf(Msg2, "%02x", buf[i++]);
+                                strlcat(Msg, Msg2, sizeof(Msg));
+                        }
+                        oncore_log(instance, LOG_DEBUG, Msg);
+                }
+        }
 #endif
 }
 
 
 
-/* Latitude, Longitude, Height */
+// Latitude, Longitude, Height
 
 static void
 oncore_msg_Adef(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	UNUSED_ARG(instance);
-	UNUSED_ARG(buf);
-	UNUSED_ARG(len);
+        UNUSED_ARG(instance);
+        UNUSED_ARG(buf);
+        UNUSED_ARG(len);
 }
 
 
 
-/* Mask Angle */
+// Mask Angle
 
 static void
 oncore_msg_Ag(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	const char *cp;
+        const char *cp;
 
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	cp = "set to";
-	if (instance->o_state == ONCORE_RUN) {
-		cp = "is";
-	}
+        cp = "set to";
+        if (instance->o_state == ONCORE_RUN) {
+                cp = "is";
+        }
 
-	instance->Ag = buf[4];
-	oncore_log_f(instance, LOG_INFO,
-		     "Satellite mask angle %s %d degrees", cp,
-		     (int)instance->Ag);
+        instance->Ag = buf[4];
+        oncore_log_f(instance, LOG_INFO,
+                     "Satellite mask angle %s %d degrees", cp,
+                     (int)instance->Ag);
 }
 
 
@@ -2013,47 +2016,47 @@ oncore_msg_Ag(
 
 static void
 oncore_msg_As(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	instance->ss_lat  = buf_w32(&buf[4]);
-	instance->ss_long = buf_w32(&buf[8]);
-	instance->ss_ht   = buf_w32(&buf[12]);
+        instance->ss_lat  = buf_w32(&buf[4]);
+        instance->ss_long = buf_w32(&buf[8]);
+        instance->ss_ht   = buf_w32(&buf[12]);
 
-	/* Print out Position */
-	oncore_print_posn(instance);
+        // Print out Position
+        oncore_print_posn(instance);
 }
 
 
 
 /*
  * Try to use Oncore UT+ Auto Survey Feature
- *	If its not there (VP), set flag to do it ourselves.
+ *      If its not there (VP), set flag to do it ourselves.
  */
 
 static void
 oncore_msg_At(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	instance->saw_At = 1;
-	if (instance->site_survey == ONCORE_SS_TESTING) {
-		if (buf[4] == 2) {
-			oncore_log(instance, LOG_NOTICE,
-					"Initiating hardware 3D site survey");
+        instance->saw_At = 1;
+        if (instance->site_survey == ONCORE_SS_TESTING) {
+                if (buf[4] == 2) {
+                        oncore_log(instance, LOG_NOTICE,
+                                        "Initiating hardware 3D site survey");
 
-			oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_HW");
-			instance->site_survey = ONCORE_SS_HW;
-		}
-	}
+                        oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_HW");
+                        instance->site_survey = ONCORE_SS_HW;
+                }
+        }
 }
 
 
@@ -2065,23 +2068,23 @@ oncore_msg_At(
 
 static void
 oncore_msg_Ay(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	if (instance->saw_Ay)
-		return;
+        if (instance->saw_Ay)
+                return;
 
-	instance->saw_Ay = 1;
+        instance->saw_Ay = 1;
 
-        /* @@Ay is between 0 and 999999999 */
-	instance->offset = buf_w32(&buf[4]);
+        // @@Ay is between 0 and 999999999
+        instance->offset = buf_w32(&buf[4]);
 
-	oncore_log_f(instance, LOG_INFO, "PPS Offset is set to %ld ns",
-		     instance->offset);
+        oncore_log_f(instance, LOG_INFO, "PPS Offset is set to %ld ns",
+                     instance->offset);
 }
 
 
@@ -2092,396 +2095,396 @@ oncore_msg_Ay(
 
 static void
 oncore_msg_Az(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	if (instance->saw_Az)
-		return;
+        if (instance->saw_Az)
+                return;
 
-	instance->saw_Az = 1;
+        instance->saw_Az = 1;
 
-	instance->delay = (unsigned long)buf_w32(&buf[4]);
+        instance->delay = (unsigned long)buf_w32(&buf[4]);
 
-	oncore_log_f(instance, LOG_INFO, "Cable delay is set to %lu ns",
-		     instance->delay);
+        oncore_log_f(instance, LOG_INFO, "Cable delay is set to %lu ns",
+                     instance->delay);
 }
 
 
 
-/* Ba, Ea and Ha come here, these contain Position */
+// Ba, Ea and Ha come here, these contain Position
 
 static void
 oncore_msg_BaEaHa(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	const char	*cp;
-	int		mode;
+        const char      *cp;
+        int             mode;
 
-	/* OK, we are close to the RUN state now.
-	 * But we have a few more items to initialize first.
-	 *
-	 * At the beginning of this routine there are several 'timers'.
-	 * We enter this routine 1/sec, and since the upper levels of NTP have usurped
-	 * the use of timers, we use the 1/sec entry to do things that
-	 * we would normally do with timers...
-	 */
+        /* OK, we are close to the RUN state now.
+         * But we have a few more items to initialize first.
+         *
+         * At the beginning of this routine there are several 'timers'.
+         * We enter this routine 1/sec, and since the upper levels of NTP have usurped
+         * the use of timers, we use the 1/sec entry to do things that
+         * we would normally do with timers...
+         */
 
-	if (instance->o_state == ONCORE_CHECK_CHAN) {	/* here while checking for the # chan */
-		if (buf[2] == 'B') {		/* 6chan */
-			if (instance->chan_ck < 6) instance->chan_ck = 6;
-		} else if (buf[2] == 'E') {	/* 8chan */
-			if (instance->chan_ck < 8) instance->chan_ck = 8;
-		} else if (buf[2] == 'H') {	/* 12chan */
-			if (instance->chan_ck < 12) instance->chan_ck = 12;
-		}
+        if (instance->o_state == ONCORE_CHECK_CHAN) {   // here while checking for the # chan
+                if (buf[2] == 'B') {            // 6chan
+                        if (instance->chan_ck < 6) instance->chan_ck = 6;
+                } else if (buf[2] == 'E') {     // 8chan
+                        if (instance->chan_ck < 8) instance->chan_ck = 8;
+                } else if (buf[2] == 'H') {     // 12chan
+                        if (instance->chan_ck < 12) instance->chan_ck = 12;
+                }
 
-		if (instance->count3++ < 5)
-			return;
+                if (instance->count3++ < 5)
+                        return;
 
-		instance->count3 = 0;
+                instance->count3 = 0;
 
-		if (instance->chan_in != -1)	/* set in Input */
-			instance->chan = (uint8_t)instance->chan_in;
-		else				/* set from test */
-			instance->chan = instance->chan_ck;
+                if (instance->chan_in != -1)    // set in Input
+                        instance->chan = (uint8_t)instance->chan_in;
+                else                            // set from test
+                        instance->chan = instance->chan_ck;
 
-		oncore_log_f(instance, LOG_INFO, "Input   says chan = %d",
-			    instance->chan_in);
-		oncore_log_f(instance, LOG_INFO, "Model # says chan = %d",
-			     instance->chan_id);
-		oncore_log_f(instance, LOG_INFO, "Testing says chan = %d",
-			     instance->chan_ck);
-		oncore_log_f(instance, LOG_INFO, "Using        chan = %d",
-			     instance->chan);
+                oncore_log_f(instance, LOG_INFO, "Input   says chan = %d",
+                            instance->chan_in);
+                oncore_log_f(instance, LOG_INFO, "Model # says chan = %d",
+                             instance->chan_id);
+                oncore_log_f(instance, LOG_INFO, "Testing says chan = %d",
+                             instance->chan_ck);
+                oncore_log_f(instance, LOG_INFO, "Using        chan = %d",
+                             instance->chan);
 
-		instance->o_state = ONCORE_HAVE_CHAN;
-		oncore_log(instance, LOG_NOTICE, "state = ONCORE_HAVE_CHAN");
+                instance->o_state = ONCORE_HAVE_CHAN;
+                oncore_log(instance, LOG_NOTICE, "state = ONCORE_HAVE_CHAN");
 
-		instance->timeout = 4;
-		oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
-		return;
-	}
+                instance->timeout = 4;
+                oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
+                return;
+        }
 
-	if (instance->o_state != ONCORE_ALMANAC && instance->o_state != ONCORE_RUN) {
-		return;
-	}
+        if (instance->o_state != ONCORE_ALMANAC && instance->o_state != ONCORE_RUN) {
+                return;
+        }
 
-	/* PAUSE 5sec - make sure results are stable, before using position */
+        // PAUSE 5sec - make sure results are stable, before using position
 
-	if (instance->count) {
-		if (instance->count++ < 5)
-			return;
-		instance->count = 0;
-	}
+        if (instance->count) {
+                if (instance->count++ < 5)
+                        return;
+                instance->count = 0;
+        }
 
-	memcpy(instance->BEHa, buf, (size_t) (len+3));	/* Ba, Ea or Ha */
+        memcpy(instance->BEHa, buf, (size_t) (len+3));  // Ba, Ea or Ha
 
-	/* check if we saw a response to Gc (M12 or M12+T */
+        // check if we saw a response to Gc (M12 or M12+T
 
-	if (instance->pps_control_msg_seen != -2) {
-		if ((instance->pps_control_msg_seen == -1) && (instance->pps_control != -1)) {
-			oncore_log(instance, LOG_INFO, "PPSCONTROL set, but not implemented (not M12)");
-		}
-		instance->pps_control_msg_seen = -2;
-	}
+        if (instance->pps_control_msg_seen != -2) {
+                if ((instance->pps_control_msg_seen == -1) && (instance->pps_control != -1)) {
+                        oncore_log(instance, LOG_INFO, "PPSCONTROL set, but not implemented (not M12)");
+                }
+                instance->pps_control_msg_seen = -2;
+        }
 
-	/* check the antenna (did it get unplugged) and almanac (is it ready) for changes. */
+        // check the antenna (did it get unplugged) and almanac (is it ready) for changes.
 
-	oncore_check_almanac(instance);
-	oncore_check_antenna(instance);
+        oncore_check_almanac(instance);
+        oncore_check_antenna(instance);
 
-	/* If we are in Almanac mode, waiting for Almanac, we can't do anything till we have it */
-	/* When we have an almanac, we will start the Bn/En/@@Hn messages */
+        // If we are in Almanac mode, waiting for Almanac, we can't do anything till we have it
+        // When we have an almanac, we will start the Bn/En/@@Hn messages
 
-	if (instance->o_state == ONCORE_ALMANAC) {
-		if (oncore_wait_almanac(instance))
-			return;
+        if (instance->o_state == ONCORE_ALMANAC) {
+                if (oncore_wait_almanac(instance))
+                        return;
 }
 
-	/* do some things once when we get this far in BaEaHa */
+        // do some things once when we get this far in BaEaHa
 
-	if (instance->once) {
-		instance->once = 0;
-		instance->count2 = 1;
+        if (instance->once) {
+                instance->once = 0;
+                instance->count2 = 1;
 
-		/* Have we seen an @@At (position hold) command response */
-		/* if not, message out */
+                // Have we seen an @@At (position hold) command response
+                // if not, message out
 
-		if (instance->chan != 12 && !instance->saw_At) {
-			oncore_log(instance, LOG_NOTICE,
-				"Not Good, no @@At command (no Position Hold), must be a GT/GT+");
-			oncore_sendmsg(instance, oncore_cmd_Av1, sizeof(oncore_cmd_Av1));
-		}
+                if (instance->chan != 12 && !instance->saw_At) {
+                        oncore_log(instance, LOG_NOTICE,
+                                "Not Good, no @@At command (no Position Hold), must be a GT/GT+");
+                        oncore_sendmsg(instance, oncore_cmd_Av1, sizeof(oncore_cmd_Av1));
+                }
 
-		/* have an Almanac, can start the SiteSurvey
-		 * (actually only need to get past the almanac_load where we diddle with At
-		 *  command,- we can't change it after we start the HW_SS below
-		 */
+                /* have an Almanac, can start the SiteSurvey
+                 * (actually only need to get past the almanac_load where we diddle with At
+                 *  command,- we can't change it after we start the HW_SS below
+                 */
 
-		mode = instance->init_type;
-		switch (mode) {
-		case 0: /* NO initialization, don't change anything */
-		case 1: /* Use given Position */
-		case 3:
-			instance->site_survey = ONCORE_SS_DONE;
-			oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_DONE");
-			break;
+                mode = instance->init_type;
+                switch (mode) {
+                case 0:  // NO initialization, don't change anything
+                case 1:  // Use given Position
+                case 3:
+                        instance->site_survey = ONCORE_SS_DONE;
+                        oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_DONE");
+                        break;
 
-		case 2:
-		case 4: /* Site Survey */
-			oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_TESTING");
-			instance->site_survey = ONCORE_SS_TESTING;
-			instance->count1 = 1;
-			if (instance->chan == 12)
-				oncore_sendmsg(instance, oncore_cmd_Gd3,  sizeof(oncore_cmd_Gd3));  /* M12+T */
-			else
-				oncore_sendmsg(instance, oncore_cmd_At2,  sizeof(oncore_cmd_At2));  /* not GT, arg not VP */
-			break;
-		default:
-			/* huh? */
-			break;
-		}
+                case 2:
+                case 4:  // Site Survey
+                        oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_TESTING");
+                        instance->site_survey = ONCORE_SS_TESTING;
+                        instance->count1 = 1;
+                        if (instance->chan == 12)
+                                oncore_sendmsg(instance, oncore_cmd_Gd3,  sizeof(oncore_cmd_Gd3));  // M12+T
+                        else
+                                oncore_sendmsg(instance, oncore_cmd_At2,  sizeof(oncore_cmd_At2));  // not GT, arg not VP
+                        break;
+                default:
+                        // huh?
+                        break;
+                }
 
-		/* Read back PPS Offset for Output */
-		/* Nb. This will fail silently for early UT (no plus) and M12 models */
+                // Read back PPS Offset for Output
+                // Nb. This will fail silently for early UT (no plus) and M12 models
 
-		oncore_sendmsg(instance, oncore_cmd_Ayx,  sizeof(oncore_cmd_Ayx));
+                oncore_sendmsg(instance, oncore_cmd_Ayx,  sizeof(oncore_cmd_Ayx));
 
-		/* Read back Cable Delay for Output */
+                // Read back Cable Delay for Output
 
-		oncore_sendmsg(instance, oncore_cmd_Azx,  sizeof(oncore_cmd_Azx));
+                oncore_sendmsg(instance, oncore_cmd_Azx,  sizeof(oncore_cmd_Azx));
 
-		/* Read back Satellite Mask Angle for Output */
+                // Read back Satellite Mask Angle for Output
 
-		oncore_sendmsg(instance, oncore_cmd_Agx,  sizeof(oncore_cmd_Agx));
-	}
+                oncore_sendmsg(instance, oncore_cmd_Agx,  sizeof(oncore_cmd_Agx));
+        }
 
 
-	/* Unfortunately, the Gd3 command returns '3' for the M12 v1.3 firmware where it is
-	 * out-of-range and it should return 0-2. (v1.3 can't do a HW Site Survey)
-	 * We must do the Gd3, and then wait a cycle or two for things to settle,
-	 * then check Ha[130]&0x10 to see if a SS is in progress.
-	 * We will set SW if HW has not been set after an appropriate delay.
-	 */
+        /* Unfortunately, the Gd3 command returns '3' for the M12 v1.3 firmware where it is
+         * out-of-range and it should return 0-2. (v1.3 can't do a HW Site Survey)
+         * We must do the Gd3, and then wait a cycle or two for things to settle,
+         * then check Ha[130]&0x10 to see if a SS is in progress.
+         * We will set SW if HW has not been set after an appropriate delay.
+         */
 
-	if (instance->site_survey == ONCORE_SS_TESTING) {
-		if (instance->chan == 12) {
-			if (instance->count1) {
-				if (instance->count1++ > 5 || instance->BEHa[130]&0x10) {
-					instance->count1 = 0;
-					if (instance->BEHa[130]&0x10) {
-						oncore_log(instance, LOG_NOTICE,
-								"Initiating hardware 3D site survey");
+        if (instance->site_survey == ONCORE_SS_TESTING) {
+                if (instance->chan == 12) {
+                        if (instance->count1) {
+                                if (instance->count1++ > 5 || instance->BEHa[130]&0x10) {
+                                        instance->count1 = 0;
+                                        if (instance->BEHa[130]&0x10) {
+                                                oncore_log(instance, LOG_NOTICE,
+                                                                "Initiating hardware 3D site survey");
 
-						oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_HW");
-						instance->site_survey = ONCORE_SS_HW;
-					} else {
-						oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_SW");
-						instance->site_survey = ONCORE_SS_SW;
-					}
-				}
-			}
-		} else {
-			if (instance->count1) {
-				if (instance->count1++ > 5) {
-					instance->count1 = 0;
-					/*
-					 * For instance->site_survey to still be ONCORE_SS_TESTING, then after a 5sec
-					 * wait after the @@At2/@@Gd3 command we have not changed the state to
-					 * ONCORE_SS_HW.  If the Hardware is capable of doing a Site Survey, then
-					 * the variable would have been changed by now.
-					 * There are three possibilities:
-					 * 6/8chan
-					 *   (a) We did not get a response to the @@At0 or @@At2 commands,
-					 *	   and it must be a GT/GT+/SL with no position hold mode.
-					 *	   We will have to do it ourselves.
-					 *   (b) We saw the @@At0, @@At2 commands, but @@At2 failed,
-					 *	   must be a VP or older UT which doesn't have Site Survey mode.
-					 *	   We will have to do it ourselves.
-					 * 12chan
-					 *   (c) We saw the @@Gd command, and saw H[13]*0x10
-					 *	   We will have to do it ourselves (done above)
-					 */
+                                                oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_HW");
+                                                instance->site_survey = ONCORE_SS_HW;
+                                        } else {
+                                                oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_SW");
+                                                instance->site_survey = ONCORE_SS_SW;
+                                        }
+                                }
+                        }
+                } else {
+                        if (instance->count1) {
+                                if (instance->count1++ > 5) {
+                                        instance->count1 = 0;
+                                        /*
+                                         * For instance->site_survey to still be ONCORE_SS_TESTING, then after a 5sec
+                                         * wait after the @@At2/@@Gd3 command we have not changed the state to
+                                         * ONCORE_SS_HW.  If the Hardware is capable of doing a Site Survey, then
+                                         * the variable would have been changed by now.
+                                         * There are three possibilities:
+                                         * 6/8chan
+                                         *   (a) We did not get a response to the @@At0 or @@At2 commands,
+                                         *         and it must be a GT/GT+/SL with no position hold mode.
+                                         *         We will have to do it ourselves.
+                                         *   (b) We saw the @@At0, @@At2 commands, but @@At2 failed,
+                                         *         must be a VP or older UT which doesn't have Site Survey mode.
+                                         *         We will have to do it ourselves.
+                                         * 12chan
+                                         *   (c) We saw the @@Gd command, and saw H[13]*0x10
+                                         *         We will have to do it ourselves (done above)
+                                         */
 
-					oncore_log_f(instance, LOG_INFO,
-						     "Initiating software 3D site survey (%d samples)",
-						     POS_HOLD_AVERAGE);
+                                        oncore_log_f(instance, LOG_INFO,
+                                                     "Initiating software 3D site survey (%d samples)",
+                                                     POS_HOLD_AVERAGE);
 
-					oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_SW");
-					instance->site_survey = ONCORE_SS_SW;
+                                        oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_SW");
+                                        instance->site_survey = ONCORE_SS_SW;
 
-					instance->ss_lat = instance->ss_long = instance->ss_ht = 0;
-					if (instance->chan == 12)
-						oncore_sendmsg(instance, oncore_cmd_Gd0, sizeof(oncore_cmd_Gd0)); /* disable */
-					else {
-						oncore_sendmsg(instance, oncore_cmd_At0, sizeof(oncore_cmd_At0)); /* disable */
-						oncore_sendmsg(instance, oncore_cmd_Av0, sizeof(oncore_cmd_Av0)); /* disable */
-					}
-				}
-			}
-		}
-	}
+                                        instance->ss_lat = instance->ss_long = instance->ss_ht = 0;
+                                        if (instance->chan == 12)
+                                                oncore_sendmsg(instance, oncore_cmd_Gd0, sizeof(oncore_cmd_Gd0));  // disable
+                                        else {
+                                                oncore_sendmsg(instance, oncore_cmd_At0, sizeof(oncore_cmd_At0));  // disable
+                                                oncore_sendmsg(instance, oncore_cmd_Av0, sizeof(oncore_cmd_Av0));  // disable
+                                        }
+                                }
+                        }
+                }
+        }
 
-	/* check the mode we are in 0/2/3D */
+        // check the mode we are in 0/2/3D
 
-	if (instance->chan == 6) {
-		if (instance->BEHa[64]&0x8)
-			instance->mode = MODE_0D;
-		else if (instance->BEHa[64]&0x10)
-			instance->mode = MODE_2D;
-		else if (instance->BEHa[64]&0x20)
-			instance->mode = MODE_3D;
-	} else if (instance->chan == 8) {
-		if (instance->BEHa[72]&0x8)
-			instance->mode = MODE_0D;
-		else if (instance->BEHa[72]&0x10)
-			instance->mode = MODE_2D;
-		else if (instance->BEHa[72]&0x20)
-			instance->mode = MODE_3D;
-	} else if (instance->chan == 12) {
-		int bits;
+        if (instance->chan == 6) {
+                if (instance->BEHa[64]&0x8)
+                        instance->mode = MODE_0D;
+                else if (instance->BEHa[64]&0x10)
+                        instance->mode = MODE_2D;
+                else if (instance->BEHa[64]&0x20)
+                        instance->mode = MODE_3D;
+        } else if (instance->chan == 8) {
+                if (instance->BEHa[72]&0x8)
+                        instance->mode = MODE_0D;
+                else if (instance->BEHa[72]&0x10)
+                        instance->mode = MODE_2D;
+                else if (instance->BEHa[72]&0x20)
+                        instance->mode = MODE_3D;
+        } else if (instance->chan == 12) {
+                int bits;
 
-		bits = (instance->BEHa[129]>>5) & 0x7;	/* actually Ha */
-		if (bits == 0x4) {
-			instance->mode = MODE_0D;
-		} else if (bits == 0x6) {
-			instance->mode = MODE_2D;
-		} else if (bits == 0x7) {
-			instance->mode = MODE_3D;
-		}
-	}
+                bits = (instance->BEHa[129]>>5) & 0x7;  // actually Ha
+                if (bits == 0x4) {
+                        instance->mode = MODE_0D;
+                } else if (bits == 0x6) {
+                        instance->mode = MODE_2D;
+                } else if (bits == 0x7) {
+                        instance->mode = MODE_3D;
+                }
+        }
 
-	/* copy the record to the (extra) location in SHMEM */
+        // copy the record to the (extra) location in SHMEM
 
-	if (instance->shmem) {
-		size_t	i;
-		uint8_t	*smp;	 /* pointer to start of shared mem for Ba/Ea/Ha */
+        if (instance->shmem) {
+                size_t  i;
+                uint8_t *smp;    // pointer to start of shared mem for Ba/Ea/Ha
 
-		switch(instance->chan) {
-		case 6:   smp = &instance->shmem[instance->shmem_Ba]; break;
-		case 8:   smp = &instance->shmem[instance->shmem_Ea]; break;
-		case 12:  smp = &instance->shmem[instance->shmem_Ha]; break;
-		default:  smp = (uint8_t *) NULL;		      break;
-		}
+                switch(instance->chan) {
+                case 6:   smp = &instance->shmem[instance->shmem_Ba]; break;
+                case 8:   smp = &instance->shmem[instance->shmem_Ea]; break;
+                case 12:  smp = &instance->shmem[instance->shmem_Ha]; break;
+                default:  smp = (uint8_t *) NULL;                     break;
+                }
 
-		switch (instance->mode) {
-		case MODE_0D:	i = 1; break;	/* 0D, Position Hold */
-		case MODE_2D:	i = 2; break;	/* 2D, Altitude Hold */
-		case MODE_3D:	i = 3; break;	/* 3D fix */
-		case MODE_UNKNOWN:
-		default:	i = 0; break;
-		}
+                switch (instance->mode) {
+                case MODE_0D:   i = 1; break;   // 0D, Position Hold
+                case MODE_2D:   i = 2; break;   // 2D, Altitude Hold
+                case MODE_3D:   i = 3; break;   // 3D fix
+                case MODE_UNKNOWN:
+                default:        i = 0; break;
+                }
 
-		if (i && smp != NULL) {
-			i *= (len+6);
-			smp[i + 2]++;
-			memcpy(&smp[i+3], buf, (size_t) (len+3));
-		}
-	}
+                if (i && smp != NULL) {
+                        i *= (len+6);
+                        smp[i + 2]++;
+                        memcpy(&smp[i+3], buf, (size_t) (len+3));
+                }
+        }
 
-	/*
-	 * check if traim timer active
-	 * if it hasn't been cleared, then @@Bn/@@En/@@Hn did not respond
-	 */
+        /*
+         * check if traim timer active
+         * if it hasn't been cleared, then @@Bn/@@En/@@Hn did not respond
+         */
 
-	if (instance->traim_delay) {
-		if (instance->traim_delay++ > 5) {
-			instance->traim = 0;
-			instance->traim_delay = 0;
-			cp = "ONCORE: Did not detect TRAIM response, TRAIM = OFF";
-			oncore_log(instance, LOG_INFO, cp);
+        if (instance->traim_delay) {
+                if (instance->traim_delay++ > 5) {
+                        instance->traim = 0;
+                        instance->traim_delay = 0;
+                        cp = "ONCORE: Did not detect TRAIM response, TRAIM = OFF";
+                        oncore_log(instance, LOG_INFO, cp);
 
-			oncore_set_traim(instance);
-		} else
-			return;
+                        oncore_set_traim(instance);
+                } else
+                        return;
 
-	}
+        }
 
-	/* by now should have a @@Ba/@@Ea/@@Ha with good data in it */
+        // by now should have a @@Ba/@@Ea/@@Ha with good data in it
 
-	if (!instance->have_dH && !instance->traim_delay)
-		oncore_compute_dH(instance);
+        if (!instance->have_dH && !instance->traim_delay)
+                oncore_compute_dH(instance);
 
-	/*
-	 * must be ONCORE_RUN if we are here.
-	 * Have # chan and TRAIM by now.
-	 */
+        /*
+         * must be ONCORE_RUN if we are here.
+         * Have # chan and TRAIM by now.
+         */
 
-	instance->pp->year   = buf[6]*256+buf[7];
-	instance->pp->yday   = ymd2yd(buf[6]*256+buf[7], buf[4], buf[5]);
-	instance->pp->hour   = buf[8];
-	instance->pp->minute = buf[9];
-	instance->pp->second = buf[10];
+        instance->pp->year   = buf[6]*256+buf[7];
+        instance->pp->yday   = ymd2yd(buf[6]*256+buf[7], buf[4], buf[5]);
+        instance->pp->hour   = buf[8];
+        instance->pp->minute = buf[9];
+        instance->pp->second = buf[10];
 
-	/*
-	 * Are we doing a Hardware or Software Site Survey?
-	 */
+        /*
+         * Are we doing a Hardware or Software Site Survey?
+         */
 
-	if (instance->site_survey == ONCORE_SS_HW || instance->site_survey == ONCORE_SS_SW) {
-		oncore_ss(instance);
-	}
+        if (instance->site_survey == ONCORE_SS_HW || instance->site_survey == ONCORE_SS_SW) {
+                oncore_ss(instance);
+        }
 
-	/* see if we ever saw a response from the @@Ayx above */
+        // see if we ever saw a response from the @@Ayx above
 
-	if (instance->count2) {
-		if (instance->count2++ > 5) {	/* this delay to check on @@Ay command */
-			instance->count2 = 0;
+        if (instance->count2) {
+                if (instance->count2++ > 5) {   // this delay to check on @@Ay command
+                        instance->count2 = 0;
 
-			/* Have we seen an Ay (1PPS time offset) command response */
-			/* if not, and non-zero offset, zero the offset, and send message */
+                        // Have we seen an Ay (1PPS time offset) command response
+                        // if not, and non-zero offset, zero the offset, and send message
 
-			if (!instance->saw_Ay && instance->offset) {
-				oncore_log(instance, LOG_INFO, "No @@Ay command, PPS OFFSET ignored");
-				instance->offset = 0;
-			}
-		}
-	}
+                        if (!instance->saw_Ay && instance->offset) {
+                                oncore_log(instance, LOG_INFO, "No @@Ay command, PPS OFFSET ignored");
+                                instance->offset = 0;
+                        }
+                }
+        }
 
-	/*
-	 * Check the leap second status once per day.
-	 */
+        /*
+         * Check the leap second status once per day.
+         */
 
-	oncore_check_leap_sec(instance);
+        oncore_check_leap_sec(instance);
 
-	/*
-	 * if SHMEM active, every 15s, steal one 'tick' to get 2D or 3D posn.
-	 */
+        /*
+         * if SHMEM active, every 15s, steal one 'tick' to get 2D or 3D posn.
+         */
 
-	if (instance->shmem && !instance->shmem_bad_Ea && instance->shmem_Posn && (instance->site_survey == ONCORE_SS_DONE))
-		oncore_shmem_get_3D(instance);
+        if (instance->shmem && !instance->shmem_bad_Ea && instance->shmem_Posn && (instance->site_survey == ONCORE_SS_DONE))
+                oncore_shmem_get_3D(instance);
 
-	if (!instance->traim)	/* NO traim, no BnEnHn, go get tick */
-		oncore_get_timestamp(instance, instance->offset, instance->offset);
+        if (!instance->traim)   // NO traim, no BnEnHn, go get tick
+                oncore_get_timestamp(instance, instance->offset, instance->offset);
 }
 
 
 
-/* Almanac Status */
+// Almanac Status
 
 static void
 oncore_msg_Bd(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	UNUSED_ARG(len);
-	oncore_log_f(instance, LOG_NOTICE,
-		     "Bd: Almanac %s, week = %d, t = %d, %d SVs: %d",
-		     ((buf[4]) ? "LOADED" : "(NONE)"), buf[5], buf[6],
-		     buf[7], w32(&buf[8]));
+        UNUSED_ARG(len);
+        oncore_log_f(instance, LOG_NOTICE,
+                     "Bd: Almanac %s, week = %d, t = %d, %d SVs: %d",
+                     ((buf[4]) ? "LOADED" : "(NONE)"), buf[5], buf[6],
+                     buf[7], w32(&buf[8]));
 }
 
 
 
-/* get leap-second warning message */
+// get leap-second warning message
 
 /*
  * @@Bj does NOT behave as documented in current Oncore firmware.
@@ -2494,221 +2497,221 @@ oncore_msg_Bd(
 
 static void
 oncore_msg_Bj(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	const char	*cp;
+        const char      *cp;
 
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	instance->saw_Bj = 1;
+        instance->saw_Bj = 1;
 
-	switch(buf[4]) {
-	case 1:
-		instance->pp->leap = LEAP_ADDSECOND;
-		cp = "Set pp.leap to LEAP_ADDSECOND";
-		break;
-	case 2:
-		instance->pp->leap = LEAP_DELSECOND;
-		cp = "Set pp.leap to LEAP_DELSECOND";
-		break;
-	case 0:
-	default:
-		instance->pp->leap = LEAP_NOWARNING;
-		cp = "Set pp.leap to LEAP_NOWARNING";
-		break;
-	}
-	oncore_log(instance, LOG_NOTICE, cp);
+        switch(buf[4]) {
+        case 1:
+                instance->pp->leap = LEAP_ADDSECOND;
+                cp = "Set pp.leap to LEAP_ADDSECOND";
+                break;
+        case 2:
+                instance->pp->leap = LEAP_DELSECOND;
+                cp = "Set pp.leap to LEAP_DELSECOND";
+                break;
+        case 0:
+        default:
+                instance->pp->leap = LEAP_NOWARNING;
+                cp = "Set pp.leap to LEAP_NOWARNING";
+                break;
+        }
+        oncore_log(instance, LOG_NOTICE, cp);
 }
 
 
 
 static void
 oncore_msg_Bl(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t	len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t  len
+        )
 {
-	int	subframe, valid, page, i, j;
-	long int tow;
-	int	day_now, day_lsf;
-	const char	*cp;
-	enum {
-		WARN_NOT_YET,
-		WARN_0,
-		WARN_PLUS,
-		WARN_MINUS
-	} warn;
+        int     subframe, valid, page, i, j;
+        long int tow;
+        int     day_now, day_lsf;
+        const char      *cp;
+        enum {
+                WARN_NOT_YET,
+                WARN_0,
+                WARN_PLUS,
+                WARN_MINUS
+        } warn;
 
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	day_now = day_lsf = 0;
-	cp = NULL;	/* keep gcc happy */
+        day_now = day_lsf = 0;
+        cp = NULL;      // keep gcc happy
 
-	subframe = buf[6] & 017;
-	valid = (buf[6] >> 4) & 017;
-	page = buf[7];
+        subframe = buf[6] & 017;
+        valid = (buf[6] >> 4) & 017;
+        page = buf[7];
 
-	if ((!instance->Bl.lsf_flg && !instance->Bl.wn_flg) && (subframe == 4 && page == 18 && valid == 10)) {
-		instance->Bl.dt_ls  = buf[32];
-		instance->Bl.WN_lsf = buf[33];
-		instance->Bl.DN_lsf = buf[34];
-		instance->Bl.dt_lsf = buf[35];
-		instance->Bl.lsf_flg++;
-	}
-	if ((instance->Bl.lsf_flg && !instance->Bl.wn_flg) && (subframe == 1 && valid == 10)) {
-		i = (buf[7+7]<<8) + buf[7+8];
-		instance->Bl.WN = i >> 6;
-		tow = (buf[7+4]<<16) + (buf[7+5]<<8) + buf[7+6];
-		tow >>= 7;
-		tow = tow & 0377777;
-		tow <<= 2;
-		instance->Bl.DN = tow/57600L + 1;
-		instance->Bl.wn_flg++;
-	}
-	if (instance->Bl.wn_flg && instance->Bl.lsf_flg)  {
-		instance->Bl.wn_flg = instance->Bl.lsf_flg = 0;
-		oncore_cmd_Bl[2] = 0;
-		oncore_sendmsg(instance, oncore_cmd_Bl, sizeof oncore_cmd_Bl);
-		oncore_cmd_Bl[2] = 1;
+        if ((!instance->Bl.lsf_flg && !instance->Bl.wn_flg) && (subframe == 4 && page == 18 && valid == 10)) {
+                instance->Bl.dt_ls  = buf[32];
+                instance->Bl.WN_lsf = buf[33];
+                instance->Bl.DN_lsf = buf[34];
+                instance->Bl.dt_lsf = buf[35];
+                instance->Bl.lsf_flg++;
+        }
+        if ((instance->Bl.lsf_flg && !instance->Bl.wn_flg) && (subframe == 1 && valid == 10)) {
+                i = (buf[7+7]<<8) + buf[7+8];
+                instance->Bl.WN = i >> 6;
+                tow = (buf[7+4]<<16) + (buf[7+5]<<8) + buf[7+6];
+                tow >>= 7;
+                tow = tow & 0377777;
+                tow <<= 2;
+                instance->Bl.DN = tow/57600L + 1;
+                instance->Bl.wn_flg++;
+        }
+        if (instance->Bl.wn_flg && instance->Bl.lsf_flg)  {
+                instance->Bl.wn_flg = instance->Bl.lsf_flg = 0;
+                oncore_cmd_Bl[2] = 0;
+                oncore_sendmsg(instance, oncore_cmd_Bl, sizeof oncore_cmd_Bl);
+                oncore_cmd_Bl[2] = 1;
 
-		i = instance->Bl.WN&01400;
-		instance->Bl.WN_lsf |= i;
+                i = instance->Bl.WN&01400;
+                instance->Bl.WN_lsf |= i;
 
-		/* have everything I need, doit */
+                // have everything I need, doit
 
-		i = (instance->Bl.WN_lsf - instance->Bl.WN);
-		if (i < 0) {
-			i += 1024;
-		}
-		day_now = instance->Bl.DN;
-		day_lsf = 7*i + instance->Bl.DN_lsf;
+                i = (instance->Bl.WN_lsf - instance->Bl.WN);
+                if (i < 0) {
+                        i += 1024;
+                }
+                day_now = instance->Bl.DN;
+                day_lsf = 7*i + instance->Bl.DN_lsf;
 
-		/* ignore if in past or more than a month in future */
+                // ignore if in past or more than a month in future
 
-		warn = WARN_NOT_YET;
-		if (day_lsf >= day_now && day_lsf - day_now < 32) {
-			/* if < 28d, doit, if 28-31, ck day-of-month < 20 (not at end of prev month) */
-			if (day_lsf - day_now < 28 ||  instance->BEHa[5] < 20) {
-				i = instance->Bl.dt_lsf - instance->Bl.dt_ls;
-				switch (i) {
-				case -1:
-					warn = WARN_MINUS;
-					break;
-				case  0:
-					warn = WARN_0;
-					break;
-				case  1:
-					warn = WARN_PLUS;
-					break;
-				default:
-					/* huh? */
-					break;
-				}
-			}
-		}
+                warn = WARN_NOT_YET;
+                if (day_lsf >= day_now && day_lsf - day_now < 32) {
+                        // if < 28d, doit, if 28-31, ck day-of-month < 20 (not at end of prev month)
+                        if (day_lsf - day_now < 28 ||  instance->BEHa[5] < 20) {
+                                i = instance->Bl.dt_lsf - instance->Bl.dt_ls;
+                                switch (i) {
+                                case -1:
+                                        warn = WARN_MINUS;
+                                        break;
+                                case  0:
+                                        warn = WARN_0;
+                                        break;
+                                case  1:
+                                        warn = WARN_PLUS;
+                                        break;
+                                default:
+                                        // huh?
+                                        break;
+                                }
+                        }
+                }
 
-		switch (warn) {
-		case WARN_0:
-		case WARN_NOT_YET:
-			instance->peer->leap = LEAP_NOWARNING;
-			cp = "Set peer.leap to LEAP_NOWARNING";
-			break;
-		case WARN_MINUS:
-			instance->peer->leap = LEAP_DELSECOND;
-			cp = "Set peer.leap to LEAP_DELSECOND";
-			break;
-		case WARN_PLUS:
-			instance->peer->leap = LEAP_ADDSECOND;
-			cp = "Set peer.leap to LEAP_ADDSECOND";
-			break;
-		default:
-			/* huh? */
-			break;
-		}
-		oncore_log(instance, LOG_NOTICE, cp);
+                switch (warn) {
+                case WARN_0:
+                case WARN_NOT_YET:
+                        instance->peer->leap = LEAP_NOWARNING;
+                        cp = "Set peer.leap to LEAP_NOWARNING";
+                        break;
+                case WARN_MINUS:
+                        instance->peer->leap = LEAP_DELSECOND;
+                        cp = "Set peer.leap to LEAP_DELSECOND";
+                        break;
+                case WARN_PLUS:
+                        instance->peer->leap = LEAP_ADDSECOND;
+                        cp = "Set peer.leap to LEAP_ADDSECOND";
+                        break;
+                default:
+                        // huh?
+                        break;
+                }
+                oncore_log(instance, LOG_NOTICE, cp);
 
-		i = instance->Bl.dt_lsf-instance->Bl.dt_ls;
-		if (i) {
-			j = (i >= 0) ? i : -i;		/* abs(i) */
-			oncore_log_f(instance, LOG_NOTICE,
-				     "see Leap_Second (%c%d) in %d days",
-				     ((i >= 0) ? '+' : '-'), j,
-				     day_lsf-day_now);
-		}
-	}
+                i = instance->Bl.dt_lsf-instance->Bl.dt_ls;
+                if (i) {
+                        j = (i >= 0) ? i : -i;          // abs(i)
+                        oncore_log_f(instance, LOG_NOTICE,
+                                     "see Leap_Second (%c%d) in %d days",
+                                     ((i >= 0) ? '+' : '-'), j,
+                                     day_lsf-day_now);
+                }
+        }
 
 /*
  * Reg only wants the following output for "deeper" driver debugging.
  * See Classic Bugs 2142 and Bug 1866
  */
 #if 0
-	oncore_log_f(instance, LOG_DEBUG,
-		     "dt_ls = %d  dt_lsf = %d  WN = %d  DN = %d  WN_lsf = %d  DNlsf = %d  wn_flg = %d  lsf_flg = %d  Bl_day = %d",
-		     instance->Bl.dt_ls, instance->Bl.dt_lsf,
-		     instance->Bl.WN, instance->Bl.DN,
-		     instance->Bl.WN_lsf, instance->Bl.DN_lsf,
-		     instance->Bl.wn_flg, instance->Bl.lsf_flg,
-		     instance->Bl.Bl_day);
+        oncore_log_f(instance, LOG_DEBUG,
+                     "dt_ls = %d  dt_lsf = %d  WN = %d  DN = %d  WN_lsf = %d  DNlsf = %d  wn_flg = %d  lsf_flg = %d  Bl_day = %d",
+                     instance->Bl.dt_ls, instance->Bl.dt_lsf,
+                     instance->Bl.WN, instance->Bl.DN,
+                     instance->Bl.WN_lsf, instance->Bl.DN_lsf,
+                     instance->Bl.wn_flg, instance->Bl.lsf_flg,
+                     instance->Bl.Bl_day);
 #endif
 }
 
 
 static void
 oncore_msg_BnEnHn(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t	len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t  len
+        )
 {
-	long	dt1, dt2;
+        long    dt1, dt2;
 
-	if (instance->o_state != ONCORE_RUN) {
-		return;
-	}
+        if (instance->o_state != ONCORE_RUN) {
+                return;
+        }
 
-	if (instance->traim_delay) {	 /* flag that @@Bn/@@En/Hn returned */
-			instance->traim_ck = 1;
-			instance->traim_delay = 0;
-			oncore_log(instance, LOG_NOTICE, "ONCORE: Detected TRAIM, TRAIM = ON");
+        if (instance->traim_delay) {     // flag that @@Bn/@@En/Hn returned
+                        instance->traim_ck = 1;
+                        instance->traim_delay = 0;
+                        oncore_log(instance, LOG_NOTICE, "ONCORE: Detected TRAIM, TRAIM = ON");
 
-			oncore_set_traim(instance);
-	}
+                        oncore_set_traim(instance);
+        }
 
-	memcpy(instance->BEHn, buf, (size_t) len);	/* Bn or En or Hn */
+        memcpy(instance->BEHn, buf, (size_t) len);      // Bn or En or Hn
 
-	if (!instance->traim)	/* BnEnHn will be turned off in any case */
-		return;
+        if (!instance->traim)   // BnEnHn will be turned off in any case
+                return;
 
-	/* If Time RAIM doesn't like it, don't trust it */
+        // If Time RAIM doesn't like it, don't trust it
 
-	if (buf[2] == 'H') {
-		if (instance->BEHn[6]) {    /* bad TRAIM */
-			oncore_log(instance, LOG_WARNING, "BAD TRAIM");
-			return;
-		}
+        if (buf[2] == 'H') {
+                if (instance->BEHn[6]) {    // bad TRAIM
+                        oncore_log(instance, LOG_WARNING, "BAD TRAIM");
+                        return;
+                }
 
-		dt1 = instance->saw_tooth + instance->offset;	 /* dt this time step */
-		instance->saw_tooth = (int8_t) instance->BEHn[14]; /* update for next time Hn[14] */
-		dt2 = instance->saw_tooth + instance->offset;	 /* dt next time step */
-	} else {
-		if (instance->BEHn[21]) /* bad TRAIM */
-			return;
+                dt1 = instance->saw_tooth + instance->offset;    // dt this time step
+                instance->saw_tooth = (int8_t) instance->BEHn[14];  // update for next time Hn[14]
+                dt2 = instance->saw_tooth + instance->offset;    // dt next time step
+        } else {
+                if (instance->BEHn[21])  // bad TRAIM
+                        return;
 
-		dt1 = instance->saw_tooth + instance->offset;	 /* dt this time step */
-		instance->saw_tooth = (int8_t) instance->BEHn[25]; /* update for next time Bn[25], En[25] */
-		dt2 = instance->saw_tooth + instance->offset;	 /* dt next time step */
-	}
+                dt1 = instance->saw_tooth + instance->offset;    // dt this time step
+                instance->saw_tooth = (int8_t) instance->BEHn[25];  // update for next time Bn[25], En[25]
+                dt2 = instance->saw_tooth + instance->offset;    // dt next time step
+        }
 
-	oncore_get_timestamp(instance, dt1, dt2);
+        oncore_get_timestamp(instance, dt1, dt2);
 }
 
 
 
-/* Here for @@Ca, @@Fa and @@Ia messages */
+// Here for @@Ca, @@Fa and @@Ia messages
 
 /* These are Self test Commands for 6, 8, and 12 chan receivers.
  * There are good reasons NOT to do a @@Ca, @@Fa or @@Ia command with the ONCORE.
@@ -2726,66 +2729,66 @@ oncore_msg_BnEnHn(
 
 static void
 oncore_msg_CaFaIa(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	int	i;
+        int     i;
 
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	if (instance->o_state == ONCORE_TEST_SENT) {
-		enum antenna_state antenna;
+        if (instance->o_state == ONCORE_TEST_SENT) {
+                enum antenna_state antenna;
 
-		instance->timeout = 0;
+                instance->timeout = 0;
 
 #ifdef ONCORE_VERBOSE_SELF_TEST
-		if (debug > 2) { /* SPECIAL DEBUG */
-			if (buf[2] == 'I')
-				oncore_log_f(instance, LOG_DEBUG,
-					     ">>@@%ca %x %x %x", buf[2],
-					     buf[4], buf[5], buf[6]);
-			else
-				oncore_log_f(instance, LOG_DEBUG,
-					     ">>@@%ca %x %x", buf[2],
-					     buf[4], buf[5]);
-		}
+                if (debug > 2) {  // SPECIAL DEBUG
+                        if (buf[2] == 'I')
+                                oncore_log_f(instance, LOG_DEBUG,
+                                             ">>@@%ca %x %x %x", buf[2],
+                                             buf[4], buf[5], buf[6]);
+                        else
+                                oncore_log_f(instance, LOG_DEBUG,
+                                             ">>@@%ca %x %x", buf[2],
+                                             buf[4], buf[5]);
+                }
 #endif
 
-		antenna = (buf[4] & 0xc0) >> 6;
-		buf[4] &= ~0xc0;
+                antenna = (buf[4] & 0xc0) >> 6;
+                buf[4] &= ~0xc0;
 
-		i = buf[4] || buf[5];
-		if (buf[2] == 'I') i = i || buf[6];
-		if (i) {
-			if (buf[2] == 'I')
-				oncore_log_f(instance, LOG_ERR,
-					     "self test failed: result %02x %02x %02x",
-					     buf[4], buf[5], buf[6]);
-			else
-				oncore_log_f(instance, LOG_ERR,
-					     "self test failed: result %02x %02x",
-					     buf[4], buf[5]);
+                i = buf[4] || buf[5];
+                if (buf[2] == 'I') i = i || buf[6];
+                if (i) {
+                        if (buf[2] == 'I')
+                                oncore_log_f(instance, LOG_ERR,
+                                             "self test failed: result %02x %02x %02x",
+                                             buf[4], buf[5], buf[6]);
+                        else
+                                oncore_log_f(instance, LOG_ERR,
+                                             "self test failed: result %02x %02x",
+                                             buf[4], buf[5]);
 
-			oncore_log(instance, LOG_ERR,
-				   "ONCORE: self test failed, shutting down driver");
+                        oncore_log(instance, LOG_ERR,
+                                   "ONCORE: self test failed, shutting down driver");
 
-			refclock_report(instance->peer, CEVNT_FAULT);
-			oncore_shutdown(instance->peer->procptr);
-			return;
-		}
+                        refclock_report(instance->peer, CEVNT_FAULT);
+                        oncore_shutdown(instance->peer->procptr);
+                        return;
+                }
 
-		/* report the current antenna state */
+                // report the current antenna state
 
-		oncore_antenna_report(instance, antenna);
+                oncore_antenna_report(instance, antenna);
 
-		instance->o_state = ONCORE_INIT;
-		oncore_log(instance, LOG_NOTICE, "state = ONCORE_INIT");
+                instance->o_state = ONCORE_INIT;
+                oncore_log(instance, LOG_NOTICE, "state = ONCORE_INIT");
 
-		instance->timeout = 4;
-		oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
-	}
+                instance->timeout = 4;
+                oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
+        }
 }
 
 
@@ -2796,37 +2799,37 @@ oncore_msg_CaFaIa(
 
 static void
 oncore_msg_Cb(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	int i;
+        int i;
 
-	if (instance->shmem == NULL)
-		return;
+        if (instance->shmem == NULL)
+                return;
 
-	if (buf[4] == 5 && buf[5] > 0 && buf[5] < 26)
-		i = buf[5];
-	else if (buf[4] == 4 && buf[5] <= 5)
-		i = buf[5] + 24;
-	else if (buf[4] == 4 && buf[5] <= 10)
-		i = buf[5] + 23;
-	else if (buf[4] == 4 && buf[5] == 25)
-		i = 34;
-	else {
-		oncore_log(instance, LOG_NOTICE, "Cb: Response is NO ALMANAC");
-		return;
-	}
+        if (buf[4] == 5 && buf[5] > 0 && buf[5] < 26)
+                i = buf[5];
+        else if (buf[4] == 4 && buf[5] <= 5)
+                i = buf[5] + 24;
+        else if (buf[4] == 4 && buf[5] <= 10)
+                i = buf[5] + 23;
+        else if (buf[4] == 4 && buf[5] == 25)
+                i = 34;
+        else {
+                oncore_log(instance, LOG_NOTICE, "Cb: Response is NO ALMANAC");
+                return;
+        }
 
-	i *= 36;
-	instance->shmem[(int)instance->shmem_Cb + i + 2]++;
-	memcpy(instance->shmem + instance->shmem_Cb + i + 3, buf,
+        i *= 36;
+        instance->shmem[(int)instance->shmem_Cb + i + 2]++;
+        memcpy(instance->shmem + instance->shmem_Cb + i + 3, buf,
                (size_t)(len + 3));
 
 #ifdef ONCORE_VERBOSE_MSG_CB
-	oncore_log_f(instance, LOG_DEBUG, "See Cb [%d,%d]", buf[4],
-		     buf[5]);
+        oncore_log_f(instance, LOG_DEBUG, "See Cb [%d,%d]", buf[4],
+                     buf[5]);
 #endif
 }
 
@@ -2834,27 +2837,27 @@ oncore_msg_Cb(
 
 /*
  * Set to Factory Defaults (Reasonable for UT w/ no Battery Backup
- *	not so for VP (eeprom) or any unit with a battery
+ *      not so for VP (eeprom) or any unit with a battery
  */
 
 static void
 oncore_msg_Cf(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	UNUSED_ARG(buf);
-	UNUSED_ARG(len);
+        UNUSED_ARG(buf);
+        UNUSED_ARG(len);
 
-	if (instance->o_state == ONCORE_RESET_SENT) {
-		oncore_sendmsg(instance, oncore_cmd_Cg, sizeof(oncore_cmd_Cg)); /* Return to  Posn Fix mode */
-										       /* Reset set VP to IDLE */
-		instance->o_state = ONCORE_TEST_SENT;
-		oncore_log(instance, LOG_NOTICE, "state = ONCORE_TEST_SENT");
+        if (instance->o_state == ONCORE_RESET_SENT) {
+                oncore_sendmsg(instance, oncore_cmd_Cg, sizeof(oncore_cmd_Cg));  // Return to  Posn Fix mode
+                                                                                       // Reset set VP to IDLE
+                instance->o_state = ONCORE_TEST_SENT;
+                oncore_log(instance, LOG_NOTICE, "state = ONCORE_TEST_SENT");
 
-		oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
-	}
+                oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
+        }
 }
 
 
@@ -2876,48 +2879,48 @@ oncore_msg_Cf(
 
 static void
 oncore_msg_Cj(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	int	mode;
+        int     mode;
 
-	memcpy(instance->Cj, buf, len);
+        memcpy(instance->Cj, buf, len);
 
-	instance->timeout = 0;
-	if (instance->o_state == ONCORE_CHECK_ID) {
-		oncore_msg_Cj_id(instance, buf, len);
-		oncore_chan_test(instance);
-	} else if (instance->o_state == ONCORE_HAVE_CHAN) {
-		mode = instance->init_type;
-		if (mode == 3 || mode == 4) {	/* Cf will return here to check for TEST */
-			instance->o_state = ONCORE_RESET_SENT;
-			oncore_log(instance, LOG_NOTICE, "state = ONCORE_RESET_SENT");
-			oncore_sendmsg(instance, oncore_cmd_Cf, sizeof(oncore_cmd_Cf));
-		} else {
-			instance->o_state = ONCORE_TEST_SENT;
-			oncore_log(instance, LOG_NOTICE, "state = ONCORE_TEST_SENT");
-		}
-	}
+        instance->timeout = 0;
+        if (instance->o_state == ONCORE_CHECK_ID) {
+                oncore_msg_Cj_id(instance, buf, len);
+                oncore_chan_test(instance);
+        } else if (instance->o_state == ONCORE_HAVE_CHAN) {
+                mode = instance->init_type;
+                if (mode == 3 || mode == 4) {   // Cf will return here to check for TEST
+                        instance->o_state = ONCORE_RESET_SENT;
+                        oncore_log(instance, LOG_NOTICE, "state = ONCORE_RESET_SENT");
+                        oncore_sendmsg(instance, oncore_cmd_Cf, sizeof(oncore_cmd_Cf));
+                } else {
+                        instance->o_state = ONCORE_TEST_SENT;
+                        oncore_log(instance, LOG_NOTICE, "state = ONCORE_TEST_SENT");
+                }
+        }
 
-	if (instance->o_state == ONCORE_TEST_SENT) {
-		if (instance->chan == 6)
-			oncore_sendmsg(instance, oncore_cmd_Ca, sizeof(oncore_cmd_Ca));
-		else if (instance->chan == 8)
-			oncore_sendmsg(instance, oncore_cmd_Fa, sizeof(oncore_cmd_Fa));
-		else if (instance->chan == 12)
-			oncore_sendmsg(instance, oncore_cmd_Ia, sizeof(oncore_cmd_Ia));
-	} else if (instance->o_state == ONCORE_INIT)
-		oncore_msg_Cj_init(instance, buf, len);
+        if (instance->o_state == ONCORE_TEST_SENT) {
+                if (instance->chan == 6)
+                        oncore_sendmsg(instance, oncore_cmd_Ca, sizeof(oncore_cmd_Ca));
+                else if (instance->chan == 8)
+                        oncore_sendmsg(instance, oncore_cmd_Fa, sizeof(oncore_cmd_Fa));
+                else if (instance->chan == 12)
+                        oncore_sendmsg(instance, oncore_cmd_Ia, sizeof(oncore_cmd_Ia));
+        } else if (instance->o_state == ONCORE_INIT)
+                oncore_msg_Cj_init(instance, buf, len);
 }
 
 
 
 /* The information on determining a Oncore 'Model', viz VP, UT, etc, from
- *	the Model Number comes from "Richard M. Hambly" <rick@cnssys.com>
- *	and from Motorola.  Until recently Rick was the only source of
- *	this information as Motorola didn't give the information out.
+ *      the Model Number comes from "Richard M. Hambly" <rick@cnssys.com>
+ *      and from Motorola.  Until recently Rick was the only source of
+ *      this information as Motorola didn't give the information out.
  *
  * Determine the Type from the Model #, this determines #chan and if TRAIM is
  *   available.
@@ -2928,116 +2931,116 @@ oncore_msg_Cj(
 
 static void
 oncore_msg_Cj_id(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	char *cp2, Model[21];
-	const char *cp, *cp1;
-	char *cpx;
+        char *cp2, Model[21];
+        const char *cp, *cp1;
+        char *cpx;
 
-	UNUSED_ARG(buf);
-	UNUSED_ARG(len);
+        UNUSED_ARG(buf);
+        UNUSED_ARG(len);
 
-	/* Write Receiver ID message to clockstats file */
+        // Write Receiver ID message to clockstats file
 
-	instance->Cj[294] = '\0';
-	for (cpx= (char *)instance->Cj; cpx< (char *) &instance->Cj[294]; ) {
-		char *cpw = strchr(cpx, '\r');
-		if (!cpw)
-			cpw = (char *)&instance->Cj[294];
-		*cpw = '\0';
-		oncore_log(instance, LOG_NOTICE, cpx);
-		*cpw = '\r';
-		cpx = cpw+2;
-	}
+        instance->Cj[294] = '\0';
+        for (cpx= (char *)instance->Cj; cpx< (char *) &instance->Cj[294]; ) {
+                char *cpw = strchr(cpx, '\r');
+                if (!cpw)
+                        cpw = (char *)&instance->Cj[294];
+                *cpw = '\0';
+                oncore_log(instance, LOG_NOTICE, cpx);
+                *cpw = '\r';
+                cpx = cpw+2;
+        }
 
-	/* next, the Firmware Version and Revision numbers */
+        // next, the Firmware Version and Revision numbers
 
-	instance->version  = (unsigned int)atoi((char *) &instance->Cj[83]);
-	instance->revision = (unsigned int)atoi((char *) &instance->Cj[111]);
+        instance->version  = (unsigned int)atoi((char *) &instance->Cj[83]);
+        instance->revision = (unsigned int)atoi((char *) &instance->Cj[111]);
 
-	/* from model number decide which Oncore this is,
-		and then the number of channels */
+        /* from model number decide which Oncore this is,
+                and then the number of channels */
 
-	for (cp= (char *) &instance->Cj[160]; *cp == ' '; cp++) {   /* start right after 'Model #' */
-		;
-	}
-	cp1 = cp;
-	cp2 = Model;
-	for (; !isspace((unsigned char)*cp) && cp-cp1 < 20; cp++, cp2++) {
-		*cp2 = *cp;
-	}
-	*cp2 = '\0';
+        for (cp= (char *) &instance->Cj[160]; *cp == ' '; cp++) {   // start right after 'Model #'
+                ;
+        }
+        cp1 = cp;
+        cp2 = Model;
+        for (; !isspace((unsigned char)*cp) && cp-cp1 < 20; cp++, cp2++) {
+                *cp2 = *cp;
+        }
+        *cp2 = '\0';
 
-	cp = 0;
-	if (!strncmp(Model, "PVT6", (size_t) 4)) {
-		cp = "PVT6";
-		instance->model = ONCORE_PVT6;
-	} else if (Model[0] == 'A') {
-		cp = "Basic";
-		instance->model = ONCORE_BASIC;
-	} else if (Model[0] == 'B' || !strncmp(Model, "T8", (size_t) 2)) {
-		cp = "VP";
-		instance->model = ONCORE_VP;
-	} else if (Model[0] == 'P') {
-		cp = "M12";
-		instance->model = ONCORE_M12;
-	} else if (Model[0] == 'R' || Model[0] == 'D' || Model[0] == 'S') {
-		if (Model[5] == 'N') {
-			cp = "GT";
-			instance->model = ONCORE_GT;
-		} else if ((Model[1] == '3' || Model[1] == '4') && Model[5] == 'G') {
-			cp = "GT+";
-			instance->model = ONCORE_GTPLUS;
-		} else if ((Model[1] == '5' && Model[5] == 'U') || (Model[1] == '1' && Model[5] == 'A')) {
-				cp = "UT";
-				instance->model = ONCORE_UT;
-		} else if (Model[1] == '5' && Model[5] == 'G') {
-			cp = "UT+";
-			instance->model = ONCORE_UTPLUS;
-		} else if (Model[1] == '6' && Model[5] == 'G') {
-			cp = "SL";
-			instance->model = ONCORE_SL;
-		} else {
-			cp = "Unknown";
-			instance->model = ONCORE_UNKNOWN;
-		}
-	} else	{
-		cp = "Unknown";
-		instance->model = ONCORE_UNKNOWN;
-	}
+        cp = 0;
+        if (!strncmp(Model, "PVT6", (size_t) 4)) {
+                cp = "PVT6";
+                instance->model = ONCORE_PVT6;
+        } else if (Model[0] == 'A') {
+                cp = "Basic";
+                instance->model = ONCORE_BASIC;
+        } else if (Model[0] == 'B' || !strncmp(Model, "T8", (size_t) 2)) {
+                cp = "VP";
+                instance->model = ONCORE_VP;
+        } else if (Model[0] == 'P') {
+                cp = "M12";
+                instance->model = ONCORE_M12;
+        } else if (Model[0] == 'R' || Model[0] == 'D' || Model[0] == 'S') {
+                if (Model[5] == 'N') {
+                        cp = "GT";
+                        instance->model = ONCORE_GT;
+                } else if ((Model[1] == '3' || Model[1] == '4') && Model[5] == 'G') {
+                        cp = "GT+";
+                        instance->model = ONCORE_GTPLUS;
+                } else if ((Model[1] == '5' && Model[5] == 'U') || (Model[1] == '1' && Model[5] == 'A')) {
+                                cp = "UT";
+                                instance->model = ONCORE_UT;
+                } else if (Model[1] == '5' && Model[5] == 'G') {
+                        cp = "UT+";
+                        instance->model = ONCORE_UTPLUS;
+                } else if (Model[1] == '6' && Model[5] == 'G') {
+                        cp = "SL";
+                        instance->model = ONCORE_SL;
+                } else {
+                        cp = "Unknown";
+                        instance->model = ONCORE_UNKNOWN;
+                }
+        } else  {
+                cp = "Unknown";
+                instance->model = ONCORE_UNKNOWN;
+        }
 
-	/* use MODEL to set CHAN and TRAIM and possibly zero SHMEM */
+        // use MODEL to set CHAN and TRAIM and possibly zero SHMEM
 
-	oncore_log_f(instance, LOG_INFO,
-		   "This looks like an Oncore %s with version %u.%u firmware.",
-		   cp, instance->version, instance->revision);
+        oncore_log_f(instance, LOG_INFO,
+                   "This looks like an Oncore %s with version %u.%u firmware.",
+                   cp, instance->version, instance->revision);
 
-	instance->chan_id = 8;	   /* default */
-	if (instance->model == ONCORE_BASIC || instance->model == ONCORE_PVT6)
-		instance->chan_id = 6;
-	else if (instance->model == ONCORE_VP || instance->model == ONCORE_UT || instance->model == ONCORE_UTPLUS)
-		instance->chan_id = 8;
-	else if (instance->model == ONCORE_M12)
-		instance->chan_id = 12;
+        instance->chan_id = 8;     // default
+        if (instance->model == ONCORE_BASIC || instance->model == ONCORE_PVT6)
+                instance->chan_id = 6;
+        else if (instance->model == ONCORE_VP || instance->model == ONCORE_UT || instance->model == ONCORE_UTPLUS)
+                instance->chan_id = 8;
+        else if (instance->model == ONCORE_M12)
+                instance->chan_id = 12;
 
-	instance->traim_id = 0;    /* default */
-	if (instance->model == ONCORE_BASIC || instance->model == ONCORE_PVT6)
-		instance->traim_id = 0;
-	else if (instance->model == ONCORE_VP || instance->model == ONCORE_UT || instance->model == ONCORE_UTPLUS)
-		instance->traim_id = 1;
-	else if (instance->model == ONCORE_M12)
-		instance->traim_id = -1;
+        instance->traim_id = 0;    // default
+        if (instance->model == ONCORE_BASIC || instance->model == ONCORE_PVT6)
+                instance->traim_id = 0;
+        else if (instance->model == ONCORE_VP || instance->model == ONCORE_UT || instance->model == ONCORE_UTPLUS)
+                instance->traim_id = 1;
+        else if (instance->model == ONCORE_M12)
+                instance->traim_id = -1;
 
-	oncore_log_f(instance, LOG_INFO, "Channels = %d, TRAIM = %s",
-		     instance->chan_id,
-		     ((instance->traim_id < 0)
-			  ? "UNKNOWN"
-			  : (instance->traim_id > 0)
-				? "ON"
-				: "OFF"));
+        oncore_log_f(instance, LOG_INFO, "Channels = %d, TRAIM = %s",
+                     instance->chan_id,
+                     ((instance->traim_id < 0)
+                          ? "UNKNOWN"
+                          : (instance->traim_id > 0)
+                                ? "ON"
+                                : "OFF"));
 }
 
 
@@ -3050,408 +3053,408 @@ oncore_msg_Cj_id(
 
 static void
 oncore_msg_Cj_init(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	uint8_t	Cmd[20];
-	int	mode;
+        uint8_t Cmd[20];
+        int     mode;
 
 
-	UNUSED_ARG(buf);
-	UNUSED_ARG(len);
+        UNUSED_ARG(buf);
+        UNUSED_ARG(len);
 
-	/* The M12 with 1.3 or 2.0 Firmware, loses track of all Satellites and has to
-	 * start again if we go from 0D -> 3D, then loses them again when we
-	 * go from 3D -> 0D.  We do this to get a @@Ea message for SHMEM.
-	 * For NOW we will turn this aspect of filling SHMEM off for the M12
-	 */
+        /* The M12 with 1.3 or 2.0 Firmware, loses track of all Satellites and has to
+         * start again if we go from 0D -> 3D, then loses them again when we
+         * go from 3D -> 0D.  We do this to get a @@Ea message for SHMEM.
+         * For NOW we will turn this aspect of filling SHMEM off for the M12
+         */
 
-	if (instance->chan == 12) {
-		instance->shmem_bad_Ea = 1;
-		oncore_log_f(instance, LOG_NOTICE,
-		   "*** SHMEM partially enabled for ONCORE M12 s/w v%u.%u ***",
-		   instance->version, instance->revision);
-	}
+        if (instance->chan == 12) {
+                instance->shmem_bad_Ea = 1;
+                oncore_log_f(instance, LOG_NOTICE,
+                   "*** SHMEM partially enabled for ONCORE M12 s/w v%u.%u ***",
+                   instance->version, instance->revision);
+        }
 
-	oncore_sendmsg(instance, oncore_cmd_Cg, sizeof(oncore_cmd_Cg)); /* Return to  Posn Fix mode */
-	oncore_sendmsg(instance, oncore_cmd_Bb, sizeof(oncore_cmd_Bb)); /* turn on for shmem (6/8/12) */
-	oncore_sendmsg(instance, oncore_cmd_Ek, sizeof(oncore_cmd_Ek)); /* turn off (VP) */
-	oncore_sendmsg(instance, oncore_cmd_Aw, sizeof(oncore_cmd_Aw)); /* UTC time (6/8/12) */
-	oncore_sendmsg(instance, oncore_cmd_AB, sizeof(oncore_cmd_AB)); /* Appl type static (VP) */
-	oncore_sendmsg(instance, oncore_cmd_Be, sizeof(oncore_cmd_Be)); /* Tell us the Almanac for shmem (6/8/12) */
-	oncore_sendmsg(instance, oncore_cmd_Bd, sizeof(oncore_cmd_Bd)); /* Tell us when Almanac changes */
+        oncore_sendmsg(instance, oncore_cmd_Cg, sizeof(oncore_cmd_Cg));  // Return to  Posn Fix mode
+        oncore_sendmsg(instance, oncore_cmd_Bb, sizeof(oncore_cmd_Bb));  // turn on for shmem (6/8/12)
+        oncore_sendmsg(instance, oncore_cmd_Ek, sizeof(oncore_cmd_Ek));  // turn off (VP)
+        oncore_sendmsg(instance, oncore_cmd_Aw, sizeof(oncore_cmd_Aw));  // UTC time (6/8/12)
+        oncore_sendmsg(instance, oncore_cmd_AB, sizeof(oncore_cmd_AB));  // Appl type static (VP)
+        oncore_sendmsg(instance, oncore_cmd_Be, sizeof(oncore_cmd_Be));  // Tell us the Almanac for shmem (6/8/12)
+        oncore_sendmsg(instance, oncore_cmd_Bd, sizeof(oncore_cmd_Bd));  // Tell us when Almanac changes
 
-	mode = instance->init_type;
+        mode = instance->init_type;
 
-	/* If there is Position input in the Config file
-	 * and mode = (1,3) set it as posn hold posn, goto 0D mode.
-	 *  or mode = (2,4) set it as INITIAL position, and do Site Survey.
-	 */
+        /* If there is Position input in the Config file
+         * and mode = (1,3) set it as posn hold posn, goto 0D mode.
+         *  or mode = (2,4) set it as INITIAL position, and do Site Survey.
+         */
 
-	if (instance->posn_set) {
-		oncore_log(instance, LOG_INFO, "Setting Posn from input data");
-		oncore_set_posn(instance);	/* this should print posn indirectly through the As cmd */
-	} else	/* must issue an @@At here to check on 6/8 Position Hold, set_posn would have */
-		if (instance->chan != 12)
-			oncore_sendmsg(instance, oncore_cmd_Atx, sizeof(oncore_cmd_Atx));
+        if (instance->posn_set) {
+                oncore_log(instance, LOG_INFO, "Setting Posn from input data");
+                oncore_set_posn(instance);      // this should print posn indirectly through the As cmd
+        } else  // must issue an @@At here to check on 6/8 Position Hold, set_posn would have
+                if (instance->chan != 12)
+                        oncore_sendmsg(instance, oncore_cmd_Atx, sizeof(oncore_cmd_Atx));
 
-	if (mode != 0) {
-			/* cable delay in ns */
-		memcpy(Cmd, oncore_cmd_Az, (size_t) sizeof(oncore_cmd_Az));
-		w32_buf(&Cmd[-2+4], (int)instance->delay);
-		oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Az));	/* 6,8,12 */
+        if (mode != 0) {
+                        // cable delay in ns
+                memcpy(Cmd, oncore_cmd_Az, (size_t) sizeof(oncore_cmd_Az));
+                w32_buf(&Cmd[-2+4], (int)instance->delay);
+                oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Az));  // 6,8,12
 
-			/* PPS offset in ns */
-		memcpy(Cmd, oncore_cmd_Ay, (size_t) sizeof(oncore_cmd_Ay));	/* some have it, some don't */
-		w32_buf(&Cmd[-2+4], instance->offset);			/* will check for hw response */
-		oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ay));
+                        // PPS offset in ns
+                memcpy(Cmd, oncore_cmd_Ay, (size_t) sizeof(oncore_cmd_Ay));     // some have it, some don't
+                w32_buf(&Cmd[-2+4], instance->offset);                  // will check for hw response
+                oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ay));
 
-		/* Satellite mask angle */
+                // Satellite mask angle
 
-		if (instance->Ag != 0xff) {	/* will have 0xff in it if not set by user */
-			memcpy(Cmd, oncore_cmd_Ag, (size_t) sizeof(oncore_cmd_Ag));
-			Cmd[-2+4] = instance->Ag;
-			oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ag));
-		}
-	}
+                if (instance->Ag != 0xff) {     // will have 0xff in it if not set by user
+                        memcpy(Cmd, oncore_cmd_Ag, (size_t) sizeof(oncore_cmd_Ag));
+                        Cmd[-2+4] = instance->Ag;
+                        oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ag));
+                }
+        }
 
-	/* 6, 8 12 chan - Position/Status/Data Output Message, 1/s
-	 * now we're really running
-	 * these were ALL started in the chan test,
-	 * However, if we had mode=3,4 then commands got turned off, so we turn
-	 * them on again here just in case
-	 */
+        /* 6, 8 12 chan - Position/Status/Data Output Message, 1/s
+         * now we're really running
+         * these were ALL started in the chan test,
+         * However, if we had mode=3,4 then commands got turned off, so we turn
+         * them on again here just in case
+         */
 
-	if (instance->chan == 6) { /* start 6chan, kill 8,12chan commands, possibly testing VP in 6chan mode */
-		oncore_sendmsg(instance, oncore_cmd_Ea0, sizeof(oncore_cmd_Ea0));
-		oncore_sendmsg(instance, oncore_cmd_En0, sizeof(oncore_cmd_En0));
-		oncore_sendmsg(instance, oncore_cmd_Ha0, sizeof(oncore_cmd_Ha0));
-		oncore_sendmsg(instance, oncore_cmd_Hn0, sizeof(oncore_cmd_Hn0));
-		oncore_sendmsg(instance, oncore_cmd_Ba, sizeof(oncore_cmd_Ba ));
-	} else if (instance->chan == 8) {  /* start 8chan, kill 6,12chan commands */
-		oncore_sendmsg(instance, oncore_cmd_Ba0, sizeof(oncore_cmd_Ba0));
-		oncore_sendmsg(instance, oncore_cmd_Bn0, sizeof(oncore_cmd_Bn0));
-		oncore_sendmsg(instance, oncore_cmd_Ha0, sizeof(oncore_cmd_Ha0));
-		oncore_sendmsg(instance, oncore_cmd_Hn0, sizeof(oncore_cmd_Hn0));
-		oncore_sendmsg(instance, oncore_cmd_Ea, sizeof(oncore_cmd_Ea ));
-	} else if (instance->chan == 12){  /* start 12chan, kill 6,12chan commands */
-		oncore_sendmsg(instance, oncore_cmd_Ba0, sizeof(oncore_cmd_Ba0));
-		oncore_sendmsg(instance, oncore_cmd_Bn0, sizeof(oncore_cmd_Bn0));
-		oncore_sendmsg(instance, oncore_cmd_Ea0, sizeof(oncore_cmd_Ea0));
-		oncore_sendmsg(instance, oncore_cmd_En0, sizeof(oncore_cmd_En0));
-		oncore_sendmsg(instance, oncore_cmd_Ha, sizeof(oncore_cmd_Ha ));
-		oncore_cmd_Gc[2] = (uint8_t)((instance->pps_control < 0) ?
+        if (instance->chan == 6) {  // start 6chan, kill 8,12chan commands, possibly testing VP in 6chan mode
+                oncore_sendmsg(instance, oncore_cmd_Ea0, sizeof(oncore_cmd_Ea0));
+                oncore_sendmsg(instance, oncore_cmd_En0, sizeof(oncore_cmd_En0));
+                oncore_sendmsg(instance, oncore_cmd_Ha0, sizeof(oncore_cmd_Ha0));
+                oncore_sendmsg(instance, oncore_cmd_Hn0, sizeof(oncore_cmd_Hn0));
+                oncore_sendmsg(instance, oncore_cmd_Ba, sizeof(oncore_cmd_Ba ));
+        } else if (instance->chan == 8) {  // start 8chan, kill 6,12chan commands
+                oncore_sendmsg(instance, oncore_cmd_Ba0, sizeof(oncore_cmd_Ba0));
+                oncore_sendmsg(instance, oncore_cmd_Bn0, sizeof(oncore_cmd_Bn0));
+                oncore_sendmsg(instance, oncore_cmd_Ha0, sizeof(oncore_cmd_Ha0));
+                oncore_sendmsg(instance, oncore_cmd_Hn0, sizeof(oncore_cmd_Hn0));
+                oncore_sendmsg(instance, oncore_cmd_Ea, sizeof(oncore_cmd_Ea ));
+        } else if (instance->chan == 12){  // start 12chan, kill 6,12chan commands
+                oncore_sendmsg(instance, oncore_cmd_Ba0, sizeof(oncore_cmd_Ba0));
+                oncore_sendmsg(instance, oncore_cmd_Bn0, sizeof(oncore_cmd_Bn0));
+                oncore_sendmsg(instance, oncore_cmd_Ea0, sizeof(oncore_cmd_Ea0));
+                oncore_sendmsg(instance, oncore_cmd_En0, sizeof(oncore_cmd_En0));
+                oncore_sendmsg(instance, oncore_cmd_Ha, sizeof(oncore_cmd_Ha ));
+                oncore_cmd_Gc[2] = (uint8_t)((instance->pps_control < 0) ?
                                     1 : instance->pps_control);
-		oncore_sendmsg(instance, oncore_cmd_Gc, sizeof(oncore_cmd_Gc)); /* PPS off/continuous/Tracking 1+sat/TRAIM */
-	}
+                oncore_sendmsg(instance, oncore_cmd_Gc, sizeof(oncore_cmd_Gc));  // PPS off/continuous/Tracking 1+sat/TRAIM
+        }
 
-	instance->count = 1;
-	instance->o_state = ONCORE_ALMANAC;
-	oncore_log(instance, LOG_NOTICE, "state = ONCORE_ALMANAC");
+        instance->count = 1;
+        instance->o_state = ONCORE_ALMANAC;
+        oncore_log(instance, LOG_NOTICE, "state = ONCORE_ALMANAC");
 }
 
 
 
-/* 12chan position */
+// 12chan position
 
 static void
 oncore_msg_Ga(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	long lat, lon, ht;
-	double Lat, Lon, Ht;
+        long lat, lon, ht;
+        double Lat, Lon, Ht;
 
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	lat = buf_w32(&buf[4]);
-	lon = buf_w32(&buf[8]);
-	ht  = buf_w32(&buf[12]);  /* GPS ellipsoid */
+        lat = buf_w32(&buf[4]);
+        lon = buf_w32(&buf[8]);
+        ht  = buf_w32(&buf[12]);  // GPS ellipsoid
 
-	Lat = lat;
-	Lon = lon;
-	Ht  = ht;
+        Lat = lat;
+        Lon = lon;
+        Ht  = ht;
 
-	Lat /= 3600000;
-	Lon /= 3600000;
-	Ht  /= 100;
+        Lat /= 3600000;
+        Lon /= 3600000;
+        Ht  /= 100;
 
-	oncore_log_f(instance, LOG_NOTICE,
-		     "Ga Posn Lat = %.7f, Lon = %.7f, Ht  = %.2f", Lat,
-		     Lon, Ht);
+        oncore_log_f(instance, LOG_NOTICE,
+                     "Ga Posn Lat = %.7f, Lon = %.7f, Ht  = %.2f", Lat,
+                     Lon, Ht);
 
-	instance->ss_lat  = lat;
-	instance->ss_long = lon;
-	instance->ss_ht   = ht;
+        instance->ss_lat  = lat;
+        instance->ss_long = lon;
+        instance->ss_ht   = ht;
 
-	oncore_print_posn(instance);
+        oncore_print_posn(instance);
 }
 
 
 
-/* 12 chan time/date */
+// 12 chan time/date
 
 static void
 oncore_msg_Gb(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	const char *	gmts;
-	int	mo, d, y, h, m, s, gmth, gmtm;
+        const char *    gmts;
+        int     mo, d, y, h, m, s, gmth, gmtm;
 
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	mo = buf[4];
-	d  = buf[5];
-	y  = 256*buf[6]+buf[7];
+        mo = buf[4];
+        d  = buf[5];
+        y  = 256*buf[6]+buf[7];
 
-	h  = buf[8];
-	m  = buf[9];
-	s  = buf[10];
+        h  = buf[8];
+        m  = buf[9];
+        s  = buf[10];
 
-	gmts = ((buf[11] == 0) ? "+" : "-");
-	gmth = buf[12];
-	gmtm = buf[13];
+        gmts = ((buf[11] == 0) ? "+" : "-");
+        gmth = buf[12];
+        gmtm = buf[13];
 
-	oncore_log_f(instance, LOG_NOTICE,
-		     "Date/Time set to: %02d-%02d-%02dT%2d:%02d:%02d%s%02d%02d",
-		     y, mo, d, h, m, s, gmts, gmth, gmtm);
+        oncore_log_f(instance, LOG_NOTICE,
+                     "Date/Time set to: %02d-%02d-%02dT%2d:%02d:%02d%s%02d%02d",
+                     y, mo, d, h, m, s, gmts, gmth, gmtm);
 }
 
 
 
-/* Response to PPS Control message (M12 and M12+T only ) */
+// Response to PPS Control message (M12 and M12+T only )
 
 static void
 oncore_msg_Gc(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	const char *tbl[] = {"OFF", "ON", "SATELLITE", "TRAIM" };
+        const char *tbl[] = {"OFF", "ON", "SATELLITE", "TRAIM" };
 
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	instance->pps_control_msg_seen = 1;
-	oncore_log_f(instance, LOG_INFO, "PPS Control set to %s",
-		     tbl[buf[4]]);
+        instance->pps_control_msg_seen = 1;
+        oncore_log_f(instance, LOG_INFO, "PPS Control set to %s",
+                     tbl[buf[4]]);
 }
 
 
 
-/* Leap Second for M12, gives all info from satellite message */
-/* also in UT v3.0 */
+// Leap Second for M12, gives all info from satellite message
+// also in UT v3.0
 
 static void
 oncore_msg_Gj(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	static const char * insrem[2] = {
-		"removed",
-		"inserted"
-	};
+        static const char * insrem[2] = {
+                "removed",
+                "inserted"
+        };
 
-	int dt;
-	const char *cp;
+        int dt;
+        const char *cp;
 
-	UNUSED_ARG(len);
+        UNUSED_ARG(len);
 
-	instance->saw_Gj = 1; /* flag, saw_Gj, don't need to try Bj in check_leap */
+        instance->saw_Gj = 1;  // flag, saw_Gj, don't need to try Bj in check_leap
 
-	/* print the message to verify what's there */
+        // print the message to verify what's there
 
-	dt = buf[5] - buf[4];
+        dt = buf[5] - buf[4];
 
-	oncore_log_f(instance, LOG_INFO,
-		     "Leap Sec Msg: %d %d %d %d %d %d %d %d %d %d",
-		     buf[4], buf[5], 256 * buf[6] + buf[7], buf[8],
-		     buf[9], buf[10],
-		     (buf[14] + 256 *
-		         (buf[13] + 256 * (buf[12] + 256 * buf[11]))),
-		     buf[15], buf[16], buf[17]);
+        oncore_log_f(instance, LOG_INFO,
+                     "Leap Sec Msg: %d %d %d %d %d %d %d %d %d %d",
+                     buf[4], buf[5], 256 * buf[6] + buf[7], buf[8],
+                     buf[9], buf[10],
+                     (buf[14] + 256 *
+                         (buf[13] + 256 * (buf[12] + 256 * buf[11]))),
+                     buf[15], buf[16], buf[17]);
 
-	/* There seems to be eternal confusion about when a leap second
-	 * takes place. It's the second *before* the new TAI offset
-	 * becomes effective. But since the ONCORE receiver tells us
-	 * just that, we would have to do some time/date calculations to
-	 * get the actual leap second -- that is, the one that is
-	 * deleted or inserted.
-	 *
-	 * Going through all this for a simple log is probably overkill,
-	 * so for fixing bug#1050 the message output is changed to
-	 * reflect the fact that it tells the second after the leap
-	 * second.
-	 */
-	if (dt)
-		oncore_log_f(instance, LOG_NOTICE,
-			     "Leap second %s (%d) before %04u-%02u-%02u/%02u:%02u:%02u",
-			     insrem[(dt > 0)], dt,
-			     256U * buf[6] + buf[7], buf[8], buf[9],
-			     buf[15], buf[16], buf[17]);
+        /* There seems to be eternal confusion about when a leap second
+         * takes place. It's the second *before* the new TAI offset
+         * becomes effective. But since the ONCORE receiver tells us
+         * just that, we would have to do some time/date calculations to
+         * get the actual leap second -- that is, the one that is
+         * deleted or inserted.
+         *
+         * Going through all this for a simple log is probably overkill,
+         * so for fixing bug#1050 the message output is changed to
+         * reflect the fact that it tells the second after the leap
+         * second.
+         */
+        if (dt)
+                oncore_log_f(instance, LOG_NOTICE,
+                             "Leap second %s (%d) before %04u-%02u-%02u/%02u:%02u:%02u",
+                             insrem[(dt > 0)], dt,
+                             256U * buf[6] + buf[7], buf[8], buf[9],
+                             buf[15], buf[16], buf[17]);
 
-	/* Only raise warning within a month of the leap second */
+        // Only raise warning within a month of the leap second
 
-	instance->pp->leap = LEAP_NOWARNING;
-	cp = "Set pp.leap to LEAP_NOWARNING";
+        instance->pp->leap = LEAP_NOWARNING;
+        cp = "Set pp.leap to LEAP_NOWARNING";
 
-	if (buf[6] == instance->BEHa[6] && buf[7] == instance->BEHa[7] && /* year */
-	    buf[8] == instance->BEHa[4]) {	/* month */
-		if (dt) {
-			if (dt < 0) {
-				instance->pp->leap = LEAP_DELSECOND;
-				cp = "Set pp.leap to LEAP_DELSECOND";
-			} else {
-				instance->pp->leap = LEAP_ADDSECOND;
-				cp = "Set pp.leap to LEAP_ADDSECOND";
-			}
-		}
-	}
-	oncore_log(instance, LOG_INFO, cp);
+        if (buf[6] == instance->BEHa[6] && buf[7] == instance->BEHa[7] &&  // year
+            buf[8] == instance->BEHa[4]) {      // month
+                if (dt) {
+                        if (dt < 0) {
+                                instance->pp->leap = LEAP_DELSECOND;
+                                cp = "Set pp.leap to LEAP_DELSECOND";
+                        } else {
+                                instance->pp->leap = LEAP_ADDSECOND;
+                                cp = "Set pp.leap to LEAP_ADDSECOND";
+                        }
+                }
+        }
+        oncore_log(instance, LOG_INFO, cp);
 }
 
 
 
-/* Power on failure */
+// Power on failure
 
 static void
 oncore_msg_Sz(
-	struct instance *instance,
-	uint8_t *buf,
-	size_t len
-	)
+        struct instance *instance,
+        uint8_t *buf,
+        size_t len
+        )
 {
-	UNUSED_ARG(buf);
-	UNUSED_ARG(len);
+        UNUSED_ARG(buf);
+        UNUSED_ARG(len);
 
-	if (instance && instance->peer) {
-		oncore_log(instance, LOG_ERR, "Oncore: System Failure at Power On");
-		oncore_shutdown(instance->peer->procptr);
-	}
+        if (instance && instance->peer) {
+                oncore_log(instance, LOG_ERR, "Oncore: System Failure at Power On");
+                oncore_shutdown(instance->peer->procptr);
+        }
 }
 
-/************** Small Subroutines ***************/
+// ************* Small Subroutines **************
 
 
 static void
 oncore_antenna_report(
-	struct instance *instance,
-	enum antenna_state new_state)
+        struct instance *instance,
+        enum antenna_state new_state)
 {
-	const char *cp;
+        const char *cp;
 
-	if (instance->ant_state == new_state) {
-		return;
-	}
+        if (instance->ant_state == new_state) {
+                return;
+        }
 
-	switch (new_state) {
-	case ONCORE_ANTENNA_OK: cp = "GPS antenna: OK";                   break;
-	case ONCORE_ANTENNA_OC: cp = "GPS antenna: short (overcurrent)";  break;
-	case ONCORE_ANTENNA_UC: cp = "GPS antenna: open (not connected)"; break;
-	case ONCORE_ANTENNA_NV: cp = "GPS antenna: short (no voltage)";   break;
-	case ONCORE_ANTENNA_UNKNOWN:
-	default:		cp = "GPS antenna: ?";                    break;
-	}
+        switch (new_state) {
+        case ONCORE_ANTENNA_OK: cp = "GPS antenna: OK";                   break;
+        case ONCORE_ANTENNA_OC: cp = "GPS antenna: short (overcurrent)";  break;
+        case ONCORE_ANTENNA_UC: cp = "GPS antenna: open (not connected)"; break;
+        case ONCORE_ANTENNA_NV: cp = "GPS antenna: short (no voltage)";   break;
+        case ONCORE_ANTENNA_UNKNOWN:
+        default:                cp = "GPS antenna: ?";                    break;
+        }
 
-	instance->ant_state = new_state;
-	oncore_log(instance, LOG_NOTICE, cp);
+        instance->ant_state = new_state;
+        oncore_log(instance, LOG_NOTICE, cp);
 }
 
 
 
 static void
 oncore_chan_test(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	/* subroutine oncore_Cj_id has determined the number of channels from the
-	 * model number of the attached oncore.  This is not always correct since
-	 * the oncore could have non-standard firmware.  Here we check (independently) by
-	 * trying a 6, 8, and 12 chan command, and see which responds.
-	 * Caution: more than one CAN respond.
-	 *
-	 * This #chan is used by the code rather than that calculated from the model number.
-	 */
+        /* subroutine oncore_Cj_id has determined the number of channels from the
+         * model number of the attached oncore.  This is not always correct since
+         * the oncore could have non-standard firmware.  Here we check (independently) by
+         * trying a 6, 8, and 12 chan command, and see which responds.
+         * Caution: more than one CAN respond.
+         *
+         * This #chan is used by the code rather than that calculated from the model number.
+         */
 
-	instance->o_state = ONCORE_CHECK_CHAN;
-	oncore_log(instance, LOG_NOTICE, "state = ONCORE_CHECK_CHAN");
+        instance->o_state = ONCORE_CHECK_CHAN;
+        oncore_log(instance, LOG_NOTICE, "state = ONCORE_CHECK_CHAN");
 
-	instance->count3 = 1;
-	oncore_sendmsg(instance, oncore_cmd_Ba, sizeof(oncore_cmd_Ba));
-	oncore_sendmsg(instance, oncore_cmd_Ea, sizeof(oncore_cmd_Ea));
-	oncore_sendmsg(instance, oncore_cmd_Ha, sizeof(oncore_cmd_Ha));
+        instance->count3 = 1;
+        oncore_sendmsg(instance, oncore_cmd_Ba, sizeof(oncore_cmd_Ba));
+        oncore_sendmsg(instance, oncore_cmd_Ea, sizeof(oncore_cmd_Ea));
+        oncore_sendmsg(instance, oncore_cmd_Ha, sizeof(oncore_cmd_Ha));
 }
 
 
 
-/* check for a GOOD Almanac, have we got one yet? */
+// check for a GOOD Almanac, have we got one yet?
 
 static void
 oncore_check_almanac(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	if (instance->chan == 6) {
-		instance->rsm.bad_almanac = instance->BEHa[64]&0x1;
-		instance->rsm.bad_fix	  = instance->BEHa[64]&0x52;
-	} else if (instance->chan == 8) {
-		instance->rsm.bad_almanac = instance->BEHa[72]&0x1;
-		instance->rsm.bad_fix	  = instance->BEHa[72]&0x52;
-	} else if (instance->chan == 12) {
-		int bits1, bits2, bits3;
+        if (instance->chan == 6) {
+                instance->rsm.bad_almanac = instance->BEHa[64]&0x1;
+                instance->rsm.bad_fix     = instance->BEHa[64]&0x52;
+        } else if (instance->chan == 8) {
+                instance->rsm.bad_almanac = instance->BEHa[72]&0x1;
+                instance->rsm.bad_fix     = instance->BEHa[72]&0x52;
+        } else if (instance->chan == 12) {
+                int bits1, bits2, bits3;
 
-		bits1 = (instance->BEHa[129]>>5) & 0x7; 	/* actually Ha */
-		bits2 = instance->BEHa[130];
-		instance->rsm.bad_almanac = (bits2 & 0x80);
-		instance->rsm.bad_fix	  = (bits2 & 0x8) || (bits1 == 0x2);
-					  /* too few sat     Bad Geom	  */
+                bits1 = (instance->BEHa[129]>>5) & 0x7;         // actually Ha
+                bits2 = instance->BEHa[130];
+                instance->rsm.bad_almanac = (bits2 & 0x80);
+                instance->rsm.bad_fix     = (bits2 & 0x8) || (bits1 == 0x2);
+                                          // too few sat     Bad Geom
 
-		bits3 = instance->BEHa[141];	/* UTC parameters */
-		if (!instance->count5_set && (bits3 & 0xC0)) {
-			instance->count5 = 4;	/* was 2 [Classic Bug 1766] */
-			instance->count5_set = 1;
-		}
+                bits3 = instance->BEHa[141];    // UTC parameters
+                if (!instance->count5_set && (bits3 & 0xC0)) {
+                        instance->count5 = 4;   // was 2 [Classic Bug 1766]
+                        instance->count5_set = 1;
+                }
 #ifdef ONCORE_VERBOSE_CHECK_ALMANAC
-		oncore_log_f(instance, LOG_DEBUG,
-			     "DEBUG BITS: (%x %x), (%x %x %x),  %x %x %x %x %x",
-			     instance->BEHa[129], instance->BEHa[130],
-			     bits1, bits2, bits3,
-			     instance->mode == MODE_0D,
-			     instance->mode == MODE_2D,
-			     instance->mode == MODE_3D,
-			     instance->rsm.bad_almanac,
-			     instance->rsm.bad_fix);
+                oncore_log_f(instance, LOG_DEBUG,
+                             "DEBUG BITS: (%x %x), (%x %x %x),  %x %x %x %x %x",
+                             instance->BEHa[129], instance->BEHa[130],
+                             bits1, bits2, bits3,
+                             instance->mode == MODE_0D,
+                             instance->mode == MODE_2D,
+                             instance->mode == MODE_3D,
+                             instance->rsm.bad_almanac,
+                             instance->rsm.bad_fix);
 #endif
-	}
+        }
 }
 
 
 
-/* check the antenna for changes (did it get unplugged?) */
+// check the antenna for changes (did it get unplugged?)
 
 static void
 oncore_check_antenna(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	enum antenna_state antenna;		/* antenna state */
+        enum antenna_state antenna;             // antenna state
 
-	antenna = instance->ant_state;
-	if (instance->chan == 12)
-		antenna = (instance->BEHa[130] & 0x6 ) >> 1;
-	else
-		antenna = (instance->BEHa[37] & 0xc0) >> 6;  /* prob unset 6, set GT, UT unset VP */
+        antenna = instance->ant_state;
+        if (instance->chan == 12)
+                antenna = (instance->BEHa[130] & 0x6 ) >> 1;
+        else
+                antenna = (instance->BEHa[37] & 0xc0) >> 6;  // prob unset 6, set GT, UT unset VP
 
-	oncore_antenna_report (instance, antenna);
+        oncore_antenna_report (instance, antenna);
 }
 
 
@@ -3481,43 +3484,43 @@ oncore_check_antenna(
 
 static void
 oncore_check_leap_sec(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	oncore_cmd_Bl[2] = 1;				/* just to be sure */
-	if (instance->Bj_day != instance->BEHa[5]) {	/* do this 1/day */
-		instance->Bj_day = instance->BEHa[5];
+        oncore_cmd_Bl[2] = 1;                           // just to be sure
+        if (instance->Bj_day != instance->BEHa[5]) {    // do this 1/day
+                instance->Bj_day = instance->BEHa[5];
 
-		if (instance->saw_Gj < 0) {	/* -1 DON'T have Gj use Bj */
-			if ((instance->BEHa[4] == 6) || (instance->BEHa[4] == 12))
-				oncore_sendmsg(instance, oncore_cmd_Bj, sizeof(oncore_cmd_Bj));
-			oncore_sendmsg(instance, oncore_cmd_Bl, sizeof(oncore_cmd_Bl));
-			return;
-		}
+                if (instance->saw_Gj < 0) {     // -1 DON'T have Gj use Bj
+                        if ((instance->BEHa[4] == 6) || (instance->BEHa[4] == 12))
+                                oncore_sendmsg(instance, oncore_cmd_Bj, sizeof(oncore_cmd_Bj));
+                        oncore_sendmsg(instance, oncore_cmd_Bl, sizeof(oncore_cmd_Bl));
+                        return;
+                }
 
-		if (instance->saw_Gj == 0)	/* 0 is don't know if we have Gj */
-			instance->count4 = 1;
+                if (instance->saw_Gj == 0)      // 0 is don't know if we have Gj
+                        instance->count4 = 1;
 
-		oncore_sendmsg(instance, oncore_cmd_Gj, sizeof(oncore_cmd_Gj));
-		return;
-	}
+                oncore_sendmsg(instance, oncore_cmd_Gj, sizeof(oncore_cmd_Gj));
+                return;
+        }
 
-	/* Gj works for some 6/8 chan UT and the M12	  */
-	/* if no response from Gj in 5 sec, we try Bj	  */
-	/* which isn't implemented in all the GT/UT either */
+        // Gj works for some 6/8 chan UT and the M12
+        // if no response from Gj in 5 sec, we try Bj
+        // which isn't implemented in all the GT/UT either
 
-	if (instance->count4) { 	/* delay, waiting for Gj response */
-		if (instance->saw_Gj == 1)
-			instance->count4 = 0;
-		else if (instance->count4++ > 5) {	/* delay, waiting for Gj response */
-			instance->saw_Gj = -1;		/* didn't see it, will use Bj */
-			instance->count4 = 0;
-			if ((instance->BEHa[4] == 6) || (instance->BEHa[4] == 12)) {
-				oncore_sendmsg(instance, oncore_cmd_Bj, sizeof(oncore_cmd_Bj));
-				oncore_sendmsg(instance, oncore_cmd_Bl, sizeof(oncore_cmd_Bl));
-			}
-		}
-	}
+        if (instance->count4) {         // delay, waiting for Gj response
+                if (instance->saw_Gj == 1)
+                        instance->count4 = 0;
+                else if (instance->count4++ > 5) {      // delay, waiting for Gj response
+                        instance->saw_Gj = -1;          // didn't see it, will use Bj
+                        instance->count4 = 0;
+                        if ((instance->BEHa[4] == 6) || (instance->BEHa[4] == 12)) {
+                                oncore_sendmsg(instance, oncore_cmd_Bj, sizeof(oncore_cmd_Bj));
+                                oncore_sendmsg(instance, oncore_cmd_Bl, sizeof(oncore_cmd_Bl));
+                        }
+                }
+        }
 }
 
 
@@ -3529,47 +3532,47 @@ oncore_check_leap_sec(
 
 static int
 oncore_checksum_ok(
-	uint8_t *buf,
-	int	len
-	)
+        uint8_t *buf,
+        int     len
+        )
 {
-	int	i, j;
+        int     i, j;
 
-	j = 0;
-	for (i = 2; i < len-3; i++)
-		j ^= buf[i];
+        j = 0;
+        for (i = 2; i < len-3; i++)
+                j ^= buf[i];
 
-	return(j == buf[len-3]);
+        return(j == buf[len-3]);
 }
 
 
 
 static void
 oncore_compute_dH(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	int GPS, MSL;
+        int GPS, MSL;
 
-	/* Here calculate dH = GPS - MSL for output message */
-	/* also set Altitude Hold mode if GT */
+        // Here calculate dH = GPS - MSL for output message
+        // also set Altitude Hold mode if GT
 
-	instance->have_dH = 1;
-	if (instance->chan == 12) {
-		GPS = buf_w32(&instance->BEHa[39]);
-		MSL = buf_w32(&instance->BEHa[43]);
-	} else {
-		GPS = buf_w32(&instance->BEHa[23]);
-		MSL = buf_w32(&instance->BEHa[27]);
-	}
-	instance->dH = GPS - MSL;
-	instance->dH /= 100.;
+        instance->have_dH = 1;
+        if (instance->chan == 12) {
+                GPS = buf_w32(&instance->BEHa[39]);
+                MSL = buf_w32(&instance->BEHa[43]);
+        } else {
+                GPS = buf_w32(&instance->BEHa[23]);
+                MSL = buf_w32(&instance->BEHa[27]);
+        }
+        instance->dH = GPS - MSL;
+        instance->dH /= 100.;
 
-	/* if MSL is not set, the calculation is meaningless */
+        // if MSL is not set, the calculation is meaningless
 
-	if (MSL)	/* not set ! */
-		oncore_log_f(instance, LOG_INFO,
-		             "dH = (GPS - MSL) = %.2fm", instance->dH);
+        if (MSL)        // not set !
+                oncore_log_f(instance, LOG_INFO,
+                             "dH = (GPS - MSL) = %.2fm", instance->dH);
 }
 
 
@@ -3580,152 +3583,152 @@ oncore_compute_dH(
 
 static void
 oncore_load_almanac(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	uint8_t	*cp, Cmd[20];
-	int	n;
-	struct timespec ts;
-	struct tm tmbuf, *tm;
+        uint8_t *cp, Cmd[20];
+        int     n;
+        struct timespec ts;
+        struct tm tmbuf, *tm;
 
-	if (!instance->shmem)
-		return;
+        if (!instance->shmem)
+                return;
 
 #ifndef ONCORE_VERBOSE_LOAD_ALMANAC
-	for (cp = instance->shmem + 4; (n = 256 * (*(cp-3)) + *(cp-2));
-	     cp += (n + 3)) {
-		if (!strncmp((char *) cp, "@@Cb", 4) &&
-		    oncore_checksum_ok(cp, 33) &&
-		    (*(cp+4) == 4 || *(cp+4) == 5)) {
-			IGNORE(write(instance->ttyfd, cp, (size_t)n));
-			oncore_print_Cb(instance, cp);
-		}
-	}
-#else	/* ONCORE_VERBOSE_LOAD_ALMANAC follows */
-	for (cp = instance->shmem + 4; (n = 256 * (*(cp-3)) + *(cp-2));
-	     cp += (n+3)) {
-		oncore_log_f(instance, LOG_DEBUG, "See %c%c%c%c %d",
-			   *(cp), *(cp+1), *(cp+2), *(cp+3), *(cp+4));
+        for (cp = instance->shmem + 4; (n = 256 * (*(cp-3)) + *(cp-2));
+             cp += (n + 3)) {
+                if (!strncmp((char *) cp, "@@Cb", 4) &&
+                    oncore_checksum_ok(cp, 33) &&
+                    (*(cp+4) == 4 || *(cp+4) == 5)) {
+                        IGNORE(write(instance->ttyfd, cp, (size_t)n));
+                        oncore_print_Cb(instance, cp);
+                }
+        }
+#else   // ONCORE_VERBOSE_LOAD_ALMANAC follows
+        for (cp = instance->shmem + 4; (n = 256 * (*(cp-3)) + *(cp-2));
+             cp += (n+3)) {
+                oncore_log_f(instance, LOG_DEBUG, "See %c%c%c%c %d",
+                           *(cp), *(cp+1), *(cp+2), *(cp+3), *(cp+4));
 
-		if (!strncmp(cp, "@@Cb", 4)) {
-			oncore_print_Cb(instance, cp);
-			if (oncore_checksum_ok(cp, 33)) {
-				if (*(cp+4) == 4 || *(cp+4) == 5) {
-					oncore_log(instance, LOG_DEBUG, "GOOD SF");
-					write(instance->ttyfd, cp, n);
-				} else
-					oncore_log(instance, LOG_DEBUG, "BAD SF");
-			} else
-				oncore_log(instance, LOG_DEBUG, "BAD CHECKSUM");
-		}
-	}
+                if (!strncmp(cp, "@@Cb", 4)) {
+                        oncore_print_Cb(instance, cp);
+                        if (oncore_checksum_ok(cp, 33)) {
+                                if (*(cp+4) == 4 || *(cp+4) == 5) {
+                                        oncore_log(instance, LOG_DEBUG, "GOOD SF");
+                                        write(instance->ttyfd, cp, n);
+                                } else
+                                        oncore_log(instance, LOG_DEBUG, "BAD SF");
+                        } else
+                                oncore_log(instance, LOG_DEBUG, "BAD CHECKSUM");
+                }
+        }
 #endif
 
-	/* Must load position and time or the Almanac doesn't do us any good */
+        // Must load position and time or the Almanac doesn't do us any good
 
-	if (!instance->posn_set) {	/* if we input a posn use it, else from SHMEM */
-		oncore_log(instance, LOG_NOTICE, "Loading Posn from SHMEM");
-		for (cp=instance->shmem+4; (n = 256*(*(cp-3)) + *(cp-2));  cp+=(n+3)) {
-			if ((instance->chan == 6  && (!strncmp((char *) cp, "@@Ba", 4) && oncore_checksum_ok(cp,  68))) ||
-			    (instance->chan == 8  && (!strncmp((char *) cp, "@@Ea", 4) && oncore_checksum_ok(cp,  76))) ||
-			    (instance->chan == 12 && (!strncmp((char *) cp, "@@Ha", 4) && oncore_checksum_ok(cp, 154)))) {
-				int ii, jj, kk;
+        if (!instance->posn_set) {      // if we input a posn use it, else from SHMEM
+                oncore_log(instance, LOG_NOTICE, "Loading Posn from SHMEM");
+                for (cp=instance->shmem+4; (n = 256*(*(cp-3)) + *(cp-2));  cp+=(n+3)) {
+                        if ((instance->chan == 6  && (!strncmp((char *) cp, "@@Ba", 4) && oncore_checksum_ok(cp,  68))) ||
+                            (instance->chan == 8  && (!strncmp((char *) cp, "@@Ea", 4) && oncore_checksum_ok(cp,  76))) ||
+                            (instance->chan == 12 && (!strncmp((char *) cp, "@@Ha", 4) && oncore_checksum_ok(cp, 154)))) {
+                                int ii, jj, kk;
 
-				instance->posn_set = 1;
-				ii = buf_w32(cp + 15);
-				jj = buf_w32(cp + 19);
-				kk = buf_w32(cp + 23);
+                                instance->posn_set = 1;
+                                ii = buf_w32(cp + 15);
+                                jj = buf_w32(cp + 19);
+                                kk = buf_w32(cp + 23);
 #ifdef ONCORE_VERBOSE_LOAD_ALMANAC
-				oncore_log_f(instance, LOG_DEBUG,
-					     "SHMEM posn = %ld (%d, %d, %d)",
-					     (long)(cp-instance->shmem),
-					     ii, jj, kk);
+                                oncore_log_f(instance, LOG_DEBUG,
+                                             "SHMEM posn = %ld (%d, %d, %d)",
+                                             (long)(cp-instance->shmem),
+                                             ii, jj, kk);
 #endif
-				if (ii != 0 || jj != 0 || kk != 0) { /* phk asked for this test */
-					instance->ss_lat  = ii;
-					instance->ss_long = jj;
-					instance->ss_ht   = kk;
-				}
-			}
-		}
-	}
-	oncore_set_posn(instance);
+                                if (ii != 0 || jj != 0 || kk != 0) {  // phk asked for this test
+                                        instance->ss_lat  = ii;
+                                        instance->ss_long = jj;
+                                        instance->ss_ht   = kk;
+                                }
+                        }
+                }
+        }
+        oncore_set_posn(instance);
 
-	/* and set time to time from Computer clock */
+        // and set time to time from Computer clock
 
-	clock_gettime(CLOCK_REALTIME, &ts);
-	tm = gmtime_r((const time_t *) &ts.tv_sec, &tmbuf);
+        clock_gettime(CLOCK_REALTIME, &ts);
+        tm = gmtime_r((const time_t *) &ts.tv_sec, &tmbuf);
 
 #ifdef ONCORE_VERBOSE_LOAD_ALMANAC
-	oncore_log_f(instance, LOG_DEBUG, "DATE %d %d %d, %d %d %d",
-		     1900 + tm->tm_year, tm->tm_mon, tm->tm_mday,
-		     tm->tm_hour, tm->tm_min, tm->tm_sec);
+        oncore_log_f(instance, LOG_DEBUG, "DATE %d %d %d, %d %d %d",
+                     1900 + tm->tm_year, tm->tm_mon, tm->tm_mday,
+                     tm->tm_hour, tm->tm_min, tm->tm_sec);
 #endif
-	if (instance->chan == 12) {
-		memcpy(Cmd, oncore_cmd_Gb, (size_t) sizeof(oncore_cmd_Gb));
-		Cmd[-2+4]  = tm->tm_mon + 1;
-		Cmd[-2+5]  = tm->tm_mday;
-		Cmd[-2+6]  = (1900+tm->tm_year)/256;
-		Cmd[-2+7]  = (1900+tm->tm_year)%256;
-		Cmd[-2+8]  = tm->tm_hour;
-		Cmd[-2+9]  = tm->tm_min;
-		Cmd[-2+10] = tm->tm_sec;
-		Cmd[-2+11] = 0;
-		Cmd[-2+12] = 0;
-		Cmd[-2+13] = 0;
-		oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Gb));
-	} else {
-		/* First set GMT offset to zero */
+        if (instance->chan == 12) {
+                memcpy(Cmd, oncore_cmd_Gb, (size_t) sizeof(oncore_cmd_Gb));
+                Cmd[-2+4]  = tm->tm_mon + 1;
+                Cmd[-2+5]  = tm->tm_mday;
+                Cmd[-2+6]  = (1900+tm->tm_year)/256;
+                Cmd[-2+7]  = (1900+tm->tm_year)%256;
+                Cmd[-2+8]  = tm->tm_hour;
+                Cmd[-2+9]  = tm->tm_min;
+                Cmd[-2+10] = tm->tm_sec;
+                Cmd[-2+11] = 0;
+                Cmd[-2+12] = 0;
+                Cmd[-2+13] = 0;
+                oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Gb));
+        } else {
+                // First set GMT offset to zero
 
-		oncore_sendmsg(instance, oncore_cmd_Ab, sizeof(oncore_cmd_Ab));
+                oncore_sendmsg(instance, oncore_cmd_Ab, sizeof(oncore_cmd_Ab));
 
-		memcpy(Cmd, oncore_cmd_Ac, (size_t) sizeof(oncore_cmd_Ac));
-		Cmd[-2+4] = tm->tm_mon + 1;
-		Cmd[-2+5] = tm->tm_mday;
-		Cmd[-2+6] = (1900+tm->tm_year)/256;
-		Cmd[-2+7] = (1900+tm->tm_year)%256;
-		oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ac));
+                memcpy(Cmd, oncore_cmd_Ac, (size_t) sizeof(oncore_cmd_Ac));
+                Cmd[-2+4] = tm->tm_mon + 1;
+                Cmd[-2+5] = tm->tm_mday;
+                Cmd[-2+6] = (1900+tm->tm_year)/256;
+                Cmd[-2+7] = (1900+tm->tm_year)%256;
+                oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ac));
 
-		memcpy(Cmd, oncore_cmd_Aa, (size_t) sizeof(oncore_cmd_Aa));
-		Cmd[-2+4] = tm->tm_hour;
-		Cmd[-2+5] = tm->tm_min;
-		Cmd[-2+6] = tm->tm_sec;
-		oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Aa));
-	}
+                memcpy(Cmd, oncore_cmd_Aa, (size_t) sizeof(oncore_cmd_Aa));
+                Cmd[-2+4] = tm->tm_hour;
+                Cmd[-2+5] = tm->tm_min;
+                Cmd[-2+6] = tm->tm_sec;
+                oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Aa));
+        }
 
-	oncore_log(instance, LOG_INFO, "Setting Posn and Time after Loading Almanac");
+        oncore_log(instance, LOG_INFO, "Setting Posn and Time after Loading Almanac");
 }
 
 
 
-/* Almanac data input */
+// Almanac data input
 
 static void
 oncore_print_Cb(
-	struct instance *instance,
-	uint8_t *cp
-	)
+        struct instance *instance,
+        uint8_t *cp
+        )
 {
 #ifndef ONCORE_VERBOSE_CB
-	UNUSED_ARG(instance);
-	UNUSED_ARG(cp);
+        UNUSED_ARG(instance);
+        UNUSED_ARG(cp);
 #else
-	int	ii;
-	char	Msg[160], Msg2[10];
+        int     ii;
+        char    Msg[160], Msg2[10];
 
-	oncore_log_f(instance, LOG_DEBUG, "DEBUG: See: %c%c%c%c", *(cp),
-		     *(cp+1), *(cp+2), *(cp+3));
+        oncore_log_f(instance, LOG_DEBUG, "DEBUG: See: %c%c%c%c", *(cp),
+                     *(cp+1), *(cp+2), *(cp+3));
 
-	snprintf(Msg, sizeof(Msg), "DEBUG: Cb: [%d,%d]", *(cp+4),
-		*(cp+5));
-	for (ii = 0; ii < 33; ii++) {
-		snprintf(Msg2, sizeof(Msg2), " %d", *(cp+ii));
-		strlcat(Msg, Msg2, sizeof(Msg));
-	}
-	oncore_log(instance, LOG_DEBUG, Msg);
+        snprintf(Msg, sizeof(Msg), "DEBUG: Cb: [%d,%d]", *(cp+4),
+                *(cp+5));
+        for (ii = 0; ii < 33; ii++) {
+                snprintf(Msg2, sizeof(Msg2), " %d", *(cp+ii));
+                strlcat(Msg, Msg2, sizeof(Msg));
+        }
+        oncore_log(instance, LOG_DEBUG, Msg);
 
-	oncore_log_f(instance, LOG_DEBUG, "Debug: Cb: [%d,%d]", *(cp+4),
-		     *(cp+5));
+        oncore_log_f(instance, LOG_DEBUG, "Debug: Cb: [%d,%d]", *(cp+4),
+                     *(cp+5));
 #endif
 }
 
@@ -3733,79 +3736,79 @@ oncore_print_Cb(
 #if 0
 static void
 oncore_print_array(
-	uint8_t *cp,
-	int	n
-	)
+        uint8_t *cp,
+        int     n
+        )
 {
-	int	jj, nn;
+        int     jj, nn;
 
-	nn = 0;
-	printf("\nTOP\n");
-	jj = n/16;
-	for (int j=0; j<jj; j++) {
-		printf("%4d: ", nn);
-		nn += 16;
-		for (int i=0; i<16; i++)
-			printf(" %o", *cp++);
-		printf("\n");
-	}
+        nn = 0;
+        printf("\nTOP\n");
+        jj = n/16;
+        for (int j=0; j<jj; j++) {
+                printf("%4d: ", nn);
+                nn += 16;
+                for (int i=0; i<16; i++)
+                        printf(" %o", *cp++);
+                printf("\n");
+        }
 }
 #endif
 
 
 static void
 oncore_print_posn(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	char ew, ns;
-	double xd, xm, xs, yd, ym, ys, hm, hft;
-	int idx, idy, is, imx, imy;
-	long lat, lon;
+        char ew, ns;
+        double xd, xm, xs, yd, ym, ys, hm, hft;
+        int idx, idy, is, imx, imy;
+        long lat, lon;
 
-	oncore_log(instance, LOG_INFO, "Posn:");
-	ew = 'E';
-	lon = instance->ss_long;
-	if (lon < 0) {
-		ew = 'W';
-		lon = -lon;
-	}
+        oncore_log(instance, LOG_INFO, "Posn:");
+        ew = 'E';
+        lon = instance->ss_long;
+        if (lon < 0) {
+                ew = 'W';
+                lon = -lon;
+        }
 
-	ns = 'N';
-	lat = instance->ss_lat;
-	if (lat < 0) {
-		ns = 'S';
-		lat = -lat;
-	}
+        ns = 'N';
+        lat = instance->ss_lat;
+        if (lat < 0) {
+                ns = 'S';
+                lat = -lat;
+        }
 
-	hm = instance->ss_ht/100.;
-	hft= hm/0.3048;
+        hm = instance->ss_ht/100.;
+        hft= hm/0.3048;
 
-	xd = lat/3600000.;	/* lat, lon in int msec arc, ht in cm. */
-	yd = lon/3600000.;
-	oncore_log_f(instance, LOG_INFO,
-		     "Lat = %c %11.7fdeg,    Long = %c %11.7fdeg,    Alt = %5.2fm (%5.2fft) GPS",
-		     ns, xd, ew, yd, hm, hft);
+        xd = lat/3600000.;      // lat, lon in int msec arc, ht in cm.
+        yd = lon/3600000.;
+        oncore_log_f(instance, LOG_INFO,
+                     "Lat = %c %11.7fdeg,    Long = %c %11.7fdeg,    Alt = %5.2fm (%5.2fft) GPS",
+                     ns, xd, ew, yd, hm, hft);
 
-	idx = xd;
-	idy = yd;
-	imx = lat%3600000;
-	imy = lon%3600000;
-	xm = imx/60000.;
-	ym = imy/60000.;
-	oncore_log_f(instance, LOG_INFO,
-		     "Lat = %c %3ddeg %7.4fm,   Long = %c %3ddeg %8.5fm,  Alt = %7.2fm (%7.2fft) GPS",
-		     ns, idx, xm, ew, idy, ym, hm, hft);
+        idx = xd;
+        idy = yd;
+        imx = lat%3600000;
+        imy = lon%3600000;
+        xm = imx/60000.;
+        ym = imy/60000.;
+        oncore_log_f(instance, LOG_INFO,
+                     "Lat = %c %3ddeg %7.4fm,   Long = %c %3ddeg %8.5fm,  Alt = %7.2fm (%7.2fft) GPS",
+                     ns, idx, xm, ew, idy, ym, hm, hft);
 
-	imx = xm;
-	imy = ym;
-	is  = lat%60000;
-	xs  = is/1000.;
-	is  = lon%60000;
-	ys  = is/1000.;
-	oncore_log_f(instance, LOG_INFO,
-		     "Lat = %c %3ddeg %2dm %5.2fs, Long = %c %3ddeg %2dm %5.2fs, Alt = %7.2fm (%7.2fft) GPS",
-		     ns, idx, imx, xs, ew, idy, imy, ys, hm, hft);
+        imx = xm;
+        imy = ym;
+        is  = lat%60000;
+        xs  = is/1000.;
+        is  = lon%60000;
+        ys  = is/1000.;
+        oncore_log_f(instance, LOG_INFO,
+                     "Lat = %c %3ddeg %2dm %5.2fs, Long = %c %3ddeg %2dm %5.2fs, Alt = %7.2fm (%7.2fft) GPS",
+                     ns, idx, imx, xs, ew, idy, imy, ys, hm, hft);
 }
 
 
@@ -3816,130 +3819,130 @@ oncore_print_posn(
 
 static void
 oncore_sendmsg(
-	struct	instance *instance,
-	uint8_t *ptr,
-	size_t len
-	)
+        struct  instance *instance,
+        uint8_t *ptr,
+        size_t len
+        )
 {
-	int	fd;
-	uint8_t cs = 0;
+        int     fd;
+        uint8_t cs = 0;
 
-	fd = instance->ttyfd;
+        fd = instance->ttyfd;
 #ifdef ONCORE_VERBOSE_SENDMSG
-	if (debug > 4) { /* SPECIAL DEBUG */
-		oncore_log_f(instance, LOG_DEBUG, "ONCORE: Send @@%c%c %d",
-			     ptr[0], ptr[1], (int)len);
-	}
+        if (debug > 4) {  // SPECIAL DEBUG
+                oncore_log_f(instance, LOG_DEBUG, "ONCORE: Send @@%c%c %d",
+                             ptr[0], ptr[1], (int)len);
+        }
 #endif
-	IGNORE(write(fd, "@@", (size_t) 2));
-	IGNORE(write(fd, ptr, len));
-	while (len--)
-		cs ^= *ptr++;
-	IGNORE(write(fd, &cs, (size_t) 1));
-	IGNORE(write(fd, "\r\n", (size_t) 2));
+        IGNORE(write(fd, "@@", (size_t) 2));
+        IGNORE(write(fd, ptr, len));
+        while (len--)
+                cs ^= *ptr++;
+        IGNORE(write(fd, &cs, (size_t) 1));
+        IGNORE(write(fd, "\r\n", (size_t) 2));
 }
 
 
 
 static void
 oncore_set_posn(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	int	mode;
-	uint8_t	  Cmd[20];
+        int     mode;
+        uint8_t   Cmd[20];
 
-	/* Turn OFF position hold, it needs to be off to set position (for some units),
-	   will get set ON in @@Ea later */
+        /* Turn OFF position hold, it needs to be off to set position (for some units),
+           will get set ON in @@Ea later */
 
-	if (instance->chan == 12)
-		oncore_sendmsg(instance, oncore_cmd_Gd0, sizeof(oncore_cmd_Gd0)); /* (12) */
-	else {
-		oncore_sendmsg(instance, oncore_cmd_At0, sizeof(oncore_cmd_At0)); /* (6/8) */
-		oncore_sendmsg(instance, oncore_cmd_Av0, sizeof(oncore_cmd_Av0)); /* (6/8) */
-	}
+        if (instance->chan == 12)
+                oncore_sendmsg(instance, oncore_cmd_Gd0, sizeof(oncore_cmd_Gd0));  // (12)
+        else {
+                oncore_sendmsg(instance, oncore_cmd_At0, sizeof(oncore_cmd_At0));  // (6/8)
+                oncore_sendmsg(instance, oncore_cmd_Av0, sizeof(oncore_cmd_Av0));  // (6/8)
+        }
 
-	mode = instance->init_type;
+        mode = instance->init_type;
 
-	if (mode != 0) {	/* first set posn hold position */
-		memcpy(Cmd, oncore_cmd_As, (size_t) sizeof(oncore_cmd_As));	/* don't modify static variables */
-		w32_buf(&Cmd[-2+4],  (int) instance->ss_lat);
-		w32_buf(&Cmd[-2+8],  (int) instance->ss_long);
-		w32_buf(&Cmd[-2+12], (int) instance->ss_ht);
-		Cmd[-2+16] = 0;
-		oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_As));	/* posn hold 3D posn (6/8/12) */
+        if (mode != 0) {        // first set posn hold position
+                memcpy(Cmd, oncore_cmd_As, (size_t) sizeof(oncore_cmd_As));     // don't modify static variables
+                w32_buf(&Cmd[-2+4],  (int) instance->ss_lat);
+                w32_buf(&Cmd[-2+8],  (int) instance->ss_long);
+                w32_buf(&Cmd[-2+12], (int) instance->ss_ht);
+                Cmd[-2+16] = 0;
+                oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_As));  // posn hold 3D posn (6/8/12)
 
-		memcpy(Cmd, oncore_cmd_Au, (size_t) sizeof(oncore_cmd_Au));
-		w32_buf(&Cmd[-2+4], (int) instance->ss_ht);
-		Cmd[-2+8] = 0;
-		oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Au));	/* altitude hold (6/8/12 not UT, M12T) */
+                memcpy(Cmd, oncore_cmd_Au, (size_t) sizeof(oncore_cmd_Au));
+                w32_buf(&Cmd[-2+4], (int) instance->ss_ht);
+                Cmd[-2+8] = 0;
+                oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Au));  // altitude hold (6/8/12 not UT, M12T)
 
-		/* next set current position */
+                // next set current position
 
-		if (instance->chan == 12) {
-			memcpy(Cmd, oncore_cmd_Ga, (size_t) sizeof(oncore_cmd_Ga));
-			w32_buf(&Cmd[-2+4], (int) instance->ss_lat);
-			w32_buf(&Cmd[-2+8], (int) instance->ss_long);
-			w32_buf(&Cmd[-2+12],(int) instance->ss_ht);
-			Cmd[-2+16] = 0;
-			oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ga));		  /* 3d posn (12) */
-		} else {
-			memcpy(Cmd, oncore_cmd_Ad, (size_t) sizeof(oncore_cmd_Ad));
-			w32_buf(&Cmd[-2+4], (int) instance->ss_lat);
-			oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ad));	/* lat (6/8) */
+                if (instance->chan == 12) {
+                        memcpy(Cmd, oncore_cmd_Ga, (size_t) sizeof(oncore_cmd_Ga));
+                        w32_buf(&Cmd[-2+4], (int) instance->ss_lat);
+                        w32_buf(&Cmd[-2+8], (int) instance->ss_long);
+                        w32_buf(&Cmd[-2+12],(int) instance->ss_ht);
+                        Cmd[-2+16] = 0;
+                        oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ga));            // 3d posn (12)
+                } else {
+                        memcpy(Cmd, oncore_cmd_Ad, (size_t) sizeof(oncore_cmd_Ad));
+                        w32_buf(&Cmd[-2+4], (int) instance->ss_lat);
+                        oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ad));  // lat (6/8)
 
-			memcpy(Cmd, oncore_cmd_Ae, (size_t) sizeof(oncore_cmd_Ae));
-			w32_buf(&Cmd[-2+4], (int) instance->ss_long);
-			oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ae));	/* long (6/8) */
+                        memcpy(Cmd, oncore_cmd_Ae, (size_t) sizeof(oncore_cmd_Ae));
+                        w32_buf(&Cmd[-2+4], (int) instance->ss_long);
+                        oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ae));  // long (6/8)
 
-			memcpy(Cmd, oncore_cmd_Af, (size_t) sizeof(oncore_cmd_Af));
-			w32_buf(&Cmd[-2+4], (int) instance->ss_ht);
-			Cmd[-2+8] = 0;
-			oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Af));	/* ht (6/8) */
-		}
+                        memcpy(Cmd, oncore_cmd_Af, (size_t) sizeof(oncore_cmd_Af));
+                        w32_buf(&Cmd[-2+4], (int) instance->ss_ht);
+                        Cmd[-2+8] = 0;
+                        oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Af));  // ht (6/8)
+                }
 
-		/* Finally, turn on position hold */
+                // Finally, turn on position hold
 
-		if (instance->chan == 12)
-			oncore_sendmsg(instance, oncore_cmd_Gd1,  sizeof(oncore_cmd_Gd1));
-		else
-			oncore_sendmsg(instance, oncore_cmd_At1,  sizeof(oncore_cmd_At1));
-	}
+                if (instance->chan == 12)
+                        oncore_sendmsg(instance, oncore_cmd_Gd1,  sizeof(oncore_cmd_Gd1));
+                else
+                        oncore_sendmsg(instance, oncore_cmd_At1,  sizeof(oncore_cmd_At1));
+        }
 }
 
 
 
 static void
 oncore_set_traim(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	if (instance->traim_in != -1)	/* set in Input */
-		instance->traim = instance->traim_in;
-	else
-		instance->traim = (int8_t)instance->traim_ck;
+        if (instance->traim_in != -1)   // set in Input
+                instance->traim = instance->traim_in;
+        else
+                instance->traim = (int8_t)instance->traim_ck;
 
-	oncore_log_f(instance, LOG_INFO, "Input   says TRAIM = %d",
-		     instance->traim_in);
-	oncore_log_f(instance, LOG_INFO, "Model # says TRAIM = %d",
-		     instance->traim_id);
-	oncore_log_f(instance, LOG_INFO, "Testing says TRAIM = %d",
-		     instance->traim_ck);
-	oncore_log_f(instance, LOG_INFO, "Using        TRAIM = %d",
-		     instance->traim);
+        oncore_log_f(instance, LOG_INFO, "Input   says TRAIM = %d",
+                     instance->traim_in);
+        oncore_log_f(instance, LOG_INFO, "Model # says TRAIM = %d",
+                     instance->traim_id);
+        oncore_log_f(instance, LOG_INFO, "Testing says TRAIM = %d",
+                     instance->traim_ck);
+        oncore_log_f(instance, LOG_INFO, "Using        TRAIM = %d",
+                     instance->traim);
 
-	if (instance->traim_ck == 1 && instance->traim == 0) {
-		/* if it should be off, and I turned it on during testing,
-		   then turn it off again */
-		if (instance->chan == 6)
-			oncore_sendmsg(instance, oncore_cmd_Bnx, sizeof(oncore_cmd_Bnx));
-		else if (instance->chan == 8)
-			oncore_sendmsg(instance, oncore_cmd_Enx, sizeof(oncore_cmd_Enx));
-		else {	/* chan == 12 */
-			oncore_sendmsg(instance, oncore_cmd_Ge0, sizeof(oncore_cmd_Ge0));
-			oncore_sendmsg(instance, oncore_cmd_Hn0, sizeof(oncore_cmd_Hn0));
-		}
-	}
+        if (instance->traim_ck == 1 && instance->traim == 0) {
+                /* if it should be off, and I turned it on during testing,
+                   then turn it off again */
+                if (instance->chan == 6)
+                        oncore_sendmsg(instance, oncore_cmd_Bnx, sizeof(oncore_cmd_Bnx));
+                else if (instance->chan == 8)
+                        oncore_sendmsg(instance, oncore_cmd_Enx, sizeof(oncore_cmd_Enx));
+                else {  // chan == 12
+                        oncore_sendmsg(instance, oncore_cmd_Ge0, sizeof(oncore_cmd_Ge0));
+                        oncore_sendmsg(instance, oncore_cmd_Hn0, sizeof(oncore_cmd_Hn0));
+                }
+        }
 }
 
 
@@ -3950,37 +3953,37 @@ oncore_set_traim(
 
 static void
 oncore_shmem_get_3D(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	if (instance->pp->second%15 == 3) {	/* start the sequence */			/* by changing mode */
-		instance->shmem_reset = 1;
-		if (instance->chan == 12) {
-			if (instance->shmem_Posn == 2)
-				oncore_sendmsg(instance, oncore_cmd_Gd2,  sizeof(oncore_cmd_Gd2));  /* 2D */
-			else
-				oncore_sendmsg(instance, oncore_cmd_Gd0,  sizeof(oncore_cmd_Gd0));  /* 3D */
-		} else {
-			if (instance->saw_At) { 		/* out of 0D -> 3D mode */
-				oncore_sendmsg(instance, oncore_cmd_At0, sizeof(oncore_cmd_At0));
-				if (instance->shmem_Posn == 2)	/* 3D -> 2D mode */
-					oncore_sendmsg(instance, oncore_cmd_Av1, sizeof(oncore_cmd_Av1));
-			} else
-				oncore_sendmsg(instance, oncore_cmd_Av0, sizeof(oncore_cmd_Av0));
-		}
-	} else if (instance->shmem_reset || (instance->mode != MODE_0D)) {
-		instance->shmem_reset = 0;
-		if (instance->chan == 12)
-			oncore_sendmsg(instance, oncore_cmd_Gd1,  sizeof(oncore_cmd_Gd1));	/* 0D */
-		else {
-			if (instance->saw_At) {
-				if (instance->mode == MODE_2D)	/* 2D -> 3D or 0D mode */
-					oncore_sendmsg(instance, oncore_cmd_Av0, sizeof(oncore_cmd_Av0));
-				oncore_sendmsg(instance, oncore_cmd_At1,  sizeof(oncore_cmd_At1)); /* to 0D mode */
-			} else
-				oncore_sendmsg(instance, oncore_cmd_Av1,  sizeof(oncore_cmd_Av1));
-		}
-	}
+        if (instance->pp->second%15 == 3) {     // start the sequence                        /* by changing mode */
+                instance->shmem_reset = 1;
+                if (instance->chan == 12) {
+                        if (instance->shmem_Posn == 2)
+                                oncore_sendmsg(instance, oncore_cmd_Gd2,  sizeof(oncore_cmd_Gd2));  // 2D
+                        else
+                                oncore_sendmsg(instance, oncore_cmd_Gd0,  sizeof(oncore_cmd_Gd0));  // 3D
+                } else {
+                        if (instance->saw_At) {                 // out of 0D -> 3D mode
+                                oncore_sendmsg(instance, oncore_cmd_At0, sizeof(oncore_cmd_At0));
+                                if (instance->shmem_Posn == 2)  // 3D -> 2D mode
+                                        oncore_sendmsg(instance, oncore_cmd_Av1, sizeof(oncore_cmd_Av1));
+                        } else
+                                oncore_sendmsg(instance, oncore_cmd_Av0, sizeof(oncore_cmd_Av0));
+                }
+        } else if (instance->shmem_reset || (instance->mode != MODE_0D)) {
+                instance->shmem_reset = 0;
+                if (instance->chan == 12)
+                        oncore_sendmsg(instance, oncore_cmd_Gd1,  sizeof(oncore_cmd_Gd1));      // 0D
+                else {
+                        if (instance->saw_At) {
+                                if (instance->mode == MODE_2D)  // 2D -> 3D or 0D mode
+                                        oncore_sendmsg(instance, oncore_cmd_Av0, sizeof(oncore_cmd_Av0));
+                                oncore_sendmsg(instance, oncore_cmd_At1,  sizeof(oncore_cmd_At1));  // to 0D mode
+                        } else
+                                oncore_sendmsg(instance, oncore_cmd_Av1,  sizeof(oncore_cmd_Av1));
+                }
+        }
 }
 
 
@@ -3994,159 +3997,159 @@ oncore_shmem_get_3D(
 
 static void
 oncore_ss(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	double	lat, lon, ht;
+        double  lat, lon, ht;
 
 
-	if (instance->site_survey == ONCORE_SS_HW) {
-		/*
-		 * Check to see if Hardware SiteSurvey has Finished.
-		 */
+        if (instance->site_survey == ONCORE_SS_HW) {
+                /*
+                 * Check to see if Hardware SiteSurvey has Finished.
+                 */
 
-		if ((instance->chan == 8  && !(instance->BEHa[37]  & 0x20)) ||
-		    (instance->chan == 12 && !(instance->BEHa[130] & 0x10))) {
-			oncore_log(instance, LOG_INFO, "Now in 0D mode");
+                if ((instance->chan == 8  && !(instance->BEHa[37]  & 0x20)) ||
+                    (instance->chan == 12 && !(instance->BEHa[130] & 0x10))) {
+                        oncore_log(instance, LOG_INFO, "Now in 0D mode");
 
-			if (instance->chan == 12)
-				oncore_sendmsg(instance, oncore_cmd_Gax, sizeof(oncore_cmd_Gax));
-			else
-				oncore_sendmsg(instance, oncore_cmd_Asx, sizeof(oncore_cmd_Asx));
+                        if (instance->chan == 12)
+                                oncore_sendmsg(instance, oncore_cmd_Gax, sizeof(oncore_cmd_Gax));
+                        else
+                                oncore_sendmsg(instance, oncore_cmd_Asx, sizeof(oncore_cmd_Asx));
 
-			oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_DONE");
-			instance->site_survey = ONCORE_SS_DONE;
-		}
-	} else {
-		/*
-		 * Must be a Software Site Survey.
-		 */
+                        oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_DONE");
+                        instance->site_survey = ONCORE_SS_DONE;
+                }
+        } else {
+                /*
+                 * Must be a Software Site Survey.
+                 */
 
-		if (instance->rsm.bad_fix)	/* Not if poor geometry or less than 3 sats */
-			return;
+                if (instance->rsm.bad_fix)      // Not if poor geometry or less than 3 sats
+                        return;
 
-		if (instance->mode != MODE_3D) {	/* Use only 3D Fixes */
-			return;
-		}
+                if (instance->mode != MODE_3D) {        // Use only 3D Fixes
+                        return;
+                }
 
-		instance->ss_lat  += buf_w32(&instance->BEHa[15]);
-		instance->ss_long += buf_w32(&instance->BEHa[19]);
-		instance->ss_ht   += buf_w32(&instance->BEHa[23]);  /* GPS ellipsoid */
-		instance->ss_count++;
+                instance->ss_lat  += buf_w32(&instance->BEHa[15]);
+                instance->ss_long += buf_w32(&instance->BEHa[19]);
+                instance->ss_ht   += buf_w32(&instance->BEHa[23]);  // GPS ellipsoid
+                instance->ss_count++;
 
-		if (instance->ss_count != POS_HOLD_AVERAGE) {
-			return;
-		}
+                if (instance->ss_count != POS_HOLD_AVERAGE) {
+                        return;
+                }
 
-		instance->ss_lat  /= POS_HOLD_AVERAGE;
-		instance->ss_long /= POS_HOLD_AVERAGE;
-		instance->ss_ht   /= POS_HOLD_AVERAGE;
+                instance->ss_lat  /= POS_HOLD_AVERAGE;
+                instance->ss_long /= POS_HOLD_AVERAGE;
+                instance->ss_ht   /= POS_HOLD_AVERAGE;
 
-		oncore_log_f(instance, LOG_NOTICE,
-			     "Surveyed posn: lat %.3f (mas) long %.3f (mas) ht %.3f (cm)",
-			     instance->ss_lat, instance->ss_long,
-			     instance->ss_ht);
-		lat = instance->ss_lat/3600000.;
-		lon = instance->ss_long/3600000.;
-		ht  = instance->ss_ht/100;
-		oncore_log_f(instance, LOG_NOTICE,
-			     "Surveyed posn: lat %.7f (deg) long %.7f (deg) ht %.2f (m)",
-			     lat, lon, ht);
+                oncore_log_f(instance, LOG_NOTICE,
+                             "Surveyed posn: lat %.3f (mas) long %.3f (mas) ht %.3f (cm)",
+                             instance->ss_lat, instance->ss_long,
+                             instance->ss_ht);
+                lat = instance->ss_lat/3600000.;
+                lon = instance->ss_long/3600000.;
+                ht  = instance->ss_ht/100;
+                oncore_log_f(instance, LOG_NOTICE,
+                             "Surveyed posn: lat %.7f (deg) long %.7f (deg) ht %.2f (m)",
+                             lat, lon, ht);
 
-		oncore_set_posn(instance);
+                oncore_set_posn(instance);
 
-		oncore_log(instance, LOG_INFO, "Now in 0D mode");
+                oncore_log(instance, LOG_INFO, "Now in 0D mode");
 
-		oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_DONE");
-		instance->site_survey = ONCORE_SS_DONE;
-	}
+                oncore_log(instance, LOG_NOTICE, "SSstate = ONCORE_SS_DONE");
+                instance->site_survey = ONCORE_SS_DONE;
+        }
 }
 
 
 
 static bool
 oncore_wait_almanac(
-	struct instance *instance
-	)
+        struct instance *instance
+        )
 {
-	if (instance->rsm.bad_almanac) {
-		instance->counta++;
-		if (instance->counta%5 == 0)
-			oncore_log(instance, LOG_INFO, "Waiting for Almanac");
+        if (instance->rsm.bad_almanac) {
+                instance->counta++;
+                if (instance->counta%5 == 0)
+                        oncore_log(instance, LOG_INFO, "Waiting for Almanac");
 
-		/*
-		 * If we get here (first time) then we don't have an almanac in memory.
-		 * Check if we have a SHMEM, and if so try to load whatever is there.
-		 */
+                /*
+                 * If we get here (first time) then we don't have an almanac in memory.
+                 * Check if we have a SHMEM, and if so try to load whatever is there.
+                 */
 
-		if (!instance->almanac_from_shmem) {
-			instance->almanac_from_shmem = 1;
-			oncore_load_almanac(instance);
-		}
-		return true;
-	} else {  /* Here we have the Almanac, we will be starting the @@Bn/@@En/@@Hn
-		     commands, and can finally check for TRAIM.  Again, we set a delay
-		     (5sec) and wait for things to settle down */
+                if (!instance->almanac_from_shmem) {
+                        instance->almanac_from_shmem = 1;
+                        oncore_load_almanac(instance);
+                }
+                return true;
+        } else {  /* Here we have the Almanac, we will be starting the @@Bn/@@En/@@Hn
+                     commands, and can finally check for TRAIM.  Again, we set a delay
+                     (5sec) and wait for things to settle down */
 
-		if (instance->chan == 6)
-			oncore_sendmsg(instance, oncore_cmd_Bn, sizeof(oncore_cmd_Bn));
-		else if (instance->chan == 8)
-			oncore_sendmsg(instance, oncore_cmd_En, sizeof(oncore_cmd_En));
-		else if (instance->chan == 12) {
-			oncore_sendmsg(instance, oncore_cmd_Gc, sizeof(oncore_cmd_Gc)); /* 1PPS on, continuous */
-			oncore_sendmsg(instance, oncore_cmd_Ge, sizeof(oncore_cmd_Ge)); /* TRAIM on */
-			oncore_sendmsg(instance, oncore_cmd_Hn, sizeof(oncore_cmd_Hn)); /* TRAIM status 1/s */
-		}
-		instance->traim_delay = 1;
+                if (instance->chan == 6)
+                        oncore_sendmsg(instance, oncore_cmd_Bn, sizeof(oncore_cmd_Bn));
+                else if (instance->chan == 8)
+                        oncore_sendmsg(instance, oncore_cmd_En, sizeof(oncore_cmd_En));
+                else if (instance->chan == 12) {
+                        oncore_sendmsg(instance, oncore_cmd_Gc, sizeof(oncore_cmd_Gc));  // 1PPS on, continuous
+                        oncore_sendmsg(instance, oncore_cmd_Ge, sizeof(oncore_cmd_Ge));  // TRAIM on
+                        oncore_sendmsg(instance, oncore_cmd_Hn, sizeof(oncore_cmd_Hn));  // TRAIM status 1/s
+                }
+                instance->traim_delay = 1;
 
-		oncore_log(instance, LOG_NOTICE, "Have now loaded an ALMANAC");
+                oncore_log(instance, LOG_NOTICE, "Have now loaded an ALMANAC");
 
-		instance->o_state = ONCORE_RUN;
-		oncore_log(instance, LOG_NOTICE, "state = ONCORE_RUN");
-	}
-	return false;
+                instance->o_state = ONCORE_RUN;
+                oncore_log(instance, LOG_NOTICE, "state = ONCORE_RUN");
+        }
+        return false;
 }
 
 
 
 static void
 oncore_log (
-	struct instance *instance,
-	int log_level,
-	const char *msg
-	)
+        struct instance *instance,
+        int log_level,
+        const char *msg
+        )
 {
-	msyslog(log_level, "REFCLOCK: ONCORE[%d]: %s", instance->unit, msg);
-	mprintf_clock_stats(instance->peer, "REFCLOCK: ONCORE[%d]: %s",
-			    instance->unit, msg);
+        msyslog(log_level, "REFCLOCK: ONCORE[%d]: %s", instance->unit, msg);
+        mprintf_clock_stats(instance->peer, "REFCLOCK: ONCORE[%d]: %s",
+                            instance->unit, msg);
 }
 
 
 static int
 oncore_log_f(
-	struct instance *	instance,
-	int			log_level,
-	const char *		fmt,
-	...
-	)
+        struct instance *       instance,
+        int                     log_level,
+        const char *            fmt,
+        ...
+        )
 {
-	va_list	ap;
-	int	rc;
-	char	msg[512];
+        va_list ap;
+        int     rc;
+        char    msg[512];
 
-	va_start(ap, fmt);
-	rc = vsnprintf(msg, sizeof(msg), fmt, ap);
-	va_end(ap);
-	oncore_log(instance, log_level, msg);
+        va_start(ap, fmt);
+        rc = vsnprintf(msg, sizeof(msg), fmt, ap);
+        va_end(ap);
+        oncore_log(instance, log_level, msg);
 
 #ifdef ONCORE_VERBOSE_ONCORE_LOG
-	instance->max_len = max(strlen(msg), instance->max_len);
-	instance->max_count++;
-	if (instance->max_count % 100 == 0)
-		oncore_log_f(instance, LOG_INFO,
-			    "Max Message Length so far is %d",
-			    instance->max_len);
+        instance->max_len = max(strlen(msg), instance->max_len);
+        instance->max_count++;
+        if (instance->max_count % 100 == 0)
+                oncore_log_f(instance, LOG_INFO,
+                            "Max Message Length so far is %d",
+                            instance->max_len);
 #endif
-	return rc;
+        return rc;
 }
 
