@@ -31,14 +31,12 @@
  *         enough for an IPv6 address.
  */
 
-
 static bool create_listener4(int port);
 static bool create_listener6(int port);
 static void* nts_ke_listener(void*);
-static void nts_ke_request(SSL *ssl,
-  char *errbuf, int errlng, const char **errtxt);
-static void nts_ke_accept_fail(char* hostname,
-    double wall, double usr, double sys, int code);
+static void nts_ke_request(NTS_Server_Info *nsi, SSL *ssl);
+static void nts_ke_accept_fail(NTS_Server_Info *nsi,
+  int code, const unsigned char *alpn);
 
 static void nts_lock_certlock(void);
 static void nts_unlock_certlock(void);
@@ -48,8 +46,10 @@ static SSL_CTX *server_ctx = NULL;
 static int listener4_sock = -1;
 static int listener6_sock = -1;
 
-static void nts_ke_setup_send(struct BufCtl_t *buf, int aead,
+static void nts_ke_setup_send(BufCtl *buf, int aead,
        uint8_t *c2s, uint8_t *s2c, int keylen);
+
+void log_ntske (NTS_Server_Info *nsi, NTSKE_Status status, const char *using);
 
 /* We need a lock to protect reloading our certificate.
  * This seems like overkill, but it doesn't happen often. */
@@ -191,26 +191,15 @@ void nts_unlock_certlock(void) {
         }
 }
 
-// lfptod goes to long double
-static inline double lfptox(l_fp r) {
-// l_fp to double
-        return ldexp((double)((int64_t)r), -32);
-}
-
 
 void* nts_ke_listener(void* arg) {
         struct timeval timeout = {.tv_sec = NTS_KE_TIMEOUT, .tv_usec = 0};
         int sock = *(int*)arg;
         char errbuf[100];
-        char addrbuf[100];
         char usingbuf[100];
-        struct timespec start, finish;          // wall clock
-        l_fp wall, usr, sys;
-        const char *errtxt;     // not NULL if error
+        NTS_Server_Info nsi;
+        SSL *ssl;
 #ifdef RUSAGE_THREAD
-        // Not in NetBSD 10.1, 2026-Apr-05
-        struct timespec start_u, finish_u;      // CPU user
-        struct timespec start_s, finish_s;      // CPU system
         struct rusage usage;
 #endif
 
@@ -224,32 +213,34 @@ void* nts_ke_listener(void* arg) {
          * writing the previous msyslog message.
          */
         getrusage(RUSAGE_THREAD, &usage);
-        start_u = tval_to_tspec(usage.ru_utime);
-        start_s = tval_to_tspec(usage.ru_stime);
+        nsi.usr = tspec_to_d(tval_to_tspec(usage.ru_utime));
+        nsi.sys = tspec_to_d(tval_to_tspec(usage.ru_stime));
 #else
-        usr = 0;
-        sys = 0;
+        nsi.usr = 0;
+        nsi.sys = 0;
 #endif
 
         while(1) {
                 NTSKE_Status status = NTSKE_SSL_Failed;
                 sockaddr_u addr;
                 socklen_t len = sizeof(addr);
-                SSL *ssl;
+                const unsigned char *alpn;
+                unsigned alpnlen;
                 int client, err;
 
                 sleep(1);                       // FIXME: log clutter/DoS
-                errtxt = NULL;
+                nsi.errtxt = NULL;
                 client = accept(sock, &addr.sa, &len);
                 if (client < 0) {
+                        // FIXME -- log with new code TCP
                         ntp_strerror_r(errno, errbuf, sizeof(errbuf));
                         msyslog(LOG_ERR, "NTSs: TCP accept failed: %s", errbuf);
                         if (EBADF == errno)
                                 return NULL;
                         continue;
                 }
-                clock_gettime(CLOCK_MONOTONIC, &start);
-                sockporttoa_r(&addr, addrbuf, sizeof(addrbuf));
+                clock_gettime(CLOCK_MONOTONIC, &nsi.start);
+                sockporttoa_r(&addr, nsi.hostaddr, sizeof(nsi.hostaddr));
 
 /* This is disabled in order to reduce clutter in the log file.
  * The client's address is now included in the final message.
@@ -294,23 +285,12 @@ void* nts_ke_listener(void* arg) {
                 SSL_set_fd(ssl, client);
 
                 err = SSL_accept(ssl);
-                if (0 >= err) {
+                SSL_get0_alpn_selected(ssl, &alpn, &alpnlen);
+                if (0 >= err || NULL == alpn) {
                         int code = SSL_get_error(ssl, err);
                         SSL_free(ssl);
                         close(client);
-                        clock_gettime(CLOCK_MONOTONIC, &finish);
-                        wall = tspec_intv_to_lfp(sub_tspec(finish, start));
-#ifdef RUSAGE_THREAD
-                        getrusage(RUSAGE_THREAD, &usage);
-                        finish_u = tval_to_tspec(usage.ru_utime);
-                        finish_s = tval_to_tspec(usage.ru_stime);
-                        usr = tspec_intv_to_lfp(sub_tspec(finish_u, start_u));
-                        sys = tspec_intv_to_lfp(sub_tspec(finish_s, start_s));
-                        start_u = finish_u;
-                        start_s = finish_s;
-#endif
-                        nts_ke_accept_fail(addrbuf,
-                          lfptox(wall), lfptox(usr), lfptox(sys), code);
+                        nts_ke_accept_fail(&nsi, code, alpn);
                         continue;
                 }
 
@@ -321,27 +301,14 @@ void* nts_ke_listener(void* arg) {
                         SSL_get_cipher_bits(ssl, NULL));
 
                 status = NTSKE_Failed;
-                nts_ke_request(ssl, errbuf, sizeof(errbuf), &errtxt);
-                if (NULL==errtxt) status = NTSKE_OK;
+                nts_ke_request(&nsi, ssl);
+                if (NULL==nsi.errtxt) status = NTSKE_OK;
 
                 SSL_shutdown(ssl);
                 SSL_free(ssl);
                 close(client);
 
-                clock_gettime(CLOCK_MONOTONIC, &finish);
-                wall = tspec_intv_to_lfp(sub_tspec(finish, start));
-#ifdef RUSAGE_THREAD
-                getrusage(RUSAGE_THREAD, &usage);
-                finish_u = tval_to_tspec(usage.ru_utime);
-                finish_s = tval_to_tspec(usage.ru_stime);
-                usr = tspec_intv_to_lfp(sub_tspec(finish_u, start_u));
-                sys = tspec_intv_to_lfp(sub_tspec(finish_s, start_s));
-                start_u = finish_u;
-                start_s = finish_s;
-#endif
-                record_ntske_log(status, addrbuf, usingbuf,
-                  lfptox(wall), lfptox(usr), lfptox(sys),
-                  errtxt);
+                log_ntske(&nsi, status, usingbuf);
         }
 
         return NULL;
@@ -351,14 +318,15 @@ void* nts_ke_listener(void* arg) {
  * print single error message for common cases.
  * Similar code in nts.c, nts_ssl_read() and nts_ssl_write()
  */
-void nts_ke_accept_fail(char* hostname,
-    double wall, double usr, double sys, int code) {
+void nts_ke_accept_fail(NTS_Server_Info *nsi,
+    int code, const unsigned char *alpn) {
         unsigned long err = ERR_peek_error();
-        char errbuf[100];
         char buff[200];
         const char *msg = NULL;
-        const char *errmsg = NULL;
-        if (0 == err) {
+        // NULL==alpn if client tries TLS 1.2
+        if (SSL_ERROR_NONE == code && NULL == alpn) {
+                msg = "No valid ALPN";
+        } else if (0 == err) {
           switch (code) {
             case SSL_ERROR_WANT_READ:
               msg = "Timeout";
@@ -370,9 +338,9 @@ void nts_ke_accept_fail(char* hostname,
               }
               // fall through
             default:
-              ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+              ntp_strerror_r(errno, nsi->errbuf, sizeof(nsi->errbuf));
               snprintf(buff, sizeof(buff), "code %d, errno=>%d, %s",
-                code, errno, errbuf);
+                code, errno, nsi->errbuf);
               msg = buff;
               break;
           }
@@ -382,58 +350,91 @@ void nts_ke_accept_fail(char* hostname,
             err = 0;
           } else {
             // Maybe we need to handle other codes
-            ntp_strerror_r(errno, errbuf, sizeof(errbuf));
+            ntp_strerror_r(errno, nsi->errbuf, sizeof(nsi->errbuf));
             snprintf(buff, sizeof(buff), "code %d, errno=>%d, %s, %lx=>%s",
-              code, errno, errbuf, err, ERR_reason_error_string(err));
+              code, errno, nsi->errbuf, err, ERR_reason_error_string(err));
             err = 0;
             msg = buff;
           }
         }
-        record_ntske_log(NTSKE_SSL_Failed, hostname, msg,
-                wall, usr, sys, errmsg);
+        log_ntske(nsi, NTSKE_SSL_Failed, msg);
 }
 
 
-void nts_ke_request(SSL *ssl,
-  char *errbuf, int errlng, const char **errtxt) {
+void nts_ke_request(NTS_Server_Info *nsi, SSL *ssl) {
         /* RFC 4: servers must accept 1024
          * Our cookies can be 104, 136, or 168 for AES_SIV_CMAC_xxx
          * 8*168 fits comfortably into 2K.
          */
         uint8_t buff[2048];
         uint8_t c2s[NTS_MAX_KEYLEN], s2c[NTS_MAX_KEYLEN];
-        int aead = NO_AEAD, keylen;
-        struct BufCtl_t buf;
+        int keylen;
+        BufCtl buf;
         int bytes_read, bytes_written;
         int used;
+        enum process_result result;
 
-        bytes_read = nts_ssl_read(ssl, buff, sizeof(buff), errtxt);
+        bytes_read = nts_ssl_read(ssl, buff, sizeof(buff), &nsi->errtxt);
         if (0 >= bytes_read)
                 return;
 
         buf.next = buff;
         buf.left = bytes_read;
-        if (!nts_ke_process_receive(&buf, &aead, errbuf, errlng, errtxt)) {
+        result = nts_ke_process_receive(nsi, &buf);
+        if (Process_OK != result) {
+                buf.next = buff;
+                buf.left = sizeof(buff);
+                // Send what we can to show what worked to help debugging
+                if (nsi->saw_aead) {
+                    if (NO_AEAD != nsi->aead) {
+                        ke_append_record_uint16(&buf, nts_algorithm_negotiation,
+                            nsi->aead);
+                    } else {
+                        ke_append_record_null(&buf, nts_algorithm_negotiation);
+                    }
+                }
+                if (nsi->saw_next_protocol) {
+                    if (nsi->next_protocol_matched) {
+                        ke_append_record_uint16(&buf,
+                            NTS_CRITICAL+nts_next_protocol_negotiation,
+                            nts_protocol_NTP);
+                    } else {
+                        ke_append_record_null(&buf,
+                            NTS_CRITICAL+nts_next_protocol_negotiation);
+                    }
+                }
+                switch (result) {
+                  case Process_Critical:
+                    ke_append_record_uint16(&buf, NTS_CRITICAL+nts_error,
+                      nts_unrecognized_critical_section);
+                    break;
+                  case Process_Error:
+                    ke_append_record_uint16(&buf, NTS_CRITICAL+nts_error,
+                      nts_bad_request);
+                    break;
+                  case Process_OK:  // keep compiler happy
+                    break;
+                  default:
+                    break;
+                }
+                ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
+                used = sizeof(buff)-buf.left;
+                nts_ssl_write(ssl, buff, used, &nsi->errtxt);
                 return;
         }
 
-        if ((NO_AEAD == aead) && (NULL != ntsconfig.aead))
-                aead = nts_string_to_aead(ntsconfig.aead);
-        if (NO_AEAD == aead)
-                aead = AEAD_AES_SIV_CMAC_256;    // default
-
-        keylen = nts_get_key_length(aead);
-        if (!nts_make_keys(ssl, aead, c2s, s2c, keylen)) {
-                *errtxt = "Can't make keys";
+        keylen = nts_get_key_length(nsi->aead);
+        if (!nts_make_keys(ssl, nsi->aead, c2s, s2c, keylen)) {
+                nsi->errtxt = "Can't make keys";
                 return;
         }
 
         buf.next = buff;
         buf.left = sizeof(buff);
-        nts_ke_setup_send(&buf, aead, c2s, s2c, keylen);
+        nts_ke_setup_send(&buf, nsi->aead, c2s, s2c, keylen);
 
         used = sizeof(buff)-buf.left;
-        bytes_written = nts_ssl_write(ssl, buff, used, errtxt);
+        bytes_written = nts_ssl_write(ssl, buff, used, &nsi->errtxt);
         if (bytes_written != used)
                 return;
 
@@ -542,19 +543,22 @@ bool create_listener6(int port) {
         return true;
 }
 
-bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
-  char *errbuf, int errlng, const char **errtxt) {
+enum process_result nts_ke_process_receive(NTS_Server_Info *nsi, BufCtl *buf) {
+        nsi->aead = NO_AEAD;
+        nsi->saw_next_protocol = false;
+        nsi->next_protocol_matched = false;
+        nsi->saw_aead = false;
         while (buf->left >= NTS_KE_HDR_LNG) {
                 uint16_t type, data;
                 int length;
                 bool critical = false;
                 type = ke_next_record(buf, &length);
                 if (length > buf->left) {
-                        snprintf(errbuf, errlng,
+                        snprintf(nsi->errbuf, sizeof(nsi->errbuf),
                                 "Chunk too big: 0x%x, %d, %d",
                                 type, buf->left, length);
-                        *errtxt = errbuf;
-                        return false;
+                        nsi->errtxt = nsi->errbuf;
+                        return Process_Error;
                 }
                 if (NTS_CRITICAL & type) {
                         critical = true;
@@ -565,73 +569,99 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
                 switch (type) {
                     case nts_error:
                         if (sizeof(data) != length) {
-                                snprintf(errbuf, errlng,
+                                snprintf(nsi->errbuf, sizeof(nsi->errbuf),
                                         "Wrong length on error: %d", length);
-                                *errtxt = errbuf;
-                                return false;
+                                nsi->errtxt = nsi->errbuf;
+                                return Process_Error;
                         }
                         data = next_uint16(buf);
-                        snprintf(errbuf, errlng,
+                        snprintf(nsi->errbuf, sizeof(nsi->errbuf),
                                 "Received error: %d", data);
-                        *errtxt = errbuf;
-                        return false;
+                        nsi->errtxt = nsi->errbuf;
+                        return Process_Error;
                     case nts_next_protocol_negotiation:
-                        if (sizeof(data) != length) {
-                                snprintf(errbuf, errlng,
-                                        "NPN-Wrong length: %d", length);
-                                *errtxt = errbuf;
-                                return false;
+                        if (nsi->saw_next_protocol) {
+                                nsi->errtxt = "NPN Duplicate";
+                                return Process_Error;
                         }
-                        data = next_uint16(buf);
-                        if (data != nts_protocol_NTP) {
-                                snprintf(errbuf, errlng,
-                                        "NPN-Bad data: %d", data);
-                                *errtxt = errbuf;
-                                return false;
+                        if (length % sizeof(uint16_t) > 0) {
+                                snprintf(nsi->errbuf, sizeof(nsi->errbuf),
+                                        "NPN Wrong length: %d", length);
+                                nsi->errtxt = nsi->errbuf;
+                                return Process_Error;
+                        }
+                        nsi->saw_next_protocol = true;
+                        for (int i=0; i<length; i+=sizeof(uint16_t)) {
+                                data = next_uint16(buf);
+                                if (data == nts_protocol_NTP) {
+                                        nsi->next_protocol_matched = true;
+                                }
                         }
                         break;
                     case nts_algorithm_negotiation:
-                        if (length % sizeof(uint16_t) > 0) {
-                                snprintf(errbuf, errlng,
-                                        "AN-Wrong length: %d", length);
-                                *errtxt = errbuf;
-                                return false;
+                        if (nsi->saw_aead) {
+                                nsi->errtxt = "AEAD Duplicate";
+                                return Process_Error;
                         }
+                        if (length % sizeof(uint16_t) > 0) {
+                                snprintf(nsi->errbuf, sizeof(nsi->errbuf),
+                                        "AN-Wrong length: %d", length);
+                                nsi->errtxt = nsi->errbuf;
+                                return Process_Error;
+                        }
+                        nsi->saw_aead = true;
                         for (int i=0; i<length; i+=sizeof(uint16_t)) {
                                 data = next_uint16(buf);
+// FIXME: config option, need bitmap or ???
                                 if (0 == nts_get_key_length(data)) {
                                         if (0)  // for debugging
                                                 msyslog(LOG_ERR, "NTSs: AN-Unsupported AEAN type: %d", data);
                                         continue;     // ignore types we don't support
                                 }
-                                if (*aead != NO_AEAD)
+                                if (nsi->aead != NO_AEAD)
                                         continue;     // already got one
-                                *aead = data;   // take this one
+                                nsi->aead = data;   // take this one
                         }
                         break;
                     case nts_end_of_message:
                         if ((0 != length) || !critical) {
-                                snprintf(errbuf, errlng,
+                                snprintf(nsi->errbuf, sizeof(nsi->errbuf),
                                         "EOM-Wrong length or not Critical: %d, %d",
                                         length, critical);
-                                *errtxt = errbuf;
-                                return false;
+                                nsi->errtxt = nsi->errbuf;
+                                return Process_Error;
                         }
                         if (0 != buf->left) {
-                                snprintf(errbuf, errlng,
+                                snprintf(nsi->errbuf, sizeof(nsi->errbuf),
                                         "EOM not at end: %d", buf->left);
-                                *errtxt = errbuf;
-                                return false;
+                                nsi->errtxt = nsi->errbuf;
+                                return Process_Error;
                         }
-                        return true;
+                        if (!nsi->saw_next_protocol) {
+                                nsi->errtxt = "NPN Missing";
+                                return Process_Error;
+                        }
+                        if (!nsi->next_protocol_matched) {
+                                nsi->errtxt = "NPN No match";
+                                return Process_Error;
+                        }
+                        if (!nsi->saw_aead) {
+                                nsi->errtxt = "AEAD Missing";
+                                return Process_Error;
+                        }
+                        if (NO_AEAD == nsi->aead) {
+                                nsi->errtxt = "AEAD No match";
+                                return Process_Error;
+                        }
+                        return Process_OK;
                     default:
                         if (critical) {
                           // This only logs the first one from a connection
-                          snprintf(errbuf, errlng,
+                          snprintf(nsi->errbuf, sizeof(nsi->errbuf),
                                 "Received strange type: T=%d, C=%d, L=%d",
                                 type, critical, length);
-                          // There is an error code for this
-                          return false;
+                          nsi->errtxt = nsi->errbuf;
+                          return Process_Critical;
                         }
                         // It might be interesting to log non-critical
                         // but that needs rate limiting
@@ -646,16 +676,16 @@ bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
          * should never happen.
          */
         if (buf->left > 0) {
-                *errtxt = "*** Leftovers";
-                return false;
+                nsi->errtxt = "Leftovers";
+                return Process_Error;
         }
 
-        *errtxt = "*** Missing EOM";
-        return false;
+        nsi->errtxt = "Missing EOM";
+        return Process_Error;
 
 }
 
-void nts_ke_setup_send(struct BufCtl_t *buf, int aead,
+void nts_ke_setup_send(BufCtl *buf, int aead,
        uint8_t *c2s, uint8_t *s2c, int keylen) {
 
         // 4.1.2 Next Protocol
@@ -676,6 +706,32 @@ void nts_ke_setup_send(struct BufCtl_t *buf, int aead,
 
         // 4.1.1: End, Critical
         ke_append_record_null(buf, NTS_CRITICAL+nts_end_of_message);
+}
+
+void log_ntske (NTS_Server_Info *nsi, NTSKE_Status status, const char *using) {
+    struct timespec finish;
+    double wall, usr, sys;
+#ifdef RUSAGE_THREAD
+    struct rusage usage;
+    /* NB: nsi->usr and nsi->sys are from near the end of the previous cycle.
+     * Thus usage timing includes the TCP accept and
+     * writing the previous msyslog message.
+     */
+    getrusage(RUSAGE_THREAD, &usage);
+    usr = tspec_to_d(tval_to_tspec(usage.ru_utime));
+    sys = tspec_to_d(tval_to_tspec(usage.ru_stime));
+#else
+    usr = 0;
+    sys = 0;
+#endif
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    wall = tspec_to_d(sub_tspec(finish, nsi->start));
+    record_ntske_log(status, nsi->hostaddr, using,
+            wall, usr-nsi->usr, sys-nsi->sys, nsi->aead, nsi->errtxt);
+#ifdef RUSAGE_THREAD
+    nsi->usr = usr;
+    nsi->sys = sys;
+#endif
 }
 
 // end

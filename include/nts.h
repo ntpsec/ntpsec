@@ -50,8 +50,19 @@ struct BufCtl_t {
 typedef struct BufCtl_t BufCtl;
 
 // Here for test routines
-bool nts_ke_process_receive(struct BufCtl_t *buf, int *aead,
-  char *errbuf, int errlng, const char **errtxt);
+enum process_result {
+        Process_OK, Process_Critical, Process_Error };
+struct NTS_Server_Info_t {
+  char hostaddr[100];
+  int aead;
+  bool saw_aead, saw_next_protocol, next_protocol_matched;
+  const char *errtxt;       // pointer to error text goes here
+  char errbuf[100];         // build it here if not simple constant
+  struct timespec start;    // Usage info at start of work
+  double sys, usr;          // CPU time
+};
+typedef struct NTS_Server_Info_t NTS_Server_Info;
+enum process_result nts_ke_process_receive(NTS_Server_Info *nsi, BufCtl *buf);
 
 // *********************************************************
 

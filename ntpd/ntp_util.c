@@ -813,6 +813,7 @@ void record_ntske_stats(void) {
 void record_ntske_log(
   NTSKE_Status tag, const char* from, const char* msg,
   double wall, double usr, double sys,
+  int aead,
   const char* errbuf
 ) {
 #ifndef DISABLE_NTS
@@ -859,6 +860,9 @@ void record_ntske_log(
     if (errbuf) {
       used += snprintf(buffer+used, sizeof(buffer)-used, ", %s", errbuf);
     }
+    if (NTSKE_OK == tag) {
+      used += snprintf(buffer+used, sizeof(buffer)-used, ", AEAD=%d", aead);
+    }
     /* can't call timespec_to_MJDtime -- not main thread */
     day = (unsigned long)now.tv_sec / SECSPERDAY + MJD_1970;
     sec = (unsigned long)now.tv_sec % SECSPERDAY;
@@ -884,6 +888,7 @@ void record_ntske_log(
   UNUSED_ARG(wall);
   UNUSED_ARG(usr);
   UNUSED_ARG(sys);
+  UNUSED_ARG(aead);
   UNUSED_ARG(errbuf);
 #endif
 }

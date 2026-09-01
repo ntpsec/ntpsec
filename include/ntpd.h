@@ -265,6 +265,7 @@ typedef enum {NTSKE_OK, NTSKE_Failed, NTSKE_SSL_Failed} NTSKE_Status;
 extern void record_ntske_log(
   NTSKE_Status tag, const char* from, const char* msg,
   double wall, double usr, double sys,
+  int aead,
   const char* errbuf
 );
 
