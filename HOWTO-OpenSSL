@@ -90,9 +90,9 @@ The above check is broken on Fedora
    Worked on 3.6.1, Fedora 43, 2026-Feb-01)
 It works on Debian, Ubuntu and FreeBSD.
 
-time make test -j4    |& tee test.log
-time make build_docs  |& tee docs.log
-sudo make install     |& tee install.log
+time make test -j4        |& tee test.log
+time make build_docs -j4  |& tee docs.log
+sudo make install         |& tee install.log
 
 On Linux:
   sudo su
@@ -101,6 +101,12 @@ On Linux:
     echo "/usr/local/ssl/lib64" > openssl.conf  # 64 bit systems
     # running ldconfig before install doesn't work
     ldconfig
+
+On Alpine (musl):
+  I couldn't get ldconfig work.  This fixed it:
+    cd /etc/ld.so.conf.d
+    sudo ln -s /usr/local/ssl/lib/libcrypto.99
+    sudo ln -s /usr/local/ssl/lib/libssl.99
 
 On FreeBSD:
   sudo ldconfig -m /usr/local/ssl/lib/
