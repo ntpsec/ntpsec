@@ -103,6 +103,7 @@ then
 else
     if [ "$log" = yes ]
     then
+		set -o pipefail 1
         ntpdig $ADJUST $TIMEOUT $PASSTHROUGH $* 2>&1 | logger -t ntpdate
     else
         ntpdig $ADJUST $TIMEOUT $PASSTHROUGH $*
