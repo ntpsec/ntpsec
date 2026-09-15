@@ -204,8 +204,8 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			adlength = buf.next-NTP_EX_HDR_LNG-pkt;
 			noncelen = next_uint16(&buf);
 			cmaclen = next_uint16(&buf);
-			if (noncelen & 3) {
-				return false; /* would require padding */
+			if (NONCE_LENGTH != noncelen) {
+				return false;
 			}
 			if (CMAC_LENGTH != cmaclen) {
 				return false;
