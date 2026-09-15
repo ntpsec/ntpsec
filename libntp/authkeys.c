@@ -62,11 +62,14 @@ unsigned long authkeynotfound;	/* keys not found */
 unsigned long authencryptions;	/* calls to authencrypt */
 unsigned long authdigestencrypt;/* calls to digest_encrypt */
 unsigned long authcmacencrypt;	/* calls to cmac_encrypt */
+unsigned long authhmacencrypt;	/* calls to hmac_encrypt */
 unsigned long authdecryptions;	/* calls to authdecrypt */
 unsigned long authdigestdecrypt;/* calls to digest_decrypt */
 unsigned long authdigestfail;	/* fails from digest_decrypt */
 unsigned long authcmacdecrypt;	/* calls to cmac_decrypt*/
 unsigned long authcmacfail;	/* fails from cmac_decrypt*/
+unsigned long authhmacdecrypt;	/* calls to hmac_decrypt*/
+unsigned long authhmacfail;	/* fails from hmac_decrypt*/
 uptime_t auth_timereset;	/* current_time when stats reset */
 
 /*
@@ -124,11 +127,14 @@ auth_reset_stats(uptime_t reset_time)
 	authencryptions = 0;
 	authdigestencrypt = 0;
 	authcmacencrypt = 0;
+	authhmacencrypt = 0;
 	authdecryptions = 0;
 	authdigestdecrypt = 0;
 	authdigestfail = 0;
 	authcmacdecrypt = 0;
 	authcmacfail = 0;
+	authhmacdecrypt = 0;
+	authhmacfail = 0;
 	auth_timereset = reset_time;
 }
 
@@ -302,29 +308,35 @@ alloc_auth_info(
 	auth->flags = flags;
 	auth->key_size = key_size;
 	auth->key = key;
+	// FIXME: Free stuff??
+	auth->digest = NULL;
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	auth->cmac_ctx = NULL;
+	auth->hmac_ctx = NULL;
+#else
+	auth->cipher = NULL;
+#endif
 	switch (type) {
 	  case AUTH_NONE:
-		auth->digest = NULL;
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
-		auth->mac_ctx = NULL;
-#else
-		auth->cipher = NULL;
-#endif
 		break;
 	  case AUTH_DIGEST:
+		// FIXME: should use EVP_MD_fetch
 		auth->digest = EVP_get_digestbyname(name);
-#if OPENSSL_VERSION_NUMBER > 0x20000000L
-		auth->mac_ctx = NULL;
-#else
-		auth->cipher = NULL;
-#endif
 		break;
 	  case AUTH_CMAC:
-		auth->digest = NULL;
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-		auth->mac_ctx = Setup_MAC_CTX(name, auth->key, auth->key_size);
+		auth->cmac_ctx = Setup_CMAC_CTX(name,
+			auth->key, auth->key_size);
 #else
 		auth->cipher = EVP_get_cipherbyname(name);
+#endif
+		break;
+	  case AUTH_HMAC:
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+		auth->hmac_ctx = Setup_HMAC_CTX(name,
+			auth->key, auth->key_size);
+#else
+		auth->digest = EVP_get_digestbyname(name);
 #endif
 		break;
 	  default:
@@ -355,7 +367,7 @@ free_auth_info(
                 auth->key = NULL;
 	}
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-	EVP_MAC_CTX_free(auth->mac_ctx);
+	EVP_MAC_CTX_free(auth->cmac_ctx);
 #endif
 	UNLINK_SLIST(unlinked, *bucket, auth, hlink, auth_info);
 	//ENSURE(sk == unlinked);
@@ -470,9 +482,9 @@ auth_setkey(
 			auth->type = type;
 			switch (type) {
 			  case AUTH_NONE:
-				auth->digest = NULL;
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-				auth->mac_ctx = NULL;
+				auth->cmac_ctx = NULL;
+				auth->hmac_ctx = NULL;
 #else
 				auth->cipher = NULL;
 #endif
@@ -480,16 +492,24 @@ auth_setkey(
 			  case AUTH_DIGEST:
 				auth->digest = EVP_get_digestbyname(name);
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-				auth->mac_ctx = NULL;
+				auth->cmac_ctx = NULL;
 #else
 				auth->cipher = NULL;
 #endif
 				break;
 			  case AUTH_CMAC:
-				auth->digest = NULL;
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-				EVP_MAC_CTX_free(auth->mac_ctx);
-				auth->mac_ctx = Setup_MAC_CTX(name, \
+				EVP_MAC_CTX_free(auth->cmac_ctx);
+				auth->cmac_ctx = Setup_CMAC_CTX(name, \
+					auth->key, auth->key_size);
+#else
+				auth->cipher = EVP_get_cipherbyname(name);
+#endif
+				break;
+			  case AUTH_HMAC:
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+				EVP_MAC_CTX_free(auth->hmac_ctx);
+				auth->hmac_ctx = Setup_HMAC_CTX(name, \
 					auth->key, auth->key_size);
 #else
 				auth->cipher = EVP_get_cipherbyname(name);
@@ -513,6 +533,7 @@ auth_setkey(
 	/*
 	 * Need to allocate new structure.  Do it.
 	 */
+// FIXME Who owns memory for key??
 	newkey = emalloc(key_size);
 	memcpy(newkey, key, key_size);
 	alloc_auth_info(bucket, keyno, type, name, 0,
@@ -553,7 +574,8 @@ auth_delkeys(void)
 			auth->type = AUTH_NONE;
 			auth->digest = NULL;
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-			auth->mac_ctx = NULL;
+			auth->cmac_ctx = NULL;
+			auth->hmac_ctx = NULL;
 #else
 			auth->cipher = NULL;
 #endif
@@ -590,6 +612,9 @@ authencrypt(
 	    case AUTH_CMAC:
 		authcmacencrypt++;
 		return cmac_encrypt(auth, pkt, length);
+	    case AUTH_HMAC:
+		authhmacencrypt++;
+		return hmac_encrypt(auth, pkt, length);
 	    case AUTH_NONE:
 	    default:
 		msyslog(LOG_ERR, "BUG: authencrypt: bogus type %u", auth->type);
@@ -630,6 +655,11 @@ authdecrypt(
 		answer = cmac_decrypt(auth, pkt, length, size);
 		if (!answer) authcmacfail++;
 		return answer;
+	    case AUTH_HMAC:
+		authhmacdecrypt++;
+		answer = hmac_decrypt(auth, pkt, length, size);
+		if (!answer) authhmacfail++;
+		return answer;
 	    case AUTH_NONE:
 	    default:
 		msyslog(LOG_ERR, "BUG: authdecrypt: bogus type %u", auth->type);
@@ -640,20 +670,46 @@ authdecrypt(
 
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
 /* Name needs "-CBC" already appended */
-EVP_MAC_CTX* Setup_MAC_CTX(const char *name, uint8_t *key, int keylen) {
+EVP_MAC_CTX* Setup_CMAC_CTX(const char *name, uint8_t *key, int keylen) {
 	OSSL_PARAM params[3];
 	char temp[100];		/* Hack: OSSL_PARAM doesn't like const */
 
-	EVP_MAC_CTX *ctx = EVP_MAC_CTX_dup(evp_ctx);
+	EVP_MAC_CTX *ctx = EVP_MAC_CTX_dup(evpc_ctx);
 	if (NULL == ctx) {
 		unsigned long err = ERR_get_error();
 		char * str = ERR_error_string(err, NULL);
-		msyslog(LOG_ERR, "Setup_MAC_CTX: EVP_MAC_CTX_dup failed: %s", str);
+		msyslog(LOG_ERR, "Setup_CMAC_CTX: EVP_MAC_CTX_dup failed: %s", str);
 		exit(1);
 	}
 
 	strlcpy(temp, name, sizeof(temp));
         params[0] = OSSL_PARAM_construct_utf8_string("cipher", temp, 0);
+        params[1] = OSSL_PARAM_construct_octet_string("key", key, keylen);
+	params[2] = OSSL_PARAM_construct_end();
+        if (0 == EVP_MAC_CTX_set_params(ctx, params)) {
+		unsigned long err = ERR_get_error();
+		char * str = ERR_error_string(err, NULL);
+		msyslog(LOG_ERR, "EVP_MAC_CTX_set_params() failed: %s: %s.",
+			str, name);
+		exit(1);
+	}
+	return ctx;
+}
+
+EVP_MAC_CTX* Setup_HMAC_CTX(const char *name, uint8_t *key, int keylen) {
+	OSSL_PARAM params[3];
+	char temp[100];		/* Hack: OSSL_PARAM doesn't like const */
+
+	EVP_MAC_CTX *ctx = EVP_MAC_CTX_dup(evph_ctx);
+	if (NULL == ctx) {
+		unsigned long err = ERR_get_error();
+		char * str = ERR_error_string(err, NULL);
+		msyslog(LOG_ERR, "Setup_HMAC_CTX: EVP_MAC_CTX_dup failed: %s", str);
+		exit(1);
+	}
+
+	strlcpy(temp, name, sizeof(temp));
+        params[0] = OSSL_PARAM_construct_utf8_string("digest", temp, 0);
         params[1] = OSSL_PARAM_construct_octet_string("key", key, keylen);
 	params[2] = OSSL_PARAM_construct_end();
         if (0 == EVP_MAC_CTX_set_params(ctx, params)) {

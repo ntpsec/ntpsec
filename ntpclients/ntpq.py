@@ -1633,11 +1633,14 @@ usage: monstats
             ("authencrypts",       "encryptions:         ", NTP_PACKETS),
             ("authdigestencrypts", "digest encryptions:  ", NTP_PACKETS),
             ("authcmacencrypts",   "CMAC encryptions:    ", NTP_PACKETS),
+            ("authhmacencrypts",   "HMAC encryptions:    ", NTP_PACKETS),
             ("authdecrypts",       "decryptions:         ", NTP_PACKETS),
             ("authdigestdecrypts", "digest decryptions:  ", NTP_PACKETS),
             ("authdigestfails",    "digest failures:     ", NTP_PACKETS),
             ("authcmacdecrypts",   "CMAC decryptions:    ", NTP_PACKETS),
             ("authcmacfails",      "CMAC failures:       ", NTP_PACKETS),
+            ("authhmacdecrypts",   "HMAC decryptions:    ", NTP_PACKETS),
+            ("authhmacfails",      "HMAC failures:       ", NTP_PACKETS),
             # Old variables no longer supported.
             # Interesting if looking at an old system.
             ("authkuncached",      "uncached keys:       ", NTP_INT),

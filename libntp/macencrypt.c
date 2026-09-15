@@ -1,5 +1,5 @@
 /*
- *	CMAC and digest support for NTP
+ *  Digest, CMAC, and HMAC support for NTP shared keys
  */
 
 /*  Notes:
@@ -8,12 +8,12 @@
  * This is the working code that has to go fast.
  * The setup code in authreadkeys is not time critical.
  *
- * There are 3 main options: MD5, SHA1, and AES.
- * MD5 and SHA1 are digests.
+ * There are 3 main options: Digest, CMAC, and HMAC
  *   https://en.wikipedia.org/wiki/Message_digest
- * AES is a MAC.
- *   https://en.wikipedia.org/wiki/Message_authentication_code
- * OpenSSL has different APIs for them.
+ * Digests make a hash of some data.
+ * For authentication, we make a hash of a secret key followed by the data.
+ * CMAC uses cipher functions such as AES.
+ * HMAC is a wrapper around digest functions.
  *
  * Before OpenSSL 3, we (and many others) used the undocumented
  * CMAC interface via openssl/cmac.h which is now (loudly) deprecated.
@@ -32,7 +32,7 @@
  * Just preloading the cipher will save a lot of memory if you
  * are using a lot of keys.  The edit in this code is simple.
  *
- * Play with attic/cmac-timing for numbers.
+ * Play with attic/{digest,cmac,hmac}-timing for numbers.
  *
  *
  * Modern CPUs come with support to speed up AES operations.
@@ -66,6 +66,7 @@ extern EVP_MD_CTX *digest_ctx;
 #include <openssl/params.h>
 #else
 #include <openssl/cmac.h>
+#include <openssl/hmac.h>
 extern CMAC_CTX *cmac_ctx;
 #endif
 
@@ -82,10 +83,10 @@ cmac_encrypt(
 	int	length		/* packet length */
 	)
 {
-	uint8_t	mac[CMAC_MAX_MAC_LENGTH];
+	uint8_t	mac[EVP_MAX_MD_SIZE];
 	size_t	len;
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-        EVP_MAC_CTX *ctx = auth->mac_ctx;
+        EVP_MAC_CTX *ctx = auth->cmac_ctx;
 
 #if OPENSSL_VERSION_NUMBER > 0x30000020L
         if (0 == EVP_MAC_init(ctx, NULL, 0, NULL)) {
@@ -143,10 +144,10 @@ cmac_decrypt(
 	int	size		/* MAC size */
 	)
 {
-	uint8_t	mac[CMAC_MAX_MAC_LENGTH];
+	uint8_t	mac[EVP_MAX_MD_SIZE];
 	size_t	len;
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-        EVP_MAC_CTX *ctx = auth->mac_ctx;
+        EVP_MAC_CTX *ctx = auth->cmac_ctx;
 
 #if OPENSSL_VERSION_NUMBER > 0x30000020L
         if (0 == EVP_MAC_init(ctx, NULL, 0, NULL)) {
@@ -199,6 +200,134 @@ cmac_decrypt(
 	}
 	return !CRYPTO_memcmp(mac, (char *)pkt + length + 4, len);
 }
+
+/*
+ * hmac_encrypt - generate HMAC authenticator
+ *
+ * Returns length of MAC including key ID and digest.
+ */
+int
+hmac_encrypt(
+	auth_info* auth,
+	uint32_t *pkt,		/* packet pointer */
+	int	length		/* packet length */
+	)
+{
+	uint8_t	mac[EVP_MAX_MD_SIZE];
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	size_t	len;
+        EVP_MAC_CTX *ctx = auth->hmac_ctx;
+
+#if OPENSSL_VERSION_NUMBER > 0x30000020L
+        if (0 == EVP_MAC_init(ctx, NULL, 0, NULL)) {
+#else
+// Bug in OpenSSL 3.0.2
+// Bug is in CMAC path.  Don't know about HMAC.  Be Safe.
+// Need to reload key which is slow.  See attic/hmac-timing
+        if (0 == EVP_MAC_init(ctx, auth->key, auth->key_size, NULL)) {
+#endif
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "encrypt: EVP_MAC_init() failed: %s.", str);
+                exit(1);
+        }
+        if (0 == EVP_MAC_update(ctx, (unsigned char *)pkt, length)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "encrypt: EVP_MAC_update() failed: %s.", str);
+                exit(1);
+        }
+        if (0 == EVP_MAC_final(ctx, mac, &len, sizeof(mac))) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "encrypt: EVP_MAC_final() failed: %s.", str);
+                exit(1);
+        }
+#else
+	unsigned int len;
+        if (NULL == HMAC(auth->digest, auth->key, auth->key_size,
+			(unsigned char *)pkt, length, mac, &len)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "encrypt: HMAC() failed: %s.", str);
+                exit(1);
+        }
+#endif
+	if (MAX_BARE_MAC_LENGTH < len)
+		len = MAX_BARE_MAC_LENGTH;
+	memmove((uint8_t *)pkt + length + 4, mac, len);
+	return (int)(len + 4);
+}
+
+
+/*
+ * hmac_decrypt - verify HMAC authenticator
+ *
+ * Returns true if valid, false if invalid.
+ */
+bool
+hmac_decrypt(
+	auth_info*	auth,
+	uint32_t	*pkt,	/* packet pointer */
+	int	length,	 	/* packet length */
+	int	size		/* MAC size */
+	)
+{
+	uint8_t	mac[EVP_MAX_MD_SIZE];
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	size_t	len;
+        EVP_MAC_CTX *ctx = auth->hmac_ctx;
+
+#if OPENSSL_VERSION_NUMBER > 0x30000020L
+        if (0 == EVP_MAC_init(ctx, NULL, 0, NULL)) {
+#else
+// Bug in OpenSSL 3.0.2
+// Need to reload key which is slow.  See attic/hmac-timing
+        if (0 == EVP_MAC_init(ctx, auth->key, auth->key_size, NULL)) {
+#endif
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "decrypt: EVP_MAC_init() failed: %s.", str);
+                return false;
+        }
+        if (0 == EVP_MAC_update(ctx, (unsigned char *)pkt, length)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "decrypt: EVP_MAC_update() failed: %s.", str);
+                return false;
+        }
+        if (0 == EVP_MAC_final(ctx, mac, &len, sizeof(mac))) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "decrypt: EVP_MAC_final() failed: %s.", str);
+                return false;
+        }
+#else
+	unsigned int len;
+        if (NULL == HMAC(auth->digest, auth->key, auth->key_size,
+			(unsigned char *)pkt, length, mac, &len)) {
+                unsigned long err = ERR_get_error();
+                char * str = ERR_error_string(err, NULL);
+                msyslog(LOG_ERR, "decrypt: HMAC() failed: %s.", str);
+                return false;
+        }
+#endif
+	if (MAX_BARE_MAC_LENGTH < len)
+		len = MAX_BARE_MAC_LENGTH;
+
+	if ((unsigned int)size != len + 4) {
+		/* Beware of DoS attack.
+		 * This indicates either the sender is broken
+		 * or some admin fatfingered things.
+		 * Similar code at digest_decrypt.
+		 */
+		if (0) msyslog(LOG_ERR,
+		    "MAC: decrypt: MAC length error");
+		return false;
+	}
+	return !CRYPTO_memcmp(mac, (char *)pkt + length + 4, len);
+}
+
 
 /*
  * digest_encrypt - generate message digest

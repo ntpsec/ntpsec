@@ -376,11 +376,14 @@ static const struct var sys_var[] = {
   Var_uli("authencrypts", RO, authencryptions),
   Var_uli("authdigestencrypts", RO, authdigestencrypt),
   Var_uli("authcmacencrypts", RO, authcmacencrypt),
+  Var_uli("authhmacencrypts", RO, authhmacencrypt),
   Var_uli("authdecrypts", RO, authdecryptions),
   Var_uli("authdigestdecrypts", RO, authdigestdecrypt),
   Var_uli("authdigestfails", RO, authdigestfail),
   Var_uli("authcmacdecrypts", RO, authcmacdecrypt),
   Var_uli("authcmacfails", RO, authcmacfail),
+  Var_uli("authhmacdecrypts", RO, authhmacdecrypt),
+  Var_uli("authhmacfails", RO, authhmacfail),
 
 // kerninfo: Kernel timekeeping info
   Var_kli("koffset", RO|N_CLOCK|KNUToMS, ntx.offset),
@@ -1637,6 +1640,8 @@ ctl_putpeer(
                 break;
 
         case CP_SRCADR:
+                if (AF_UNSPEC == AF(&p->srcadr))
+                        break;   // empty slot: pool, or no DNS yet
                 ctl_putadr(CV_NAME, 0, &p->srcadr);
                 break;
 

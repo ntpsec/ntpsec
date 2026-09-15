@@ -23,26 +23,30 @@ where `keyno` is a positive integer (between 1 and 65535),
 
 The file does not need to be sorted by `keyno`.
 
-`type` can be the name of any digest or cipher supported by your
-OpenSSL package.  Digests or CMACs longer than 20 bytes will be truncated.
+Internally, there are 3 modes corresponding to 3 different 'types': Digest, CMAC, and HMAC.
 
-You can get a list from `openssl list -digest-algorithms` or
-`openssl list -cipher-algorithms`.
-(As of Jan 2018, they lie.  Be sure to try it.  {ntpdman} will
-print an error on startup if a selected type isn't supported.)
+Digest mode computes the MAC (Message Authentication Code) by computing
+the digest of the key prepended to the packet.  You get digest mode by
+specifying a `type` that is the name of a digest-algorithm that
+OpenSSL supports.  You can get a list from `openssl list -digest-algorithms`.
 
-AES-128 is recommended by RFC 8573.  Most modern CPUs have hardware
-support.
-
+CMAC mode uses a cipher algorithm.  You get CMAC mode by specifying
+a 'type' that is the name of a cipher-algorithm that OpenSSL supports.
+You can get a list from `openssl list -cipher-algorithms`.
 Only the +-CBC+ cipher modes are useful.
 The +-CBC+ is appended to the `type` internally. Do not include it in `type`.
+
+HMAC mode uses a digest-algorithm.  You get to HMAC mode by prepending `HMAC-` to the name of a digest-algorithm.
+
+MACs longer than 20 bytes will be truncated.
 
 AES is an alias for AES-128.
 
 SHA-1 is an alias for SHA1. (NIST uses SHA-1.  OpenSSL uses SHA1.)
 
-Note that MD5 was deprecated by RFC 8573 in June of 2019.
-+AES-128+ is currently preferred.  Most modern CPUs have hardware
+Note that MD5 was deprecated by RFC 8573 in June of 2019 which
+recommends AES-CMAC as described in RFC 4493 as a replacement.
++AES-128+ is the appropriate `type`.  Most modern CPUs have hardware
 support.  Our code still supports MD5 for backwards compatibility.
 
 FIPS 140-2, FIPS 180-4, and/or FIPS 202 may restrict your choices.
@@ -53,6 +57,8 @@ The `key` may be printable ASCII excluding "#" or hex encoded.
 Keys longer than 20 characters are assumed to be hex.  The max
 length of a (de-hexified) key is 32 bytes.  If you
 want to use an ASCII key longer than 20 bytes, you must hexify it.
+
+Digest (and HMAC-) keys can be any length.  CMAC keys will be truncated or padded to match what the cipher-algorithm requires.
 
 Note that the keys used by the {ntpqman} programs are
 checked against passwords entered by hand, so it is generally

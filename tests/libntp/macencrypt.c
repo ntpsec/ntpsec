@@ -26,21 +26,26 @@ TEST_TEAR_DOWN(macencrypt) {}
  */
 char MD5key[] = "abcdefgh";
 char CMACkey[] = "0123456789abcdef";  /* AES-128 needs 16 bytes */
+char HMACkey[] = "0123456790abcdef";
 const char *packet = "ijklmnopqrstuvwx";
 const int packetLength = 16;
 const int keyIdLength = 4;
 const int digestLength = 16;
+const int hmacLength = 20;
 
 /* Need #define to avoid VLA (variable length array) */
-#define totalLength 36
+#define totalDigestLength 36
+#define totalCMACLength 36
+#define totalHMACLength 40
 
 char expectedMD5Packet[] = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x53";
 char expectedCMACPacket[] = "ijklmnopqrstuvwx\0\0\0\0\xb0\xa1\xcf\xd2\x7f\x69\x0c\x43\xa7\x5d\x6c\x55\x91\x4b\x15\x14";
+char expectedHMACPacket[] = "ijklmnopqrstuvwx\0\0\0\0\x3c\xcf\xfc\x85\x9b\x52\xb4\xcd\xc4\x3a\xfe\xbe\xe5\x27\xe0\x2e\xd6\x60\x46\xa6";
 
 auth_info auth;
 
-TEST(macencrypt, Encrypt) {
-	char packetPtr[totalLength];
+TEST(macencrypt, EncryptDigest) {
+	char packetPtr[totalDigestLength+20];
 	memset(packetPtr+packetLength, 0, (size_t)keyIdLength);
 	memcpy(packetPtr, packet, (size_t)packetLength);
 
@@ -53,7 +58,7 @@ TEST(macencrypt, Encrypt) {
 	auth.digest = EVP_get_digestbyname("MD5");
 #endif
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-	auth.mac_ctx = NULL;
+	auth.cmac_ctx = NULL;
 #else
 	auth.cipher = NULL;
 #endif
@@ -65,28 +70,28 @@ TEST(macencrypt, Encrypt) {
 	int length = digest_encrypt(&auth,
 				    (uint32_t*)packetPtr, packetLength);
 
-	TEST_ASSERT_EQUAL(4+16, length);
+	TEST_ASSERT_EQUAL(4+16, length);            /* MD5 */
 
 	TEST_ASSERT_TRUE(digest_decrypt(&auth,
 					(uint32_t*)packetPtr, packetLength, length));
 
 	if (0) {
 		printf("\n");
-		for (int i = 0; i< totalLength; i++) {
+		for (int i = 0; i< totalDigestLength; i++) {
 			printf("%02x ", (unsigned int)expectedMD5Packet[i] & 0xff);
 		}
 		printf("\n");
-		for (int i = 0; i< totalLength; i++) {
+		for (int i = 0; i< totalDigestLength; i++) {
 			printf("%02x ", (unsigned int)packetPtr[i] & 0xff);
 		}
 		printf("\n");
 	}
-	TEST_ASSERT_TRUE(memcmp(expectedMD5Packet, packetPtr, totalLength) == 0);
+	TEST_ASSERT_TRUE(memcmp(expectedMD5Packet, packetPtr, totalDigestLength) == 0);
 
 }
 
 TEST(macencrypt, CMAC_Encrypt) {
-	char packetPtr[totalLength];
+	char packetPtr[totalCMACLength+20];
 	memset(packetPtr+packetLength, 0, (size_t)keyIdLength);
 	memcpy(packetPtr, packet, (size_t)packetLength);
 
@@ -97,8 +102,8 @@ TEST(macencrypt, CMAC_Encrypt) {
 	auth.key = (uint8_t *)CMACkey;
 	auth.key_size = (unsigned short)strlen(CMACkey);
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-	auth.mac_ctx = Setup_MAC_CTX("AES-128-CBC", auth.key, auth.key_size);
-	TEST_ASSERT_NOT_NULL(auth.mac_ctx);
+	auth.cmac_ctx = Setup_CMAC_CTX("AES-128-CBC", auth.key, auth.key_size);
+	TEST_ASSERT_NOT_NULL(auth.cmac_ctx);
 #else
 	auth.cipher = EVP_get_cipherbyname("AES-128-CBC");
 	TEST_ASSERT_NOT_NULL(auth.cipher);
@@ -114,20 +119,59 @@ TEST(macencrypt, CMAC_Encrypt) {
 
 	if (0) {
 		printf("\n");
-		for (int i = 0; i< totalLength; i++) {
+		for (int i = 0; i< totalCMACLength; i++) {
 			printf("%02x ", (unsigned int)expectedCMACPacket[i] & 0xff);
 		}
 		printf("\n");
-		for (int i = 0; i< totalLength; i++) {
+		for (int i = 0; i< totalCMACLength; i++) {
 			printf("%02x ", (unsigned int)packetPtr[i] & 0xff);
 		}
 		printf("\n");
 	}
-	TEST_ASSERT_TRUE(memcmp(expectedCMACPacket, packetPtr, totalLength) == 0);
+	TEST_ASSERT_TRUE(memcmp(expectedCMACPacket, packetPtr, totalCMACLength) == 0);
+}
+
+TEST(macencrypt, EncryptHMAC) {
+	char packetPtr[totalHMACLength];
+	memset(packetPtr+packetLength, 0, (size_t)keyIdLength);
+	memcpy(packetPtr, packet, (size_t)packetLength);
+
+	auth.keyid = 1234;
+	auth.type = AUTH_HMAC;
+	auth.digest = NULL;
+	auth.key = (uint8_t *)HMACkey;
+	auth.key_size = (unsigned short)strlen(HMACkey);
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+	auth.hmac_ctx = Setup_HMAC_CTX("SHA256", auth.key, auth.key_size);
+	TEST_ASSERT_NOT_NULL(auth.cmac_ctx);
+#else
+	auth.digest = EVP_get_digestbyname("SHA256");
+	TEST_ASSERT_NOT_NULL(auth.digest);
+#endif
+
+	int length = hmac_encrypt(&auth,
+				  (uint32_t*)packetPtr, packetLength);
+
+	TEST_ASSERT_EQUAL(4+20, length);            /* SHA256 truncated */
+	TEST_ASSERT_TRUE(hmac_decrypt(&auth,
+				      (uint32_t*)packetPtr, packetLength, length));
+
+	if (1) {
+		printf("\nExpected: ");
+		for (int i = 0; i< totalHMACLength; i++) {
+			printf("%02x ", (unsigned int)expectedHMACPacket[i] & 0xff);
+		}
+		printf("\nFound:    ");
+		for (int i = 0; i< totalHMACLength; i++) {
+			printf("%02x ", (unsigned int)packetPtr[i] & 0xff);
+		}
+		printf("\n");
+	}
+	TEST_ASSERT_TRUE(memcmp(expectedHMACPacket, packetPtr, totalHMACLength) == 0);
 
 }
 
-TEST(macencrypt, DecryptValid) {
+TEST(macencrypt, DecryptValidDigest) {
 	TEST_ASSERT_TRUE(digest_decrypt(&auth,
 		(uint32_t*)expectedMD5Packet, packetLength, 20));
 }
@@ -137,7 +181,12 @@ TEST(macencrypt, DecryptValidCMAC) {
 		(uint32_t*)expectedCMACPacket, packetLength, 20));
 }
 
-TEST(macencrypt, DecryptInvalid) {
+TEST(macencrypt, DecryptValidHMAC) {
+	TEST_ASSERT_TRUE(hmac_decrypt(&auth,
+		(uint32_t*)expectedHMACPacket, packetLength, 24));
+}
+
+TEST(macencrypt, DecryptInvalidDigest) {
 	char invalidPacket[] = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
 
 	TEST_ASSERT_FALSE(digest_decrypt(&auth,
@@ -149,6 +198,13 @@ TEST(macencrypt, DecryptInvalidCMAC) {
 
 	TEST_ASSERT_FALSE(cmac_decrypt(&auth,
 		(uint32_t*)invalidPacket, packetLength, 20));
+}
+
+TEST(macencrypt, DecryptInvalidHMAC) {
+	char invalidPacket[] = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
+
+	TEST_ASSERT_FALSE(hmac_decrypt(&auth,
+		(uint32_t*)invalidPacket, packetLength, 24));
 }
 
 TEST(macencrypt, IPv4AddressToRefId) {
@@ -213,8 +269,8 @@ TEST(macencrypt, null_trunc) {
 	auth.key_size = (unsigned short)strlen(CMACkey);
 
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-	auth.mac_ctx = Setup_MAC_CTX("AES-128-CBC", auth.key, auth.key_size);
-	TEST_ASSERT_NOT_NULL(auth.mac_ctx);
+	auth.cmac_ctx = Setup_CMAC_CTX("AES-128-CBC", auth.key, auth.key_size);
+	TEST_ASSERT_NOT_NULL(auth.cmac_ctx);
 #else
 	auth.cipher = EVP_get_cipherbyname("AES-128-CBC");
 	TEST_ASSERT_NOT_NULL(auth.cipher);
@@ -283,8 +339,8 @@ TEST(macencrypt, CMAC_TestVectors) {
 	auth.key_size = (unsigned short)sizeof(key);
 
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-	auth.mac_ctx = Setup_MAC_CTX("AES-128-CBC", auth.key, auth.key_size);
-	TEST_ASSERT_NOT_NULL(auth.mac_ctx);
+	auth.cmac_ctx = Setup_CMAC_CTX("AES-128-CBC", auth.key, auth.key_size);
+	TEST_ASSERT_NOT_NULL(auth.cmac_ctx);
 #else
 	auth.cipher = EVP_get_cipherbyname("AES-128-CBC");
 	TEST_ASSERT_NOT_NULL(auth.cipher);
@@ -316,13 +372,15 @@ TEST(macencrypt, CMAC_TestVectors) {
  * Thus the tests must be run in the right order.
  */
 TEST_GROUP_RUNNER(macencrypt) {
-	RUN_TEST_CASE(macencrypt, Encrypt);
-	RUN_TEST_CASE(macencrypt, DecryptValid);
-	RUN_TEST_CASE(macencrypt, DecryptInvalid);
-	RUN_TEST_CASE(macencrypt, CMAC_Encrypt);
+	RUN_TEST_CASE(macencrypt, EncryptDigest);
+	RUN_TEST_CASE(macencrypt, DecryptValidDigest);
+	RUN_TEST_CASE(macencrypt, DecryptInvalidDigest);
 	RUN_TEST_CASE(macencrypt, CMAC_Encrypt);
 	RUN_TEST_CASE(macencrypt, DecryptValidCMAC);
 	RUN_TEST_CASE(macencrypt, DecryptInvalidCMAC);
+	RUN_TEST_CASE(macencrypt, EncryptHMAC);
+	RUN_TEST_CASE(macencrypt, DecryptValidHMAC);
+	RUN_TEST_CASE(macencrypt, DecryptInvalidHMAC);
 	RUN_TEST_CASE(macencrypt, IPv4AddressToRefId);
 	RUN_TEST_CASE(macencrypt, IPv6AddressToRefId);
 	RUN_TEST_CASE(macencrypt, null_trunc);

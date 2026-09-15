@@ -28,6 +28,7 @@
 
 #if OPENSSL_VERSION_NUMBER < 0x20000000L || defined(LIBRESSL_VERSION_NUMBER)
 #include <openssl/cmac.h>
+#include <openssl/hmac.h>
 #endif
 
 #define NAMEBUFSIZE 100
@@ -80,6 +81,20 @@ nexttok(
 
 	*str = cp;
 	return starttok;
+}
+
+static char*
+try_hmac(const char *upcased, char* namebuf) {
+	if (0 != memcmp("HMAC-", upcased, 5)) {
+		return NULL;
+	}
+	strlcpy(namebuf, upcased+5, NAMEBUFSIZE);
+	if (0) msyslog(LOG_INFO, "DEBUG try_hmac: %s=>%s", upcased, namebuf);
+	if (EVP_get_digestbyname(namebuf) == NULL) {
+		return NULL;
+	}
+	/* FIXME: 3.0 needs a Fetch to be sure it really exists. */
+	return namebuf;
 }
 
 static char*
@@ -145,7 +160,7 @@ check_cmac_mac_length(
 	keyid_t keyno,
 	char *name) {
 	size_t length = 0;
-	EVP_MAC_CTX *ctx = evp_ctx; 
+	EVP_MAC_CTX *ctx = evpc_ctx; 
 	OSSL_PARAM params[2];
 
 	params[0] = OSSL_PARAM_construct_utf8_string("cipher", name, 0);
@@ -159,10 +174,10 @@ check_cmac_mac_length(
         }
 	length = EVP_MAC_CTX_get_mac_size(ctx);
 
-	/* CMAC_MAX_MAC_LENGTH isn't in the OpenSSL API
+	/* EVP_MAX_MD_SIZE isn't in the OpenSSL API
 	 * Check here to avoid buffer overrun in cmac_decrypt and cmac_encrypt
 	 */
-	if (CMAC_MAX_MAC_LENGTH < length) {
+	if (EVP_MAX_MD_SIZE < length) {
 		msyslog(LOG_ERR,
 			"AUTH: authreadkeys: CMAC for key %u, %s is too big: %lu",
 			keyno, name, (long unsigned int)length);
@@ -178,7 +193,7 @@ static void
 check_cmac_mac_length(
 	keyid_t keyno,
 	char *name) {
-	unsigned char mac[CMAC_MAX_MAC_LENGTH+1024];
+	unsigned char mac[EVP_MAX_MD_SIZE+1024];
 	size_t length = 0;
 	char key[EVP_MAX_KEY_LENGTH];  /* garbage is OK */
 	CMAC_CTX *ctx;
@@ -196,10 +211,10 @@ check_cmac_mac_length(
 	CMAC_Final(ctx, mac, &length);
 	CMAC_CTX_free(ctx);
 
-	/* CMAC_MAX_MAC_LENGTH isn't in API
+	/* EVP_MAX_MD_SIZE isn't in API
 	 * Check here to avoid buffer overrun in cmac_decrypt and cmac_encrypt
 	 */
-	if (CMAC_MAX_MAC_LENGTH < length) {
+	if (EVP_MAX_MD_SIZE < length) {
 		msyslog(LOG_ERR,
 			"AUTH: authreadkeys: CMAC for key %u, %s is too big: %lu",
 			keyno, name, (long unsigned int)length);
@@ -209,6 +224,61 @@ check_cmac_mac_length(
 	if (MAX_BARE_MAC_LENGTH < length) {
 		msyslog(LOG_ERR, "AUTH: authreadkeys: CMAC for key %u, %s will be truncated.", keyno, name);
 	}
+}
+#endif
+
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+static void
+check_hmac_mac_length(
+	keyid_t keyno,
+	char *name) {
+	size_t length = 0;
+	EVP_MAC_CTX *ctx = evpc_ctx; 
+	OSSL_PARAM params[2];
+
+	params[0] = OSSL_PARAM_construct_utf8_string("digest", name, 0);
+	params[1] = OSSL_PARAM_construct_end();
+	if (0 == EVP_MAC_CTX_set_params(ctx, params)) {
+		unsigned long err = ERR_get_error();
+		char * str = ERR_error_string(err, NULL);
+		msyslog(LOG_ERR, "EVP_MAC_CTX_set_params() failed: %s: %lu=>%s.\n",
+			str, (unsigned long)keyno, name);
+		exit(1);
+        }
+	length = EVP_MAC_CTX_get_mac_size(ctx);
+
+	/* EVP_MAX_MD_SIZE should cover this.
+	 * Check here to avoid buffer overrun in hmac_decrypt and hmac_encrypt
+	 */
+	if (EVP_MAX_MD_SIZE < length) {
+		msyslog(LOG_ERR,
+			"AUTH: authreadkeys: HMAC for key %u, %s is too big: %lu",
+			keyno, name, (long unsigned int)length);
+		exit(1);
+	}
+
+	if (MAX_BARE_MAC_LENGTH < length) {
+		msyslog(LOG_ERR, "AUTH: authreadkeys: HMAC for key %u, %s will be truncated.", keyno, name);
+	}
+}
+#else
+static void
+check_hmac_mac_length(
+	keyid_t keyno,
+	char *name) {
+
+    const EVP_MD *digest = EVP_get_digestbyname(name);
+    uint8_t pkt[100];
+    uint8_t key[10];
+    unsigned char answer[EVP_MAX_MD_SIZE];
+    unsigned int length = 0;
+    unsigned char *result = HMAC(digest,
+        key, sizeof(key), pkt, sizeof(pkt), answer, &length);
+    if (NULL == result) return;  /* error */
+
+    if (MAX_BARE_MAC_LENGTH < length) {
+        msyslog(LOG_ERR, "AUTH: authreadkeys: HMAC for key %u, %s will be truncated.", keyno, name);
+    }
 }
 #endif
 
@@ -222,11 +292,14 @@ check_mac_length(
 	char *name,
 	char *upcased) {
 	switch (type) {
+	    case AUTH_DIGEST:
+		check_digest_mac_length(keyno, name);
+		break;
 	    case AUTH_CMAC:
 		check_cmac_mac_length(keyno, name);
 		break;
-	    case AUTH_DIGEST:
-		check_digest_mac_length(keyno, name);
+	    case AUTH_HMAC:
+		check_hmac_mac_length(keyno, name);
 		break;
 	    case AUTH_NONE:
 	    default:
@@ -276,6 +349,7 @@ check_key_length(
 	    case AUTH_CMAC:
 		length = check_cmac_key_length(keyno, name, key, keylength);
 		break;
+	    case AUTH_HMAC:
 	    case AUTH_DIGEST:
 		/* any length key works */
 		break;
@@ -388,6 +462,11 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 		}
 
 		name = NULL;
+		if (NULL == name) {
+			name = try_hmac(upcased, namebuf);
+			if (NULL != name)
+				type = AUTH_HMAC;
+		}
 		if (NULL == name) {
 			name = try_cmac(upcased, namebuf);
 			if (NULL != name)

@@ -18,17 +18,21 @@
 #include <openssl/cmac.h>
 #endif
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#if OPENSSL_VERSION_NUMBER < 0x20000000L || defined(LIBRESSL_VERSION_NUMBER)
 static void	atexit_ssl_cleanup(void);
 #endif
 
 static bool ssl_init_done;
 EVP_MD_CTX *digest_ctx;
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
-EVP_MAC_CTX *evp_ctx;
+EVP_MAC_CTX *evpc_ctx;
+EVP_MAC_CTX *evph_ctx;
 #else
 CMAC_CTX *cmac_ctx;
 #endif
+
+void ssl_init_cmac(void);
+void ssl_init_hmac(void);
 
 void
 ssl_init(void)
@@ -43,7 +47,9 @@ ssl_init(void)
 	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS|OPENSSL_INIT_LOAD_CRYPTO_STRINGS|OPENSSL_INIT_ADD_ALL_CIPHERS|OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
 #endif
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+// Was 0x10100000L.  Maybe HMAC() doesn't call init??
+// Similar changes in 2 other places for atexit_ssl_cleanup
+#if OPENSSL_VERSION_NUMBER < 0x20000000L || defined(LIBRESSL_VERSION_NUMBER)
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 	atexit(&atexit_ssl_cleanup);
@@ -54,6 +60,13 @@ ssl_init(void)
 	ntp_RAND_bytes(&dummy, 1);
 
 	digest_ctx = EVP_MD_CTX_new();
+	ssl_init_cmac();
+	ssl_init_hmac();
+
+	ssl_init_done = true;
+}
+
+void ssl_init_cmac (void) {
 #if OPENSSL_VERSION_NUMBER > 0x20000000L
 	{
 	EVP_MAC *mac = EVP_MAC_fetch(NULL, "cmac", NULL);
@@ -61,8 +74,8 @@ ssl_init(void)
 		msyslog(LOG_ERR, "ssl_init: EVP_MAC_fetch failed");
 		exit(1);
 	}
-	evp_ctx = EVP_MAC_CTX_new(mac);
-	if (NULL == evp_ctx) {
+	evpc_ctx = EVP_MAC_CTX_new(mac);
+	if (NULL == evpc_ctx) {
 		msyslog(LOG_ERR, "ssl_init: EVP_MAC_CTX_new failed");
 		exit(1);
 	}
@@ -75,7 +88,7 @@ ssl_init(void)
 	char key[16];
 	char copy[100];		/* OSSL_PARAM vs const */
 
-	ctx = EVP_MAC_CTX_dup(evp_ctx);
+	ctx = EVP_MAC_CTX_dup(evpc_ctx);
 	if (NULL != ctx ) {
 		/* Was failing: 2023-feb-20, OpenSSL 3.0.8 */
 		unsigned long err = ERR_get_error();
@@ -87,28 +100,45 @@ ssl_init(void)
 	params[0] = OSSL_PARAM_construct_utf8_string("cipher", copy, 0);
 	params[1] = OSSL_PARAM_construct_octet_string("key", key, 16);
 	params[2] = OSSL_PARAM_construct_end();
-	if (0 == EVP_MAC_CTX_set_params(evp_ctx, params)) {
+	if (0 == EVP_MAC_CTX_set_params(evpc_ctx, params)) {
 		unsigned long err = ERR_get_error();
 		char * str = ERR_error_string(err, NULL);
-		msyslog(LOG_ERR, "ssl_init: EVP_MAC_CTX_set_params() failed: %s", str);
+		msyslog(LOG_ERR, "ssl_init_cmac: EVP_MAC_CTX_set_params() failed: %s", str);
 	}
 
 
-	ctx = EVP_MAC_CTX_dup(evp_ctx);
+	ctx = EVP_MAC_CTX_dup(evpc_ctx);
 	if (NULL == ctx ) {
 		unsigned long err = ERR_get_error();
 		char * str = ERR_error_string(err, NULL);
-		msyslog(LOG_ERR, "ssl_init: second dup failed: %s", str);
+		msyslog(LOG_ERR, "ssl_init_cmac: second dup failed: %s", str);
 	}
 	}
 #else
 	cmac_ctx = CMAC_CTX_new();
 #endif
-	ssl_init_done = true;
 }
 
+void ssl_init_hmac (void) {
+#if OPENSSL_VERSION_NUMBER > 0x20000000L
+        EVP_MAC *mac;
+        mac = EVP_MAC_fetch(NULL, "hmac", NULL);
+        if (NULL == mac) {
+		unsigned long err = ERR_get_error();
+		char * str = ERR_error_string(err, NULL);
+		msyslog(LOG_ERR, "ssl_init_hmac: EVP_MAC_fetch failed: %s", str);
+	}
+        evph_ctx = EVP_MAC_CTX_new(mac);
+        if (NULL == evph_ctx) {
+		unsigned long err = ERR_get_error();
+		char * str = ERR_error_string(err, NULL);
+		msyslog(LOG_ERR, "ssl_init_hmac: EVP_MAC_CTX_new failed: %s", str);
+	}
+        EVP_MAC_free(mac);
+#endif
+}
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#if OPENSSL_VERSION_NUMBER < 0x20000000L || defined(LIBRESSL_VERSION_NUMBER)
 static void
 atexit_ssl_cleanup(void)
 {
