@@ -117,6 +117,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 	return used;
 }
 
+#define CookieLenUnknown -1
 bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	struct BufCtl_t buf;
 	uint16_t aead;
@@ -130,7 +131,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 	buf.left = lng-LEN_PKT_NOMAC;
 
 	sawcookie = sawAEEF = false;
-	cookielen = 0;
+	cookielen = CookieLenUnknown;
 	ntspacket->uidlen = 0;
 	ntspacket->needed = 0;
 
@@ -160,7 +161,7 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			if (sawcookie) {
 				return false; /* second cookie */
 			}
-			if (0 == cookielen) {
+			if (CookieLenUnknown == cookielen) {
 				cookielen = length;
 			}
 			else if (length != cookielen) {
@@ -178,13 +179,16 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
 			ntspacket->aead = aead;
 			break;
 		    case NTS_Cookie_Placeholder:
-			if (0 == cookielen) {
+			if (CookieLenUnknown == cookielen) {
 				cookielen = length;
 			}
 			else if (length != cookielen) {
 				return false;
 			}
 			ntspacket->needed++;
+			if (NTS_MAX_COOKIES < ntspacket->needed) {
+				return false;
+			}
 			buf.next += length;
 			buf.left -= length;
 			break;
