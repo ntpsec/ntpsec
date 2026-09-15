@@ -497,7 +497,7 @@ void set_hostname(SSL *ssl, const char *hostname) {
  * of wildcards to make it clear that they're permitted unless specifically
  * prohibited in an RFC
  */
-        SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
+        SSL_set_hostflags(ssl, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS | X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT);
 #if OPENSSL_VERSION_NUMBER >= 0x40000000L
 {
         sockaddr_u addr;
@@ -555,7 +555,11 @@ bool check_certificate(SSL *ssl, struct peer* peer) {
             if (gen->type != GEN_DNS)
               continue;
             // string is NUL terminated but may have internal NULs
+#if OPENSSL_VERSION_NUMBER >= 0x40100000L
+            len = (unsigned int)ASN1_STRING_get_length(gen->d.ia5);
+#else
             len = (unsigned int)ASN1_STRING_length(gen->d.ia5);
+#endif
             dnsname = (const char *)ASN1_STRING_get0_data(gen->d.ia5);
             if (0 != buff[0])
               strlcat(buff, ", ", sizeof(buff));
