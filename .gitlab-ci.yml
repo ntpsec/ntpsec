@@ -110,14 +110,6 @@ AsciiDoc-classic3-Debian-Old:
     - DEBIAN_FRONTEND="noninteractive" apt-get install -y python3-dev asciidoc-base
     - python3 ./waf configure --enable-warnings --enable-Werror --enable-doc --enable-manpage build --disable-nts --pyshebang "/usr/bin/env python3"
 
-AsciiDoc-classic-Python2:
-  <<: *job_definition
-  image: $CI_REGISTRY_IMAGE/python2
-  script:
-    - apt-get update
-    - DEBIAN_FRONTEND="noninteractive" apt-get install -y python2-dev asciidoc-base
-    - python2 ./waf configure --enable-warnings --enable-Werror --enable-doc --enable-manpage build --disable-nts --pyshebang "/usr/bin/env python3"
-
 debian-oldstable-basic:
   <<: *job_definition
   image: $CI_REGISTRY_IMAGE/debian-oldstable
