@@ -539,8 +539,9 @@ jjy_receive ( struct recvbuf *rbufp )
 
         l_fp    tRecvTimestamp;         // arrival timestamp
         int     rc ;
-        char    *pBuf, sLogText [ MAX_LOGTEXT ] ;
-        int     i, j, iReadRawBuf, iBreakPosition ;
+        char    *pBuf, sLogText [MAX_LOGTEXT];
+        int i, j, iReadRawBuf, iBreakPosition;
+        unsigned u;
 
         /*
          * Initialize pointers and read the timecode and timestamp
@@ -554,34 +555,37 @@ jjy_receive ( struct recvbuf *rbufp )
          */
         if ( up->linediscipline == LDISC_RAW ) {
 
-                pp->lencode  = (int)refclock_gtraw ( rbufp, pp->a_lastcode, BMAX-1, &tRecvTimestamp ) ;
-                // 3rd argument can be BMAX, but the coverity scan tool claim "Memory - corruptions  (OVERRUN)"
-                // "a_lastcode" is defined as "char a_lastcode[BMAX]" in the ntp_refclock.h
-                // To avoid its claim, pass the value BMAX-1.
+                pp->lencode = refclock_gtraw(rbufp, pp->a_lastcode,
+                                             BMAX - 1, &tRecvTimestamp ) ;
+                /* 3rd argument can be BMAX, but the coverity scan tool
+                 * claim "Memory - corruptions  (OVERRUN)"
+                 * "a_lastcode" is defined as "char a_lastcode[BMAX]" in
+                 * the ntp_refclock.h
+                 * To avoid its claim, pass the value BMAX - 1. */
 
                 /*
                  * Append received characters to temporary buffer
                  */
-                for ( i = 0 ;
-                      i < pp->lencode && up->iRawBufLen < MAX_RAWBUF - 2 ;
-                      i ++ , up->iRawBufLen ++ ) {
-                        up->sRawBuf[up->iRawBufLen] = pp->a_lastcode[i] ;
+                for (u = 0 ;
+                     u < pp->lencode &&
+                     up->iRawBufLen < MAX_RAWBUF - 2;
+                     u++ , up->iRawBufLen ++ ) {
+                        up->sRawBuf[up->iRawBufLen] = pp->a_lastcode[u] ;
                 }
                 up->sRawBuf[up->iRawBufLen] = 0 ;
 
 
         } else {
-
-                pp->lencode  = refclock_gtlin ( rbufp, pp->a_lastcode, BMAX, &tRecvTimestamp ) ;
-
+                pp->lencode  = refclock_gtlin (rbufp, pp->a_lastcode,
+                                               BMAX, &tRecvTimestamp);
         }
 #ifdef DEBUG
-        printf( "\nrefclock_jjy.c : %s : Len=%d  ", sFunctionName, pp->lencode ) ;
-        for ( i = 0 ; i < pp->lencode ; i ++ ) {
-                if ( iscntrl( pp->a_lastcode[i] & 0x7F ) ) {
-                        printf("<x%02X>", (unsigned)(pp->a_lastcode[i] & 0xFF));
+        printf( "\nrefclock_jjy.c : %s : Len=%u  ", sFunctionName, pp->lencode);
+        for (u = 0 ; u < pp->lencode; u++ ) {
+                if (iscntrl(pp->a_lastcode[u] & 0x7F ) ) {
+                        printf("<x%02X>", (unsigned)(pp->a_lastcode[u] & 0xFF));
                 } else {
-                        printf( "%c", pp->a_lastcode[i] ) ;
+                        printf( "%c", pp->a_lastcode[u] ) ;
                 }
         }
         printf( "\n" ) ;
@@ -622,59 +626,64 @@ jjy_receive ( struct recvbuf *rbufp )
         for ( ; up->iProcessState == JJY_PROCESS_STATE_RECEIVE ; ) {
 
                 if ( up->linediscipline == LDISC_RAW ) {
-
-                        if ( up->bWaitBreakString ) {
-                                iBreakPosition = getRawDataBreakPosition( up, iReadRawBuf ) ;
-                                if ( iBreakPosition == -1 ) {
-                                        // Break string have not come yet
-                                        if ( up->iRawBufLen < MAX_RAWBUF - 2
-                                          || iReadRawBuf > 0 ) {
-                                                // Temporary buffer is not full
-                                                break ;
-                                        } else {
-                                                // Temporary buffer is full
-                                                iBreakPosition = up->iRawBufLen - 1 ;
-                                        }
-                                }
-                        } else {
-                                iBreakPosition = up->iRawBufLen - 1 ;
-                        }
-
-                        // Copy characters from temporary buffer to process buffer
-                        up->iLineBufLen = up->iTextBufLen = 0 ;
-                        for ( i = iReadRawBuf ; i <= iBreakPosition ; i ++ ) {
-
-                                // Copy all characters
-                                up->sLineBuf[up->iLineBufLen] = up->sRawBuf[i] ;
-                                up->iLineBufLen ++ ;
-
-                                // Copy printable characters
-                                if ( ! iscntrl( (int)up->sRawBuf[i] ) ) {
-                                        up->sTextBuf[up->iTextBufLen] = up->sRawBuf[i] ;
-                                        up->iTextBufLen ++ ;
-                                }
-
-                        }
-                        up->sLineBuf[up->iLineBufLen] = 0 ;
-                        up->sTextBuf[up->iTextBufLen] = 0 ;
-#ifdef DEBUG
-                        printf( "refclock_jjy.c : %s : up->iLineBufLen=%d up->iTextBufLen=%d\n",
-                                 sFunctionName, up->iLineBufLen, up->iTextBufLen ) ;
-#endif
-
-                        if ( up->bSkipCntrlCharOnly && up->iTextBufLen == 0 ) {
-#ifdef DEBUG
-                                printf( "refclock_jjy.c : %s : Skip cntrl char only : up->iRawBufLen=%d iReadRawBuf=%d iBreakPosition=%d\n",
-                                         sFunctionName, up->iRawBufLen, iReadRawBuf, iBreakPosition ) ;
-#endif
-                                if ( iBreakPosition + 1 < up->iRawBufLen ) {
-                                        iReadRawBuf = iBreakPosition + 1 ;
-                                        continue ;
-                                } else {
+                    if ( up->bWaitBreakString ) {
+                        iBreakPosition = getRawDataBreakPosition(up,
+                                                                 iReadRawBuf);
+                        if ( iBreakPosition == -1 ) {
+                                // Break string have not come yet
+                                if (up->iRawBufLen < MAX_RAWBUF - 2 ||
+                                    iReadRawBuf > 0 ) {
+                                        // Temporary buffer is not full
                                         break ;
+                                } else {
+                                        // Temporary buffer is full
+                                        iBreakPosition = up->iRawBufLen - 1;
                                 }
-
                         }
+                    } else {
+                        iBreakPosition = up->iRawBufLen - 1;
+                    }
+
+                    /* Copy characters from temporary buffer to
+                     * process buffer */
+                    up->iLineBufLen = up->iTextBufLen = 0 ;
+                    for (i = iReadRawBuf ; i <= iBreakPosition; i++) {
+
+                        // Copy all characters
+                        up->sLineBuf[up->iLineBufLen] = up->sRawBuf[i];
+                        up->iLineBufLen ++ ;
+
+                        // Copy printable characters
+                        if ( ! iscntrl( (int)up->sRawBuf[i] ) ) {
+                                up->sTextBuf[up->iTextBufLen] = up->sRawBuf[i];
+                                up->iTextBufLen ++ ;
+                        }
+
+                    }
+                    up->sLineBuf[up->iLineBufLen] = 0 ;
+                    up->sTextBuf[up->iTextBufLen] = 0 ;
+#ifdef DEBUG
+                    printf("refclock_jjy.c : %s : up->iLineBufLen=%d "
+                           " up->iTextBufLen=%d\n",
+                           sFunctionName, up->iLineBufLen, up->iTextBufLen);
+#endif
+
+                    if ( up->bSkipCntrlCharOnly && up->iTextBufLen == 0 ) {
+#ifdef DEBUG
+                        printf("refclock_jjy.c : %s : Skip cntrl char "
+                               "only : up->iRawBufLen=%d iReadRawBuf=%d "
+                               " iBreakPosition=%d\n",
+                                 sFunctionName, up->iRawBufLen,
+                                 iReadRawBuf, iBreakPosition ) ;
+#endif
+                        if ( iBreakPosition + 1 < up->iRawBufLen ) {
+                                iReadRawBuf = iBreakPosition + 1;
+                                continue ;
+                        } else {
+                                break ;
+                        }
+
+                    }
 
                 }
 

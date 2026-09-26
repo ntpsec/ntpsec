@@ -112,8 +112,8 @@ struct refclockproc {
         unsigned long   nextaction;     // local activity timeout
         void    (*action)(struct peer *);  // timeout callback
 
-        char    a_lastcode[BMAX];  // last timecode received
-        int     lencode;        // length of last timecode
+        char a_lastcode[BMAX];  // last timecode received
+        unsigned lencode;       // length of last timecode
 
         int     year;           // year of eternity
         int     yday;           // day of year

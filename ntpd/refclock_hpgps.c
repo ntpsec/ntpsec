@@ -275,11 +275,11 @@ void hpgps_receive(struct recvbuf *rbufp)
         *pp->a_lastcode = '\0';
         pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &rd_timestamp);
 
-        DPRINT(1, ("hpgps: lencode: %d timecode:%s\n",
+        DPRINT(1, ("hpgps: lencode: %u timecode:%s\n",
                    pp->lencode, pp->a_lastcode));
 
 if (HPDEBUG) {
-  printf("HP in:%3d %s\n", pp->lencode, pp->a_lastcode);
+  printf("HP in:%3u %s\n", pp->lencode, pp->a_lastcode);
 }
         /*
          * If there's no characters in the reply, we can quit now
@@ -354,7 +354,8 @@ if (HPDEBUG) {
         if (up->linecnt > 0) {
                 up->linecnt--;
                 // Silently drop whole line if it doesn't fit.
-                if ((int)(pp->lencode + 2) <= (SMAX - (up->lastptr - up->statscrn))) {
+                if ((int)(pp->lencode + 2) <=
+                    (SMAX - (up->lastptr - up->statscrn))) {
                         if ( (up->lastptr != up->statscrn) || (up->linecnt > 0) )
                                 // ID string stays on same line
                                 *up->lastptr++ = '\n';

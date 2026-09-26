@@ -226,7 +226,7 @@ spectracom_receive(
         l_fp    trtmp;  // arrival timestamp
         int     tz;  // time zone
         int     day, month;  // ddd conversion
-        int     temp;  // int temp
+        unsigned temp;
         char    syncchar;  // synchronization indicator
         char    qualchar;  // quality indicator
         char    leapchar;  // leap indicator
@@ -514,7 +514,7 @@ spectracom_poll(
 #endif  // HAVE_PPSAPI
         refclock_receive(peer);
         record_clock_stats(peer, pp->a_lastcode);
-        DPRINT(1, ("spectracom: timecode %d %s\n", pp->lencode,
+        DPRINT(1, ("spectracom: timecode %u %s\n", pp->lencode,
                    pp->a_lastcode));
 }
 

@@ -272,7 +272,7 @@ true_receive(
         // These variables hold data until we decide to keep it
         char    rd_lastcode[BMAX];
         l_fp    rd_tmp;
-        unsigned short  rd_lencode;
+        unsigned rd_lencode;
 
         /*
          * Get the clock this applies to and pointers to the data.
@@ -284,7 +284,7 @@ true_receive(
         /*
          * Read clock output.  Automatically handles CLKLDISC.
          */
-        rd_lencode = (unsigned short)refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
+        rd_lencode = refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
         rd_lastcode[rd_lencode] = '\0';
 
         /*
@@ -292,11 +292,11 @@ true_receive(
          */
         if (rd_lencode == 0) {
                 return;
-}
+        }
         pp->lencode = rd_lencode;
         strlcpy(pp->a_lastcode, rd_lastcode, sizeof(pp->a_lastcode));
         pp->lastrec = rd_tmp;
-        true_debug(peer, "receive(%s) [%d]\n", pp->a_lastcode,
+        true_debug(peer, "receive(%s) [%u]\n", pp->a_lastcode,
                    pp->lencode);
 
         up->pollcnt = 2;

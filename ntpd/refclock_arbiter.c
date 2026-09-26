@@ -313,7 +313,7 @@ arb_receive(
         strlcpy(pp->a_lastcode, tbuf, sizeof(pp->a_lastcode));
         pp->a_lastcode[LENARB - 2] = up->qualchar;
         strlcat(pp->a_lastcode, up->status, sizeof(pp->a_lastcode));
-        pp->lencode = (int)strlen(pp->a_lastcode);
+        pp->lencode = strlen(pp->a_lastcode);
         syncchar = ' ';
         if (sscanf(pp->a_lastcode, "%c%2d %3d %2d:%2d:%2d",
             &syncchar, &pp->year, &pp->yday, &pp->hour,
@@ -439,7 +439,7 @@ arb_poll(
         }
         refclock_receive(peer);
         record_clock_stats(peer, pp->a_lastcode);
-        DPRINT(1, ("arbiter: timecode %d %s\n",
+        DPRINT(1, ("arbiter: timecode %u %s\n",
                    pp->lencode, pp->a_lastcode));
 }
 
