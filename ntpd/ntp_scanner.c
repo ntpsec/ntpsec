@@ -433,7 +433,7 @@ bool lex_push_file(const char * path)
 
         if (is_directory(fullpath)) {
             // directory scanning
-            struct dirent **namelist;
+            struct dirent **namelist = NULL;  // pacify coverity
             int basecount;
             int i;
 
@@ -441,6 +441,8 @@ bool lex_push_file(const char * path)
             basecount = scandir(fullpath, &namelist,
                                 conf_enable_filter, dirent_rcmp);
             if (0 > basecount) {
+                 msyslog(LOG_DEBUG, "CONFIG: scandir(%s) failed %s(%d)\n",
+                         fullpath, strerror(errno), errno);
                 return false;
             }
 
