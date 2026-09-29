@@ -126,7 +126,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
         struct BufCtl_t buf;
         uint16_t aead;
-        int noncelen, cmaclen;
+        unsigned noncelen, cmaclen;
         bool sawcookie, sawAEEF;
         int cookielen;                  // cookie and placeholder(s)
 
