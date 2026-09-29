@@ -3238,13 +3238,20 @@ oncore_msg_Gc(
         size_t len
         )
 {
-        const char *tbl[] = {"OFF", "ON", "SATELLITE", "TRAIM" };
-
         UNUSED_ARG(len);
 
+        const char *tbl[] = {"OFF", "ON", "SATELLITE", "TRAIM", "Unk"};
+        const char *s;
+
+        if (COUNTOF(tbl) <= buf[4]) {
+            s = tbl[COUNTOF(tbl) - 1];
+        } else {
+            s = tbl[buf[4]];
+        }
+
         instance->pps_control_msg_seen = 1;
-        oncore_log_f(instance, LOG_INFO, "PPS Control set to %s",
-                     tbl[buf[4]]);
+        oncore_log_f(instance, LOG_INFO, "PPS Control set to %s(%u)",
+                     s, buf[4]);
 }
 
 
