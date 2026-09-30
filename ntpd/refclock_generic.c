@@ -1565,67 +1565,59 @@ list_err(
  * fooled
  */
 
-static char *
-mkreadable(
-        char  *buffer,
-        long  blen,
-        const char  *src,
-        unsigned long  srclen,
-        int hex
-        )
+static char *mkreadable(char *buffer,
+                        size_t blen,
+                        const char *src,
+                        size_t srclen,
+                        int hex)
 {
         static const char ellipsis[] = "...";
         char *b    = buffer;
         char *endb = NULL;
 
-        if (blen < 4) {
+        if (4 > blen) {
                 return NULL;            // don't bother with mini buffers
+        }
+        if (2048 < srclen) {
+              /* Ugh, srclen underflowed somewhere.  Ignore ot.
+               * Coverity CID 583320 */
+            return NULL; 
         }
 
         endb = buffer + blen - sizeof(ellipsis);
 
         blen--;                 // account for '\0'
 
-        while (blen && srclen--)
-        {
-                if (!hex &&             // no binary only
-                    (*src != '\\') &&   // no plain "\"
-                    (*src != '"') &&    // no "
-                    isprint((unsigned char)*src))       // only printables
-                {                       // they are easy...
+        while (blen && srclen--) {
+                if (!hex &&                     // no binary only
+                    (*src != '\\') &&           // no plain "\"
+                    (*src != '"') &&            // no "
+                    isprint((int)*src)) {       // only printables
+                                                // they are easy...
                         *buffer++ = *src++;
                         blen--;
-                }
-                else
-                {
-                        if (blen < 4)
-                        {
-                                while (blen--)
-                                {
-                                        *buffer++ = '.';
-                                }
-                                *buffer = '\0';
-                                return b;
+                } else if (4 > blen) {
+                        // only 4 bytes left, fill with '...'
+                        while (blen--) {
+                                *buffer++ = '.';
                         }
-                        else
-                        {
-                                if (*src == '\\')
-                                {
-                                        memcpy(buffer, "\\\\", 2);
-                                        buffer += 2;
-                                        blen   -= 2;
-                                        src++;
-                                }
-                                else
-                                {
-                                        snprintf(buffer, (size_t)blen,
-                                                 "\\x%02x", (unsigned)(*src++));
-                                        blen   -= 4;
-                                        buffer += 4;
-                                }
-                        }
+                        *buffer = '\0';
+                        return b;
+                } else if (*src == '\\') {
+                        memcpy(buffer, "\\\\", 2);
+                        buffer += 2;
+                        blen   -= 2;
+                        src++;
+                } else {
+                        snprintf(buffer, blen, "\\x%02x",
+                                (unsigned)(*src++));
+                        blen   -= 4;
+                        buffer += 4;
                 }
-                if (srclen && !blen && endb) {  // overflow - set last chars to ...
+                if (srclen &&
+                    !blen &&
+                    endb) {
+                        // overflow - set last chars to ...
                         memcpy(endb, ellipsis, sizeof(ellipsis));
                 }
         }
@@ -1639,13 +1631,10 @@ mkreadable(
  * mkascii - make a printable ascii string
  * assumes (unless defined better) 7-bit ASCII
  */
-static char *
-mkascii(
-        char  *buffer,
-        long  blen,
-        const char  *src,
-        unsigned long  srclen
-        )
+static char *mkascii(char  *buffer,
+                     size_t  blen,
+                     const char  *src,
+                     size_t  srclen)
 {
         return mkreadable(buffer, blen, src, srclen, 0);
 }
@@ -3272,7 +3261,8 @@ parse_process(
         l_fp off, rectime = 0, reftime = 0;
         double fudge;
 
-        // silence warning: integral part may be used uninitialized in this function
+        /* silence warning:
+         * integral part may be used uninitialized in this function */
         ZERO(off);
 
         /*
@@ -3824,8 +3814,11 @@ gps16x_message(
                 {
                         char msgbuffer[600];
 
-                        mkreadable(msgbuffer, sizeof(msgbuffer), (char *)parsetime->parse_msg, parsetime->parse_msglen, 1);
-                        printf("REFCLOCK: PARSE receiver #%d: received message (%d bytes) >%s<\n",
+                        mkreadable(msgbuffer, sizeof(msgbuffer),
+                                  (char *)parsetime->parse_msg,
+                                  parsetime->parse_msglen, 1);
+                        printf("REFCLOCK: PARSE receiver #%d: "
+                               "received message (%d bytes) >%s<\n",
                                 parse->peer->procptr->refclkunit,
                                 parsetime->parse_msglen,
                                 msgbuffer);
@@ -4142,14 +4135,20 @@ gps16x_message(
 
                                         get_mbg_ascii_msg(&bufp, &gps_ascii_msg);
                                         strlcpy(buffer, "gps_message=", sizeof(buffer));
-                                        if (gps_ascii_msg.valid)
-                                                {
-                                                        char buffer1[128];
-                                                        mkreadable(buffer1, sizeof(buffer1), gps_ascii_msg.s, strlen(gps_ascii_msg.s), (int)0);
-                                                        strlcat(buffer, buffer1, sizeof(buffer));
-                                                }
-                                        else
-                                                strlcat(buffer, "<None>", sizeof(buffer));
+                                        if (gps_ascii_msg.valid) {
+                                            char buffer1[128];
+
+                                            mkreadable(buffer1,
+                                                sizeof(buffer1),
+                                                gps_ascii_msg.s,
+                                                strlen(gps_ascii_msg.s),
+                                                (int)0);
+                                            strlcat(buffer, buffer1,
+                                                    sizeof(buffer));
+                                        } else {
+                                            strlcat(buffer, "<None>",
+                                                    sizeof(buffer));
+                                        }
 
                                         set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
                                 }
@@ -4221,13 +4220,13 @@ gps16x_poll(
         put_mbg_header(&outp, header);
 
 #ifdef DEBUG
-        if (debug > 2)  // SPECIAL DEBUG
-        {
+        if (debug > 2) {  // SPECIAL DEBUG
             char buffer[128];
 
-            mkreadable(buffer, sizeof(buffer), (char *)cmd_buffer, (unsigned)(outp - cmd_buffer), 1);
-            printf(
-                "REFCLOCK: PARSE receiver #%d: transmitted message #%lu (%d bytes) >%s<\n",
+            mkreadable(buffer, sizeof(buffer), (char *)cmd_buffer,
+                      outp - cmd_buffer, 1);
+            printf("REFCLOCK: PARSE receiver #%d:"
+                  " transmitted message #%lu (%d bytes) >%s<\n",
                    parse->peer->procptr->refclkunit,
                    parse->localstate - 1,
                    (int)(outp - cmd_buffer),
@@ -4599,8 +4598,9 @@ sendetx(
                   char buffer[256];
 
                   mkreadable(buffer, sizeof(buffer), (char *)buf->txt,
-                             (unsigned long)buf->idx, 1);
-                  printf("REFCLOCK: PARSE receiver #%d: transmitted message (%d bytes) >%s<\n",
+                             buf->idx, 1);
+                  printf("REFCLOCK: PARSE receiver #%d: "
+                         "transmitted message (%d bytes) >%s<\n",
                          parse->peer->procptr->refclkunit,
                          buf->idx, buffer);
           }
@@ -5086,11 +5086,9 @@ trimbletsip_message(
                 break;
 
                 case CMD_RMESSAGE:
-                        mkreadable(t, (int)BUFFER_SIZE(pbuffer, t),
+                        mkreadable(t, BUFFER_SIZE(pbuffer, t),
                                    (char *)&mb(0),
-                                   (unsigned)(size - 2U -
-                                              (unsigned)(&mb(0) - buffer)),
-                                   0);
+                                    size - 2U - (unsigned)(&mb(0) - buffer), 0);
                         break;
 
                 case CMD_RMACHSTAT:
