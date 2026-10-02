@@ -87,23 +87,25 @@ if __name__ == "__main__":
 
     basetime = ntp.util.monoclock()
     if verbose:
-        sys.stdout.write("Waiting for ntpd to synchronize...  ")
+        sys.stdout.write("Waiting for ntpd to synchronize...\n")
 
     for i in range(tries):
         session = ntp.packet.ControlSession()
-        # session.debug = 4
+        # session.debug = 4  # debug
         if not session.openhost("localhost"):
+            # can this ever happen?
             if verbose:
                 sys.stdout.write("\bntpd is not running!\n")
+            time.sleep(sleep)
             continue
 
         msg = None
         try:
             msg = session.doquery(2)     # Request system variables
-        except ntp.packet.ControlException as e:
+        except (ntp.packet.ControlException, socket.error) as e:
+            # Can bare socket.error happen?
             sys.stderr.write("localhost: timed out, nothing received\n")
             sys.stderr.write(e.message)
-        except socket.error:
             if verbose:
                 sys.stdout.write("\b" + "*+:."[i % 4])
             time.sleep(sleep)
