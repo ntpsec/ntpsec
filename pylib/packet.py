@@ -1017,7 +1017,8 @@ class ControlSession:
             warndbg("At %s, socket read begins" % time.asctime(), 4)
             try:
                 rawdata = ntp.poly.polybytes(self.sock.recv(4096))
-            except socket.error:  # pragma: no cover
+            except socket.error as e:  # pragma: no cover
+                warndbg("socket error %s(%d)" % (e.strerror, e.errno), 4)
                 # usually, errno 111: connection refused
                 raise ControlException(SERR_SOCKET)
 
