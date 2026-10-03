@@ -26,7 +26,7 @@
 
 #include <openssl/err.h>
 #include <openssl/rand.h>
-#include "aes_siv.h"
+#include "aes_siv_evp.h"
 #include "ntp_fp.h"
 #include "nts.h"
 

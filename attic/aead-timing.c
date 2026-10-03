@@ -37,7 +37,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
-#include "aes_siv.h"
+#include "aes_siv_evp.h"
 
 #define UNUSED_ARG(arg)         ((void)(arg))
 #define INSIST(x)       assert(x)
