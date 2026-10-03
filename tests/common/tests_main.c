@@ -39,6 +39,9 @@ static void RunAllTests(void)
 #endif
 
 #ifdef TEST_LIBNTP
+#ifndef DISABLE_NTS
+	RUN_TEST_GROUP(aes_siv_evp);
+#endif
 	RUN_TEST_GROUP(authkeys);
 	RUN_TEST_GROUP(calendar);
 	RUN_TEST_GROUP(clocktime);

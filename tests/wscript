@@ -58,6 +58,9 @@ def build(ctx):
         "libntp/ymd2yd.c"
     ] + common_source
 
+    if not ctx.env.DISABLE_NTS:
+        libntp_source += ["libntp/aes_siv_evp.c"]
+
     ctx.ntp_test(
         features="c cprogram test",
         target="test_libntp",
@@ -109,11 +112,11 @@ def build(ctx):
     ctx.ntp_test(
         defines=unity_config + ["TEST_NTPD=1"],
         features="c cprogram test",
-        includes=[ctx.bldnode.parent.abspath(), "../include", "unity", "../ntpd", "common", "../libaes_siv"],
+        includes=[ctx.bldnode.parent.abspath(), "../include", "unity", "../ntpd", "common"],
         install_path=None,
         source=ntpd_source,
         target="test_ntpd",
-        use="ntpd_lib libntpd_obj unity ntp aes_siv "
+        use="ntpd_lib libntpd_obj unity ntp "
             "M PTHREAD CRYPTO RT SOCKET NSL",
     )
 
