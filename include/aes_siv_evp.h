@@ -76,6 +76,9 @@ int AES_SIV_CTX_copy(AES_SIV_CTX *dst, AES_SIV_CTX const *src);
  *
  * Returns: 1 on success, 0 on failure
  *
+ * plaintext may be NULL only when plaintext_len is 0.
+ * *out_len is updated only on success.
+ *
  * Key length determines the SIV variant:
  *   32 bytes -> AEAD_AES_SIV_CMAC_256 (AES-128)
  *   48 bytes -> AEAD_AES_SIV_CMAC_384 (AES-192)
@@ -109,6 +112,9 @@ int AES_SIV_Encrypt(AES_SIV_CTX *ctx, unsigned char *out, size_t *out_len,
  *
  * Returns: 1 on success (authentication passed), 0 on failure
  *
+ * out may be NULL only when the plaintext is empty (ciphertext_len is 16).
+ * *out_len is updated only on success.
+ *
  * Key length determines the SIV variant:
  *   32 bytes -> AEAD_AES_SIV_CMAC_256 (AES-128)
  *   48 bytes -> AEAD_AES_SIV_CMAC_384 (AES-192)
@@ -124,4 +130,4 @@ int AES_SIV_Decrypt(AES_SIV_CTX *ctx, unsigned char *out, size_t *out_len,
 }
 #endif
 
-#endif /* AES_SIV_EVP_H_ */
+#endif  // AES_SIV_EVP_H_

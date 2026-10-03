@@ -73,8 +73,9 @@ https://medium.com/@porteneuve/mastering-git-subtrees-943d29a798ec
 These don't even touch the biggest issue, which is stable reproducible
 builds.  For this reason, we use naive textual inclusion.
 
-So far this has only been an issue with libaes_siv. If you notice
-there's an inclusion not listed here, file an issue.
+This used to be an issue with libaes_siv; NTPsec now uses OpenSSL's
+native AES-SIV instead. If you notice there's an inclusion not listed
+here, file an issue.
 
 == C Guidelines
 
@@ -216,7 +217,13 @@ We also use their RAND_bytes().
    Note that OpenSSL 1.0.1 is no longer supported.  2020-Feb-17
    Note that OpenSSL 1.1.0 is no longer supported.  2020-Mar-12
 
-We also use waf, libaes_siv, libjsmn, and unity but we have local
+NTS uses OpenSSL's native AES-SIV through the EVP interface, so
+OpenSSL 3.0 or newer is required when NTS is enabled (configure
+checks this unless --disable-nts); libntp/aes_siv_evp.c wraps it.  OpenSSL
+before 3.5.0 cannot tag an empty plaintext, so for that case the
+wrapper computes the RFC 5297 S2V tag itself using OpenSSL's CMAC.
+
+We also use waf, libjsmn, and unity but we have local
 copies rather than depending on the host distro to provide them.
 
 === Coding style and indentation

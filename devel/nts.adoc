@@ -106,9 +106,10 @@ not a network connection.
 -    1 to 8 cookies link:{draft-nts}#section-4.1.6[4.1.6]
 -    The selected AEAD algorithm link:{draft-nts}#section-4.1.5[4.1.5]
 
-For AEAD, we need libaes_siv.so, RFC 5297
-It's not in OpenSSL yet.
-  https://github.com/dfoxfranke/libaes_siv
+For AEAD (AES-SIV, RFC 5297) we use OpenSSL's native EVP AES-SIV,
+which needs OpenSSL 3.0 or newer; see libntp/aes_siv_evp.c.
+OpenSSL before 3.5.0 cannot tag an empty plaintext, so for that case
+the wrapper computes the RFC 5297 S2V tag itself using OpenSSL's CMAC.
 
 An NTP client SHOULD NOT initiate NTS-KE by default.  Configuration
 parameters from the NTPD config file will tell the NTPD client when and
