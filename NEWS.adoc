@@ -15,6 +15,28 @@ on user-visible changes.
 * Shared key authentication now supports HMAC mode.
 It's one of the options for NIST's authenticated service.
 https://www.nist.gov/pml/time-and-frequency-division/time-services/nist-authenticated-ntp-service
+* A shared key ID equal to the maximum key number is now accepted in the configuration (NTPsec/ntpsec#896).
+* The Trimble TSIP reference clock driver no longer announces an imminent leap second weeks early whenever the receiver has a leap correction queued.
+* Fixed misaligned access to restriction list entries, which could crash ntpd on strict-alignment platforms.
+* ntpd now starts on systems whose OpenSSL providers don't offer MD5, such as FIPS-only configurations. Keys whose algorithm OpenSSL can't run are now skipped with a log message when the keys file is read, instead of failing on every packet (NTPsec/ntpsec#900).
+
+=== Security Fixes:
+
+* Fixed an out-of-bounds read in NTS server extension parsing caused by an unchecked nonce length, which allowed a remote attacker holding an NTS cookie to crash `ntpd` (CVE-2026-102486).
+* Fixed a remotely triggerable exit in the NTS server when a request carried more NTS Cookie Placeholders than fit in the response (CVE-2026-102483).
+* Fixed an out-of-bounds write in the JJY reference clock driver when a Telephone JJY source sends more time replies than expected (CVE-2026-102484).
+* Fixed an out-of-bounds read in the Motorola Oncore reference clock driver on a PPS Control reply with an out-of-range mode byte (CVE-2026-102485).
+
+=== NTS and NTS-KE Fixes:
+
+* The NTS-KE server no longer treats unrecognized non-critical records as critical, fixing interoperability with chrony (NTPsec/ntpsec#892).
+* The NTS-KE server now replies with an RFC 8915 Error record when a request is malformed or the server cannot derive session keys, rejects duplicate or missing Next Protocol and AEAD records, and passes the ntske-test suite.
+* The NTS server now rejects Unique Identifier extension fields shorter than the 32 octets RFC 8915 requires.
+* The NTS server now rejects NTS cookies shorter than the key ID and nonce before parsing them.
+* The NTS server now accepts requests with nonces longer than 16 octets, shorter nonces with enough padding, and encrypted extension fields, as RFC 8915 allows.
+* The NTS-KE client now rejects responses that lack an End of Message record.
+* The NTS client now bounds the AEEF nonce length against the bytes remaining in the packet.
+* Fixed misaligned reads and writes of NTS-KE records, which could crash ntpd on strict-alignment platforms.
 
 == 2026-07-30: 1.2.5
 
