@@ -199,7 +199,8 @@ enum nts_protocol_type {
 
 enum nts_errors_type {
         nts_unrecognized_critical_section = 0,
-        nts_bad_request = 1
+        nts_bad_request = 1,
+        nts_internal_server_error = 2
 };
 
 

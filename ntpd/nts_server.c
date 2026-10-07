@@ -426,6 +426,13 @@ void nts_ke_request(NTS_Server_Info *nsi, SSL *ssl) {
         keylen = nts_get_key_length(nsi->aead);
         if (!nts_make_keys(ssl, nsi->aead, c2s, s2c, keylen)) {
                 nsi->errtxt = "Can't make keys";
+                buf.next = buff;
+                buf.left = sizeof(buff);
+                ke_append_record_uint16(&buf, NTS_CRITICAL+nts_error,
+                  nts_internal_server_error);
+                ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
+                used = sizeof(buff)-buf.left;
+                nts_ssl_write(ssl, buff, used, &nsi->errtxt);
                 return;
         }
 
