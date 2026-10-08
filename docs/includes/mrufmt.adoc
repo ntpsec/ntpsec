@@ -20,7 +20,9 @@ KoD response, respectively.
 |+v+             |Packet version number.
 |+count+         |Packets received from this address.
 |+score+         |Packets per second (averaged with exponential decay).
-|+drop+          |Packets dropped (or KoDed) from this address.
+|+drop+          |
+Packets dropped (or KoDed) from this address. Always 0 unless a +restrict ... limited+
+line applies to the address.
 |+rport+         |Source port of last packet from this address.
 |+remote address+|
 DNS name, numeric address, or address followed by claimed DNS name

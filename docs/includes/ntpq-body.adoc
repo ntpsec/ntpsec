@@ -327,10 +327,10 @@ from given IP addresses (provided by addr.'x'= entries where 0 <= x
 the fragment limit controls. NOTE: a single mrulist command may
 cause many query/response rounds allowing limits as low as 3 to
 potentially retrieve thousands of entries in responses.
-The +mincount=+'count' option filters out entries that have received less
-than 'count' packets.
-The +mindrop=+'drop' option filters out entries that have dropped less
-than 'drop' packets.
+The +mincount=+'count' option filters out entries that have received
+fewer than 'count' packets.
+The +mindrop=+'drop' option filters out entries that have dropped
+fewer than 'drop' packets due to rate limiting.
 The +minscore=+'score' option filters out entries with a score less
 than 'score'.
 The +maxlstint=+'seconds' option filters out entries where no packets have
@@ -339,7 +339,7 @@ The +minlstint=+'seconds' option filters out entries with a packet has
 arrived within 'seconds'.
 The +laddr=+'localaddr' option filters out entries for packets
 received on any local address other than 'localaddr'. +resany=+'hexmask'
-and +resall=+'hexmask' filter entries containing none or less than all,
+and +resall=+'hexmask' filter entries containing none or fewer than all,
 respectively, of the bits in 'hexmask', which must begin with +0x+.
 +
 The _sortorder_ defaults to +lstint+ and may be any of +addr+,
