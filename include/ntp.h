@@ -667,10 +667,14 @@ struct restrict_u_tag {
 		res_addr6 v6;
 	} u;
 };
-#define	V4_SIZEOF_RESTRICT_U	(offsetof(restrict_u, u)	\
-				 + sizeof(res_addr4))
-#define	V6_SIZEOF_RESTRICT_U	(offsetof(restrict_u, u)	\
-				 + sizeof(res_addr6))
+/* Round up to preserve restrict_u alignment when these sizes are used as
+ * the stride between consecutive entries in an emalloc'd array. */
+#define	V4_SIZEOF_RESTRICT_U	((offsetof(restrict_u, u) + sizeof(res_addr4) \
+				  + __alignof__(restrict_u) - 1)	\
+				 & ~(__alignof__(restrict_u) - 1))
+#define	V6_SIZEOF_RESTRICT_U	((offsetof(restrict_u, u) + sizeof(res_addr6) \
+				  + __alignof__(restrict_u) - 1)	\
+				 & ~(__alignof__(restrict_u) - 1))
 
 /* pythonize-header: stop ignoring */
 
