@@ -93,7 +93,6 @@ try_hmac(const char *upcased, char* namebuf) {
 	if (EVP_get_digestbyname(namebuf) == NULL) {
 		return NULL;
 	}
-	/* FIXME: 3.0 needs a Fetch to be sure it really exists. */
 	return namebuf;
 }
 
@@ -109,7 +108,6 @@ try_cmac(const char *upcased, char* namebuf) {
 	if (EVP_get_cipherbyname(namebuf) == NULL) {
 		return NULL;
 	}
-	/* FIXME: 3.0 needs a Fetch to be sure it really exists. */
 	return namebuf;
 }
 
@@ -130,6 +128,40 @@ try_digest(char *upcased, char *namebuf) {
 		}
 	}
 	return NULL;
+}
+
+/*
+ * EVP_get_digestbyname() and EVP_get_cipherbyname() know every name
+ * libcrypto was built with, even when no loaded provider implements
+ * it, as with MD5 under a FIPS provider.  Fetch to be sure.
+ */
+static bool
+auth_available(
+	AUTH_Type type,
+	const char *name
+	)
+{
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	if (AUTH_CMAC == type) {
+		EVP_CIPHER *cipher = EVP_CIPHER_fetch(NULL, name, NULL);
+
+		if (NULL == cipher) {
+			return false;
+		}
+		EVP_CIPHER_free(cipher);
+	} else {
+		EVP_MD *md = EVP_MD_fetch(NULL, name, NULL);
+
+		if (NULL == md) {
+			return false;
+		}
+		EVP_MD_free(md);
+	}
+#else
+	UNUSED_ARG(type);
+	UNUSED_ARG(name);
+#endif
+	return true;
 }
 
 static void
@@ -483,6 +515,13 @@ msyslog(LOG_ERR, "AUTH: authreadkeys: reading %s", file);
 				keyno, token);
                         continue;
                 }
+		if (!auth_available(type, name)) {
+			msyslog(LOG_ERR,
+			    "AUTH: authreadkeys: key %u: %s not available "
+			    "from OpenSSL, skipped; use AES-128 CMAC "
+			    "(RFC 8573) or NTS", keyno, token);
+			continue;
+		}
 
 
 
