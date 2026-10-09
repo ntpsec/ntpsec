@@ -63,6 +63,10 @@ int ntp_getopt_long(int argc, char* const argv[], const char *optstring,
 /* mac_md5encrypt.c */
 extern	uint32_t	addr2refid	(sockaddr_u *);
 
+/* md5.c */
+#define NTP_MD5_LENGTH	16
+extern	void	ntp_md5		(const void *, size_t, uint8_t *);
+
 /* emalloc.c */
 #ifndef EREALLOC_CALLSITE	/* ntp_malloc.h defines */
 extern	void *	ereallocz	(void *, size_t, size_t, int);
