@@ -51,7 +51,6 @@
 
 #include <openssl/err.h>
 #include <openssl/evp.h>	/* provides OpenSSL digest API */
-#include <openssl/md5.h>
 #include "hack-ancient-openssl.h"
 
 #include "ntp_fp.h"
@@ -420,57 +419,13 @@ digest_decrypt(
 uint32_t
 addr2refid(sockaddr_u *addr)
 {
-	uint8_t		digest[MD5_DIGEST_LENGTH];
+	uint8_t		digest[NTP_MD5_LENGTH];
 	uint32_t	addr_refid;
-	static EVP_MD_CTX	*ctx;
-	unsigned int	len;
 
 	if (IS_IPV4(addr))
 		return (NSRCADR(addr));
 
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-	static OSSL_LIB_CTX *libctx;
-	EVP_MD *md5 = 0;
-	if(libctx == NULL) {
-		libctx = OSSL_LIB_CTX_new();
-		if(libctx == NULL) {
-			msyslog(LOG_ERR, "MAC: MD5 init failed");
-			exit(1);
-		}
-	}
-	if(ctx == NULL) {
-		ctx = EVP_MD_CTX_new();
-		if(ctx == NULL) {
-			msyslog(LOG_ERR, "MAC: MD5 init failed");
-			exit(1);
-		}
-	}
-	/* See section FIPS Provider:
-	 * https://www.openssl.org/docs/man3.0/man7/crypto.html
-	 * for property query strings
-	 */
-	md5 = EVP_MD_fetch(libctx, "MD5", "fips=no");
-	if(!EVP_DigestInit_ex(ctx, md5, NULL)) {
-		msyslog(LOG_ERR, "MAC: MD5 init failed");
-		exit(1);
-	}
-	EVP_MD_free(md5);
-#else
-	if(ctx == NULL) {
-		ctx = EVP_MD_CTX_new();
-	}
-#ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
-	/* MD5 is not used as a crypto hash here. */
-	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-#endif
-	if (!EVP_DigestInit_ex(ctx, EVP_md5(), NULL)) {
-		msyslog(LOG_ERR, "MAC: MD5 init failed");
-		exit(1);
-	}
-#endif
-	EVP_DigestUpdate(ctx, (uint8_t *)PSOCK_ADDR6(addr),
-	    sizeof(struct in6_addr));
-	EVP_DigestFinal_ex(ctx, digest, &len);
+	ntp_md5(PSOCK_ADDR6(addr), sizeof(struct in6_addr), digest);
 	memcpy(&addr_refid, digest, sizeof(addr_refid));
 	return (addr_refid);
 }

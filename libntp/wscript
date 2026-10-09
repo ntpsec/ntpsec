@@ -21,6 +21,7 @@ def build(ctx):
         "isc_interfaceiter.c",
         "isc_net.c",
         "macencrypt.c",
+        "md5.c",
         "ntp_endian.c",
         "numtoa.c",
         "refidsmear.c",
