@@ -102,7 +102,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
                              buf.next, &left,
                              peer->nts_state.c2s, peer->nts_state.keylen,
                              nonce, NONCE_LENGTH,
-                             NULL, 0,           // no plain/cipher text
+                             (const uint8_t *)"", 0,  // no plaintext
                              packet, adlength);
         if (!ok) {
                 msyslog(LOG_ERR,
@@ -126,7 +126,7 @@ int extens_client_send(struct peer *peer, struct pkt *xpkt) {
 bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
         struct BufCtl_t buf;
         uint16_t aead;
-        unsigned noncelen, cmaclen;
+        unsigned noncelen, ctlen, noncepad, ctpad, fieldlen;
         bool sawcookie, sawAEEF;
         int cookielen;                  // cookie and placeholder(s)
 
@@ -144,7 +144,8 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
                 uint16_t type;
                 int length, adlength;
                 size_t outlen;
-                uint8_t *nonce, *cmac;
+                uint8_t *nonce, *ciphertext;
+                uint8_t plaintext[MAX_EXT_LEN];
                 bool ok;
 
                 type = ex_next_record(&buf, &length); // length excludes header
@@ -203,33 +204,38 @@ bool extens_server_recv(struct ntspacket_t *ntspacket, uint8_t *pkt, int lng) {
                         if (!sawcookie) {
                                 return false; // no cookie yet, no c2s
                         }
-                        if (length != NTP_EX_HDR_LNG+NONCE_LENGTH+CMAC_LENGTH) {
+                        if (length < NTP_EX_U16_LNG*2+NONCE_LENGTH+CMAC_LENGTH) {
                                 return false;
                         }
                         /* Additional data is up to this exten.
                          * backup over header */
                         adlength = buf.next-NTP_EX_HDR_LNG-pkt;
                         noncelen = next_uint16(&buf);
-                        cmaclen = next_uint16(&buf);
-                        if (NONCE_LENGTH != noncelen) {
+                        ctlen = next_uint16(&buf);
+                        // nonce, ciphertext, and additional padding
+                        fieldlen = (unsigned)length - NTP_EX_U16_LNG*2;
+                        noncepad = (noncelen + 3) & ~3U;
+                        ctpad = (ctlen + 3) & ~3U;
+                        if (noncepad + ctpad > fieldlen) {
                                 return false;
                         }
-                        if (CMAC_LENGTH != cmaclen) {
+                        // RFC 8915 5.6: nonce plus additional padding
+                        // must be at least N_REQ, 16 for AES-SIV
+                        if (fieldlen - ctpad < NONCE_LENGTH) {
                                 return false;
                         }
                         nonce = buf.next;
-                        cmac = nonce+NONCE_LENGTH;
-                        outlen = 6;
+                        ciphertext = nonce+noncepad;
+                        // Encrypted extension fields are decrypted
+                        // but not used.
+                        outlen = sizeof(plaintext);
                         ok = AES_SIV_Decrypt(wire_ctx,
-                                             NULL, &outlen,
+                                             plaintext, &outlen,
                                              ntspacket->c2s, ntspacket->keylen,
                                              nonce, noncelen,
-                                             cmac, CMAC_LENGTH,
+                                             ciphertext, ctlen,
                                              pkt, adlength);
                         if (!ok) {
-                                return false;
-                        }
-                        if (0 != outlen) {
                                 return false;
                         }
                         // we already used 2 length slots way above*/

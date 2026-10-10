@@ -120,7 +120,7 @@ TEST(nts_extens, extens_server_recv) {
 	append_header(&buf, NTS_AEEF, NTP_EX_HDR_LNG+NONCE_LENGTH+CMAC_LENGTH);
 	ok = extens_server_recv(&ntspkt, pkt, sizeof(pkt));
 	TEST_ASSERT_EQUAL(false, ok);
-	/* Bad AEEF length */
+	/* Ciphertext shorter than the SIV tag (zero lengths) */
 	memset(pkt+LEN_PKT_NOMAC, 0, sizeof(pkt)-LEN_PKT_NOMAC);
 	buf.next = pkt+LEN_PKT_NOMAC;
 	buf.left = sizeof(pkt) - LEN_PKT_NOMAC;
@@ -128,9 +128,9 @@ TEST(nts_extens, extens_server_recv) {
 	append_header(&buf, NTS_AEEF, NTP_EX_HDR_LNG+NONCE_LENGTH+CMAC_LENGTH+8);
 	ok = extens_server_recv(&ntspkt, pkt, sizeof(pkt));
 	TEST_ASSERT_EQUAL(false, ok);
-	/* Bad noncelen */
+	/* Nonce runs past the end of the field */
 	uint8_t aeef_data1[NTP_EX_HDR_LNG+NONCE_LENGTH+CMAC_LENGTH] = {
-		0, 3, /* nonce length, bad, not mod 4 */
+		0, 32, /* nonce length, bad, longer than the field */
 		0, 16, /* cmac length */
 		1, 2, 3, /* nonce */
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}; /* cmac */
@@ -141,10 +141,10 @@ TEST(nts_extens, extens_server_recv) {
 	ex_append_record_bytes(&buf, NTS_AEEF, aeef_data1, sizeof(aeef_data1));
 	ok = extens_server_recv(&ntspkt, pkt, sizeof(pkt));
 	TEST_ASSERT_EQUAL(false, ok);
-	/* Bad CMAC length */
+	/* Ciphertext shorter than the SIV tag */
 	uint8_t aeef_data2[NTP_EX_HDR_LNG+NONCE_LENGTH+CMAC_LENGTH] = {
 		0, 16, /* nonce length */
-		0, 8, /* cmac length, bad != 16 */
+		0, 8, /* ciphertext length, bad < 16 */
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, /* nonce */
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}; /* cmac */
 	memset(pkt+LEN_PKT_NOMAC, 0, sizeof(pkt)-LEN_PKT_NOMAC);
@@ -225,7 +225,86 @@ TEST(nts_extens, extens_server_recv) {
 	/* TEST_ASSERT_EQUAL(true, ok); //disable */
 }
 
+/* Build a request with a cookie and an NTS Authenticator and Encrypted
+ * Extension Fields field, and return its length */
+static int build_request(uint8_t *pkt, size_t pktlen,
+			 uint8_t *cookie, int cookielen, uint8_t *c2s,
+			 unsigned noncelen, unsigned addpad,
+			 const uint8_t *plain, size_t plainlen) {
+	BufCtl buf;
+	AES_SIV_CTX *ctx;
+	unsigned noncepad = (noncelen + 3) & ~3U;
+	unsigned ctlen = plainlen + CMAC_LENGTH;
+	unsigned ctpad = (ctlen + 3) & ~3U;
+	size_t outlen = ctpad;
+	uint8_t *nonce;
+	int adlength;
+
+	memset(pkt, 0, pktlen);
+	memcpy(pkt, base_pkt, sizeof(base_pkt));
+	buf.next = pkt+LEN_PKT_NOMAC;
+	buf.left = pktlen - LEN_PKT_NOMAC;
+	ex_append_record_bytes(&buf, NTS_Cookie, cookie, cookielen);
+	adlength = buf.next - pkt;
+	ex_append_header(&buf, NTS_AEEF,
+			 NTP_EX_U16_LNG*2 + noncepad + ctpad + addpad);
+	append_uint16(&buf, noncelen);
+	append_uint16(&buf, ctlen);
+	nonce = buf.next;
+	memset(nonce, 0xA5, noncelen);
+	ctx = AES_SIV_CTX_new();
+	TEST_ASSERT_TRUE(AES_SIV_Encrypt(ctx, nonce + noncepad, &outlen,
+					 c2s, 32, nonce, noncelen,
+					 plain, plainlen, pkt, adlength));
+	AES_SIV_CTX_free(ctx);
+	buf.next += noncepad + ctpad + addpad;
+	return buf.next - pkt;
+}
+
+TEST(nts_extens, extens_server_recv_rfc8915) {
+	struct ntspacket_t ntspkt;
+	uint8_t pkt[2048];
+	uint8_t cookie[NTS_MAX_COOKIELEN];
+	/* AEAD_AES_SIV_CMAC_256 keys are 32 octets */
+	uint8_t c2s[32] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+	uint8_t s2c[32] = {16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+	/* An unknown extension field, encrypted */
+	const uint8_t ext[] = {0x00, 0xFF, 0, 8, 1, 2, 3, 4};
+	int cookielen, lng;
+
+	nts_cookie_init();
+	nts_nKeys = 0;
+	nts_make_cookie_key();
+	cookielen = nts_make_cookie(cookie, AEAD_AES_SIV_CMAC_256, c2s, s2c,
+				    sizeof(c2s));
+
+	/* 16-octet nonce, no plaintext */
+	memset(&ntspkt, 0, sizeof(ntspkt));
+	lng = build_request(pkt, sizeof(pkt), cookie, cookielen, c2s,
+			    16, 0, (const uint8_t *)"", 0);
+	TEST_ASSERT_TRUE(extens_server_recv(&ntspkt, pkt, lng));
+
+	/* Longer nonce and an encrypted extension field */
+	memset(&ntspkt, 0, sizeof(ntspkt));
+	lng = build_request(pkt, sizeof(pkt), cookie, cookielen, c2s,
+			    24, 0, ext, sizeof(ext));
+	TEST_ASSERT_TRUE(extens_server_recv(&ntspkt, pkt, lng));
+
+	/* Short nonce with enough additional padding */
+	memset(&ntspkt, 0, sizeof(ntspkt));
+	lng = build_request(pkt, sizeof(pkt), cookie, cookielen, c2s,
+			    8, 8, (const uint8_t *)"", 0);
+	TEST_ASSERT_TRUE(extens_server_recv(&ntspkt, pkt, lng));
+
+	/* Short nonce without enough additional padding */
+	memset(&ntspkt, 0, sizeof(ntspkt));
+	lng = build_request(pkt, sizeof(pkt), cookie, cookielen, c2s,
+			    8, 4, ext, sizeof(ext));
+	TEST_ASSERT_FALSE(extens_server_recv(&ntspkt, pkt, lng));
+}
+
 TEST_GROUP_RUNNER(nts_extens) {
 	RUN_TEST_CASE(nts_extens, extens_client_send);
 	RUN_TEST_CASE(nts_extens, extens_server_recv);
+	RUN_TEST_CASE(nts_extens, extens_server_recv_rfc8915);
 }
