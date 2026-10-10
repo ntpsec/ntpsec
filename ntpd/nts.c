@@ -20,9 +20,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <arpa/inet.h>
 #include <openssl/err.h>
 
+#include "ntp_endian.h"
 #include "ntp_types.h"
 #include "ntp_stdlib.h"
 #include "ntpd.h"
@@ -292,9 +292,8 @@ bool nts_load_certificate(SSL_CTX *ctx) {
 // scan partial(?) buffer for end marker
 static bool find_end_marker(uint8_t *buff, int bytes) {
   while (NTS_KE_HDR_LNG<=bytes) {
-    uint16_t *buff16 = (uint16_t *)buff;
-    uint16_t type = ntohs(*buff16++) & ~NTS_CRITICAL;
-    uint16_t length = ntohs(*buff16++);
+    uint16_t type = ntp_be16dec(buff) & ~NTS_CRITICAL;
+    uint16_t length = ntp_be16dec(buff + NTS_KE_U16_LNG);
     if (NTS_KE_HDR_LNG + length > bytes) return false;
     if (nts_end_of_message == type) return true;
     buff += NTS_KE_HDR_LNG + length;
@@ -446,21 +445,19 @@ void ex_append_header(BufCtl* buf, uint16_t type, uint16_t length) {
 }
 
 void append_header(BufCtl* buf, uint16_t type, uint16_t length) {
-        uint16_t * ptr = (uint16_t *)buf->next;
         if (NTS_KE_HDR_LNG > buf->left)
                 return;
-        *ptr++ = htons(type);
-        *ptr++ = htons(length);
+        ntp_be16enc(buf->next, type);
+        ntp_be16enc(buf->next + NTS_KE_U16_LNG, length);
         buf->next += NTS_KE_HDR_LNG;
         buf->left -= NTS_KE_HDR_LNG;
         // leaves buf pointing to where data will go
 }
 
 void append_uint16(BufCtl* buf, uint16_t data) {
-        uint16_t * ptr = (uint16_t *)buf->next;
         if (NTS_KE_U16_LNG > buf->left)
                 return;
-        *ptr++ = htons(data);
+        ntp_be16enc(buf->next, data);
         buf->next += NTS_KE_U16_LNG;
         buf->left -= NTS_KE_U16_LNG;
 }
@@ -475,18 +472,16 @@ void append_bytes(BufCtl* buf, uint8_t *data, int length) {
 
 // Reads type and length of the next record, and moves cursor to the data
 uint16_t ke_next_record(BufCtl* buf, int *length) {
-        uint16_t *ptr = (uint16_t *)buf->next;
-        uint16_t type = ntohs(*ptr++);
-        *length = ntohs(*ptr++);
+        uint16_t type = ntp_be16dec(buf->next);
+        *length = ntp_be16dec(buf->next + NTS_KE_U16_LNG);
         buf->next += NTS_KE_HDR_LNG;
         buf->left -= NTS_KE_HDR_LNG;
         return type;
 }
 
 uint16_t ex_next_record(BufCtl* buf, int *length) {
-        uint16_t *ptr = (uint16_t *)buf->next;
-        uint16_t type = ntohs(*ptr++);
-        *length = ntohs(*ptr++)-NTS_KE_HDR_LNG;
+        uint16_t type = ntp_be16dec(buf->next);
+        *length = ntp_be16dec(buf->next + NTS_KE_U16_LNG) - NTS_KE_HDR_LNG;
         buf->next += NTS_KE_HDR_LNG;
         buf->left -= NTS_KE_HDR_LNG;
         return type;
@@ -494,8 +489,7 @@ uint16_t ex_next_record(BufCtl* buf, int *length) {
 
 // Reads a uint16 from the record and advances to the next data
 uint16_t next_uint16(BufCtl* buf) {
-        uint16_t *ptr = (uint16_t *)buf->next;
-        uint16_t data = ntohs(*ptr++);
+        uint16_t data = ntp_be16dec(buf->next);
         buf->next += NTS_KE_U16_LNG;
         buf->left -= NTS_KE_U16_LNG;
         return data;

@@ -24,4 +24,9 @@ static inline uint64_t ntp_be64dec(const uint8_t *buf) {
 	return ((uint64_t)ntp_be32dec(buf) << 32) | ntp_be32dec(buf + 4);
 }
 
+static inline void ntp_be16enc(uint8_t *buf, uint16_t v) {
+	buf[0] = (uint8_t)(v >> 8);
+	buf[1] = (uint8_t)v;
+}
+
 #endif
