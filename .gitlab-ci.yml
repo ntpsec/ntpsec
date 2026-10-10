@@ -357,6 +357,14 @@ debian-stable-mDNS-refclocks:
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
+debian-stable-ubsan:
+  <<: *job_definition
+  image: $IMAGE_REGISTRY/debian-stable
+  variables:
+    UBSAN_OPTIONS: print_stacktrace=1
+  script:
+    - python3 ./waf configure --disable-doc --disable-manpage --cflags=-fsanitize=undefined --cflags=-fno-sanitize-recover=undefined --cflags=-g --ldflags=-fsanitize=undefined build
+
 cross-armhf-build:
   allow_failure: true
   <<: *job_definition
