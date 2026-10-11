@@ -295,6 +295,7 @@ static bool find_end_marker(uint8_t *buff, int bytes) {
     uint16_t *buff16 = (uint16_t *)buff;
     uint16_t type = ntohs(*buff16++) & ~NTS_CRITICAL;
     uint16_t length = ntohs(*buff16++);
+    if (NTS_KE_HDR_LNG + length > bytes) return false;
     if (nts_end_of_message == type) return true;
     buff += NTS_KE_HDR_LNG + length;
     bytes -= NTS_KE_HDR_LNG + length;
