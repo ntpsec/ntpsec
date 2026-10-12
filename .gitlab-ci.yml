@@ -417,6 +417,7 @@ coverity-scan:
       - 255
 
 macos-basic:
+  timeout: 5m
   <<: *job_definition
   script:
     - PKG_CONFIG_PATH=${HOMEBREW_PREFIX}/opt/openssl/lib/pkgconfig python ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
@@ -430,6 +431,7 @@ macos-basic:
     - if: '$CI_COMMIT_BRANCH && $CI_PROJECT_PATH == "NTPsec/ntpsec"'
 
 macos-refclocks:
+  timeout: 5m
   <<: *job_definition
   script:
     - PKG_CONFIG_PATH=${HOMEBREW_PREFIX}/opt/openssl/lib/pkgconfig python ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build  --pyshebang "/usr/bin/env python3" || cat build/config.log

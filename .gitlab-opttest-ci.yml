@@ -67,6 +67,7 @@ gentoo-options-tester:
     - emerge -q y sys-libs/libcap sys-devel/bison net-misc/pps-tools app-text/asciidoc sys-libs/libseccomp app-shells/bash
 
 macos-options-tester:
+  timeout: 6m
   stage: test
   needs: []
   script:
