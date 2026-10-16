@@ -375,8 +375,22 @@ void nts_ke_request(NTS_Server_Info *nsi, SSL *ssl) {
         enum process_result result;
 
         bytes_read = nts_ssl_read(ssl, buff, sizeof(buff), &nsi->errtxt);
-        if (0 >= bytes_read)
+        if (0 > bytes_read)
                 return;
+        if (0 == bytes_read) {
+                // RFC 8915 4.1.3: Bad Request on timeout without a request.
+                // Keep the read's error text for the log.
+                const char *werrtxt = NULL;
+
+                buf.next = buff;
+                buf.left = sizeof(buff);
+                ke_append_record_uint16(&buf, NTS_CRITICAL+nts_error,
+                  nts_bad_request);
+                ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
+                used = sizeof(buff)-buf.left;
+                nts_ssl_write(ssl, buff, used, &werrtxt);
+                return;
+        }
 
         buf.next = buff;
         buf.left = bytes_read;

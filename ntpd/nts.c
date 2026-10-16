@@ -317,7 +317,7 @@ int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length, const char** errtxt) 
       unsigned long err = ERR_peek_error();
       if (SSL_ERROR_ZERO_RETURN == code) {
         *errtxt = "SSL_read Connection reset1";
-        return 0;
+        return -1;
       }
       if (SSL_ERROR_WANT_READ == code) {
         *errtxt = "SSL_read Timeout";
@@ -327,7 +327,7 @@ int nts_ssl_read(SSL *ssl, uint8_t *buff, int buff_length, const char** errtxt) 
       if (SSL_ERROR_SSL == code &&
           SSL_R_UNEXPECTED_EOF_WHILE_READING == ERR_GET_REASON(err)) {
         *errtxt = "SSL_read Connection reset2";
-        return 0;
+        return -1;
       }
 #else
       // Hack for OpenSSL 1.1.1w  11 Sep 2023
