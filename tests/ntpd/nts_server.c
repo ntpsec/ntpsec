@@ -156,6 +156,28 @@ TEST(nts_server, nts_ke_process_receive) {
 	/* test */
 	success = nts_ke_process_receive(&nsi, &buf);
 	TEST_ASSERT_EQUAL(Process_Critical, success);
+
+	/* ===== Test: Warning from a client is a Bad Request ===== */
+	uint8_t bufw[] = {
+		0x80, nts_warning, 0, 2, 0, 1,
+		0x80, nts_end_of_message, 0, 0,
+	};
+	buf.next = bufw;
+	buf.left = sizeof(bufw);
+	success = nts_ke_process_receive(&nsi, &buf);
+	TEST_ASSERT_EQUAL(Process_Error, success);
+
+	/* ===== Test: critical Server Negotiation is ignored ===== */
+	uint8_t bufsn[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2, 0x00, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 2, 0x00, AEAD_AES_SIV_CMAC_256,
+		0x80, nts_server_negotiation, 0, 3, 'a', '.', 'b',
+		0x80, nts_end_of_message, 0, 0,
+	};
+	buf.next = bufsn;
+	buf.left = sizeof(bufsn);
+	success = nts_ke_process_receive(&nsi, &buf);
+	TEST_ASSERT_EQUAL(Process_OK, success);
 }
 
 TEST_GROUP_RUNNER(nts_server) {

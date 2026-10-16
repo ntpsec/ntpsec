@@ -693,6 +693,23 @@ enum process_result nts_ke_process_receive(NTS_Server_Info *nsi, BufCtl *buf) {
                                 return Process_NoMatch;
                         }
                         return Process_OK;
+                    case nts_warning:
+                        FALLTHRU
+                    case nts_new_cookie:
+                        // RFC 8915 4.1.4, 4.1.6: clients MUST NOT send these
+                        snprintf(nsi->errbuf, sizeof(nsi->errbuf),
+                                "Client sent record type %d", type);
+                        nsi->errtxt = nsi->errbuf;
+                        return Process_Error;
+                    case nts_server_negotiation:
+                        FALLTHRU
+                    case nts_port_negotiation:
+                        // RFC 8915 4.1.7, 4.1.8: honoring these is
+                        // optional, and a client SHOULD NOT, but may, set
+                        // the Critical Bit
+                        buf->next += length;
+                        buf->left -= length;
+                        break;
                     default:
                         if (critical) {
                           // This only logs the first one from a connection
