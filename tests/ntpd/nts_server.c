@@ -64,7 +64,7 @@ TEST(nts_server, nts_ke_process_receive) {
 
 	/* ===== Test: nts_next_protocol_negotiation, bad length ===== */
 	uint8_t buf2[] = {
-		0x80, nts_next_protocol_negotiation, 0, 4, 0x11, 0x22, 0x33, 0x44,
+		0x80, nts_next_protocol_negotiation, 0, 3, 0x11, 0x22, 0x33,
 		0x80, nts_end_of_message, 0, 0,
 	};
 	buf.next = buf2;
@@ -73,7 +73,7 @@ TEST(nts_server, nts_ke_process_receive) {
 	success = nts_ke_process_receive(&nsi, &buf);
 	TEST_ASSERT_EQUAL(Process_Error, success);
 
-	/* ===== Test: nts_next_protocol_negotiation, bad protocol ===== */
+	/* ===== Test: nts_next_protocol_negotiation, unsupported protocol ===== */
 	uint8_t buf3[] = {
 		0x80, nts_next_protocol_negotiation, 0, 2, 0x11, 0x22,
 		0x80, nts_end_of_message, 0, 0,
@@ -81,6 +81,38 @@ TEST(nts_server, nts_ke_process_receive) {
 	buf.next = buf3;
 	buf.left = sizeof(buf3);
 	/* test */
+	success = nts_ke_process_receive(&nsi, &buf);
+	TEST_ASSERT_EQUAL(Process_NoMatch, success);
+
+	/* ===== Test: nts_next_protocol_negotiation, empty ===== */
+	uint8_t bufne[] = {
+		0x80, nts_next_protocol_negotiation, 0, 0,
+		0x80, nts_end_of_message, 0, 0,
+	};
+	buf.next = bufne;
+	buf.left = sizeof(bufne);
+	success = nts_ke_process_receive(&nsi, &buf);
+	TEST_ASSERT_EQUAL(Process_Error, success);
+
+	/* ===== Test: nts_algorithm_negotiation, no supported AEAD ===== */
+	uint8_t bufna[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2, 0x00, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 2, 0x11, 0x22,
+		0x80, nts_end_of_message, 0, 0,
+	};
+	buf.next = bufna;
+	buf.left = sizeof(bufna);
+	success = nts_ke_process_receive(&nsi, &buf);
+	TEST_ASSERT_EQUAL(Process_NoMatch, success);
+
+	/* ===== Test: nts_algorithm_negotiation, empty ===== */
+	uint8_t bufae[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2, 0x00, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 0,
+		0x80, nts_end_of_message, 0, 0,
+	};
+	buf.next = bufae;
+	buf.left = sizeof(bufae);
 	success = nts_ke_process_receive(&nsi, &buf);
 	TEST_ASSERT_EQUAL(Process_Error, success);
 

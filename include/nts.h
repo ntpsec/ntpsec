@@ -51,7 +51,8 @@ typedef struct BufCtl_t BufCtl;
 
 // Here for test routines
 enum process_result {
-        Process_OK, Process_Critical, Process_Error };
+        Process_OK, Process_Critical, Process_Error,
+        Process_NoMatch };      // well-formed, but nothing in common
 struct NTS_Server_Info_t {
   char hostaddr[100];
   int aead;

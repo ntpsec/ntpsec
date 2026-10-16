@@ -417,6 +417,8 @@ void nts_ke_request(NTS_Server_Info *nsi, SSL *ssl) {
                             NTS_CRITICAL+nts_next_protocol_negotiation);
                     }
                 }
+                // RFC 8915 4.1.2, 4.1.5: if nothing matched, the
+                // empty records above are the answer, without an error
                 switch (result) {
                   case Process_Critical:
                     ke_append_record_uint16(&buf, NTS_CRITICAL+nts_error,
@@ -426,6 +428,8 @@ void nts_ke_request(NTS_Server_Info *nsi, SSL *ssl) {
                     ke_append_record_uint16(&buf, NTS_CRITICAL+nts_error,
                       nts_bad_request);
                     break;
+                  case Process_NoMatch:
+                    FALLTHRU
                   case Process_OK:  // keep compiler happy
                     break;
                   default:
@@ -565,6 +569,8 @@ bool create_listener6(int port) {
 }
 
 enum process_result nts_ke_process_receive(NTS_Server_Info *nsi, BufCtl *buf) {
+        bool npn_empty = false, aead_empty = false;
+
         nsi->aead = NO_AEAD;
         nsi->saw_next_protocol = false;
         nsi->next_protocol_matched = false;
@@ -612,6 +618,7 @@ enum process_result nts_ke_process_receive(NTS_Server_Info *nsi, BufCtl *buf) {
                                 return Process_Error;
                         }
                         nsi->saw_next_protocol = true;
+                        npn_empty = (0 == length);
                         for (int i=0; i<length; i+=sizeof(uint16_t)) {
                                 data = next_uint16(buf);
                                 if (data == nts_protocol_NTP) {
@@ -631,6 +638,7 @@ enum process_result nts_ke_process_receive(NTS_Server_Info *nsi, BufCtl *buf) {
                                 return Process_Error;
                         }
                         nsi->saw_aead = true;
+                        aead_empty = (0 == length);
                         for (int i=0; i<length; i+=sizeof(uint16_t)) {
                                 data = next_uint16(buf);
 // FIXME: config option, need bitmap or ???
@@ -662,17 +670,27 @@ enum process_result nts_ke_process_receive(NTS_Server_Info *nsi, BufCtl *buf) {
                                 nsi->errtxt = "NPN Missing";
                                 return Process_Error;
                         }
+                        // RFC 8915 4.1.2: the request lists at least one
+                        if (npn_empty) {
+                                nsi->errtxt = "NPN Empty";
+                                return Process_Error;
+                        }
                         if (!nsi->next_protocol_matched) {
                                 nsi->errtxt = "NPN No match";
-                                return Process_Error;
+                                return Process_NoMatch;
                         }
                         if (!nsi->saw_aead) {
                                 nsi->errtxt = "AEAD Missing";
                                 return Process_Error;
                         }
+                        // RFC 8915 4.1.5: the request lists at least one
+                        if (aead_empty) {
+                                nsi->errtxt = "AEAD Empty";
+                                return Process_Error;
+                        }
                         if (NO_AEAD == nsi->aead) {
                                 nsi->errtxt = "AEAD No match";
-                                return Process_Error;
+                                return Process_NoMatch;
                         }
                         return Process_OK;
                     default:
