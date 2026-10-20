@@ -714,9 +714,6 @@ the project manager to cut each release.
   to settle down.  If the discussion suggests that now is not a good
   time to cut a release, wait until the raised issues are resolved.
 
-. Check with the buildbot reports, assure that there are no unplanned
-  regressions on the supported platforms.
-
 . Do the "Release Prep Steps" section below.
 
 . Modify the .../VERSION file with the new version number.
@@ -724,6 +721,8 @@ the project manager to cut each release.
 
 . Modify the .../NEWS.adoc file, changing the "Repository head"
   to the current date and the version string.
+
+. Modify the .../PIVOT.h file
 
 . Run ./waf configure
 

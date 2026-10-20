@@ -10,7 +10,9 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository Head
+== 2026-10-20: 1.2.6
+
+Note: Python 2 and OpenSSL 1.1.0 support will be removed in the next release.
 
 * Shared key authentication now supports HMAC mode.
 It's one of the options for NIST's authenticated service.
