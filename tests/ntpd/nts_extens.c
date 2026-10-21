@@ -253,6 +253,7 @@ static int build_request(uint8_t *pkt, size_t pktlen,
 	nonce = buf.next;
 	memset(nonce, 0xA5, noncelen);
 	ctx = AES_SIV_CTX_new();
+	TEST_ASSERT_NOT_NULL(ctx);
 	TEST_ASSERT_TRUE(AES_SIV_Encrypt(ctx, nonce + noncepad, &outlen,
 					 c2s, 32, nonce, noncelen,
 					 plain, plainlen, pkt, adlength));
