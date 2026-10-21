@@ -90,3 +90,6 @@ build-ubuntu-devel:
 build-cross-armhf:
   allow_failure: true
   <<: *build_definition
+
+build-quality-checks:
+  <<: *build_definition
