@@ -3062,7 +3062,8 @@ process_routing_msgs(struct asyncio_reader *reader)
 	 */
 #ifdef HAVE_LINUX_RTNETLINK_H
 	for (nh = (struct nlmsghdr *)buffer;
-	     NLMSG_OK(nh, (unsigned) cnt);
+	     cnt >= (ssize_t)sizeof(struct nlmsghdr)
+	     && NLMSG_OK(nh, (size_t)cnt);
 	     nh = NLMSG_NEXT(nh, cnt)) {
 		msg_type = nh->nlmsg_type;
 #else
