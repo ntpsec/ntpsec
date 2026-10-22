@@ -27,7 +27,6 @@ pages:
     - gitlab-org
 
 include:
-  - template: Code-Quality.gitlab-ci.yml
   - template: SAST.gitlab-ci.yml
   - local: '.gitlab-opttest-ci.yml'
   - local: '.gitlab-docker-ci.yml'
@@ -507,3 +506,24 @@ feature-mssntp:
   image: $IMAGE_REGISTRY/alpine
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-mssntp build
+
+code-quality-c:
+  <<: *job_definition
+  stage: test
+  image: $IMAGE_REGISTRY/quality-checks
+  script:
+    - cppcheck --xml --enable=warning,style,performance,portability -I include -i libaes_siv -i attic -i build . 2> cppcheck-report.xml
+    - cppcheck-codequality --input-file cppcheck-report.xml --output-file gl-code-quality-c.json
+  artifacts:
+    reports:
+      codequality: gl-code-quality-c.json
+
+code-quality-python:
+  <<: *job_definition
+  stage: test
+  image: $IMAGE_REGISTRY/quality-checks
+  script:
+    - ruff check --output-format gitlab --output-file gl-code-quality-python.json . || true
+  artifacts:
+    reports:
+      codequality: gl-code-quality-python.json
