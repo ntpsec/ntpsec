@@ -512,7 +512,8 @@ code-quality-c:
   stage: test
   image: $IMAGE_REGISTRY/quality-checks
   script:
-    - cppcheck --xml --enable=warning,style,performance,portability -I include -i libaes_siv -i attic -i build . 2> cppcheck-report.xml
+    - python3 ./waf configure --disable-doc --disable-manpage --refclock=all
+    - cppcheck --xml --enable=warning,style,performance,portability --max-configs=1 -I build/main -I include -i libaes_siv -i attic -i build -i tests/unity -i libjsmn . 2> cppcheck-report.xml
     - cppcheck-codequality --input-file cppcheck-report.xml --output-file gl-code-quality-c.json
   artifacts:
     reports:
