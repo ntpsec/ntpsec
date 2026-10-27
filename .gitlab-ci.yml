@@ -453,59 +453,29 @@ feature-attic:
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --enable-attic build
 
-feature-classic-mode:
+feature:
   <<: *job_definition
   image: $IMAGE_REGISTRY/alpine
+  parallel:
+    matrix:
+      - FEATURE: [
+          --enable-classic-mode,
+          --enable-debug,
+          --disable-debug-gdb,
+          --enable-debug-timing,
+          --disable-droproot,
+          --enable-early-droproot,
+          --enable-leap-smear,
+          --enable-mssntp,
+        ]
   script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-classic-mode build
+    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all $FEATURE build
 
 feature-seccomp:
   <<: *job_definition
   image: $IMAGE_REGISTRY/alpine-seccomp
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-seccomp build
-
-feature-debug:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/alpine
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-debug build
-
-feature-disable-debug-gdb:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/alpine
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --disable-debug-gdb build
-
-feature-debug-timing:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/alpine
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-debug-timing build
-
-feature-disable-droproot:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/alpine
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --disable-droproot build
-
-feature-early-droproot:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/alpine
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-early-droproot build
-
-feature-leap-smear:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/alpine
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-leap-smear build
-
-feature-mssntp:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/alpine
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all --enable-mssntp build
 
 code-quality-c:
   <<: *job_definition
