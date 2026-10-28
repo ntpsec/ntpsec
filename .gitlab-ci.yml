@@ -38,6 +38,12 @@ include:
   tags:
     - gitlab-org
 
+.refclocks:
+  <<: *job_definition
+  image: $IMAGE_REGISTRY/$DISTRO
+  script:
+    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
+
 prisoner-0:
   <<: *job_definition
   image: $IMAGE_REGISTRY/alpine
@@ -46,6 +52,33 @@ prisoner-0:
     - DESTDIR=prison python3 ./waf install uninstall
     - DESTDIR=build/prison python3 ./waf install uninstall
     - DESTDIR=../prison python3 ./waf install uninstall
+
+refclocks:
+  extends: .refclocks
+  parallel:
+    matrix:
+      - DISTRO: [
+          alpine,
+          centos-latest,
+          debian-stable,
+          debian-stable-mdns,
+          debian-testing,
+          fedora-latest,
+          rocky,
+          ubuntu-latest,
+          ubuntu-rolling,
+        ]
+
+refclocks-unstable:
+  extends: .refclocks
+  allow_failure: true
+  parallel:
+    matrix:
+      - DISTRO: [
+          alpine-edge,
+          debian-unstable,
+          ubuntu-devel,
+        ]
 
 alpine-basic:
   <<: *job_definition
@@ -56,12 +89,6 @@ alpine-basic:
     - python3 ./waf install
     - python3 ./waf uninstall
 
-alpine-refclocks:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/alpine
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
-
 alpine-edge-basic:
   allow_failure: true
   <<: *job_definition
@@ -71,13 +98,6 @@ alpine-edge-basic:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
     - python3 ./waf uninstall
-
-alpine-edge-refclocks:
-  allow_failure: true
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/alpine-edge
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
 
 # AsciiDoc-3-Fedora:
 #   <<: *job_definition
@@ -138,12 +158,6 @@ debian-stable-basic:
     - python3 ./waf install
     - python3 ./waf uninstall
 
-debian-stable-refclocks:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/debian-stable
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
-
 debian-testing-basic:
   <<: *job_definition
   image: $IMAGE_REGISTRY/debian-testing
@@ -152,12 +166,6 @@ debian-testing-basic:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
     - python3 ./waf uninstall
-
-debian-testing-refclocks:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/debian-testing
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 debian-unstable-basic:
   allow_failure: true
@@ -169,13 +177,6 @@ debian-unstable-basic:
     - python3 ./waf install
     - python3 ./waf uninstall
 
-debian-unstable-refclocks:
-  allow_failure: true
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/debian-unstable
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
-
 ubuntu-latest-basic:
   <<: *job_definition
   image: $IMAGE_REGISTRY/ubuntu-latest
@@ -184,12 +185,6 @@ ubuntu-latest-basic:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
     - python3 ./waf uninstall
-
-ubuntu-latest-refclocks:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/ubuntu-latest
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 ubuntu-devel-basic:
   <<: *job_definition
@@ -202,13 +197,6 @@ ubuntu-devel-basic:
     - python3 ./waf install
     - python3 ./waf uninstall
 
-ubuntu-devel-refclocks:
-  <<: *job_definition
-  allow_failure: true
-  image: $IMAGE_REGISTRY/ubuntu-devel
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
-
 ubuntu-rolling-basic:
   <<: *job_definition
   image: $IMAGE_REGISTRY/ubuntu-rolling
@@ -217,12 +205,6 @@ ubuntu-rolling-basic:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
     - python3 ./waf uninstall
-
-ubuntu-rolling-refclocks:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/ubuntu-rolling
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 freebsd-basic:
   <<: *job_definition
@@ -254,12 +236,6 @@ centos-latest-basic:
     - python3 ./waf install
     - python3 ./waf uninstall
 
-centos-latest-refclocks:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/centos-latest
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
-
 rocky-basic:
   <<: *job_definition
   image: $IMAGE_REGISTRY/rocky
@@ -268,12 +244,6 @@ rocky-basic:
     - python3 ./waf install
     - python3 ./waf uninstall
 
-rocky-refclocks:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/rocky
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
-
 fedora-latest-basic:
   <<: *job_definition
   image: $IMAGE_REGISTRY/fedora-latest
@@ -281,12 +251,6 @@ fedora-latest-basic:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
     - python3 ./waf install
     - python3 ./waf uninstall
-
-fedora-latest-refclocks:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/fedora-latest
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build
 
 python3:
   <<: *job_definition
@@ -349,12 +313,6 @@ debian-stable-mDNS-basic:
   image: $IMAGE_REGISTRY/debian-stable-mdns
   script:
     - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build --pyshebang "/usr/bin/env python3"
-
-debian-stable-mDNS-refclocks:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/debian-stable-mdns
-  script:
-    - python3 ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage --refclock=all build --pyshebang "/usr/bin/env python3"
 
 debian-stable-ubsan:
   <<: *job_definition
