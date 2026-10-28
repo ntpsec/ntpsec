@@ -1,4 +1,4 @@
-.build_template: &build_definition
+.build_template:
   variables:
     # Try to save some time by only grabbing the most recent commit
     GIT_DEPTH: '1'
@@ -7,89 +7,53 @@
   services:
     - docker:dind
   script:
-    - IMAGE_NAME=${CI_JOB_NAME/build-/}
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker pull $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest || true
+    - docker pull $CI_REGISTRY_IMAGE/$DISTRO:latest || true
     - >
       docker build
       --pull
-      --cache-from $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest
+      --cache-from $CI_REGISTRY_IMAGE/$DISTRO:latest
       --rm=false
-      --tag $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest .
-      --file .dockerfiles/$IMAGE_NAME
-    - docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest
+      --tag $CI_REGISTRY_IMAGE/$DISTRO:latest .
+      --file .dockerfiles/$DISTRO
+    - docker push $CI_REGISTRY_IMAGE/$DISTRO:latest
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
-build-alpine:
-  <<: *build_definition
+build-image:
+  extends: .build_template
+  parallel:
+    matrix:
+      - DISTRO: [
+          alpine,
+          alpine-pages,
+          alpine-seccomp,
+          centos-latest,
+          clang,
+          coverity,
+          debian-oldstable,
+          debian-stable,
+          debian-stable-i386,
+          debian-stable-mdns,
+          debian-testing,
+          fedora-latest,
+          gentoo,
+          opensuse-leap,
+          python3,
+          quality-checks,
+          rocky,
+          ubuntu-latest,
+          ubuntu-rolling,
+        ]
 
-build-alpine-edge:
+build-image-unstable:
+  extends: .build_template
   allow_failure: true
-  <<: *build_definition
-
-build-alpine-pages:
-  <<: *build_definition
-
-build-alpine-seccomp:
-  <<: *build_definition
-
-build-centos-latest:
-  <<: *build_definition
-
-build-rocky:
-  <<: *build_definition
-
-build-clang:
-  <<: *build_definition
-
-build-coverity:
-  <<: *build_definition
-
-build-debian-oldstable:
-  <<: *build_definition
-
-build-debian-stable:
-  <<: *build_definition
-
-build-debian-stable-i386:
-  <<: *build_definition
-
-build-debian-stable-mdns:
-  <<: *build_definition
-
-build-debian-testing:
-  <<: *build_definition
-
-build-debian-unstable:
-  allow_failure: true
-  <<: *build_definition
-
-build-fedora-latest:
-  <<: *build_definition
-
-build-gentoo:
-  <<: *build_definition
-
-build-opensuse-leap:
-  <<: *build_definition
-
-build-python3:
-  <<: *build_definition
-
-build-ubuntu-latest:
-  <<: *build_definition
-
-build-ubuntu-rolling:
-  <<: *build_definition
-
-build-ubuntu-devel:
-  allow_failure: true
-  <<: *build_definition
-
-build-cross-armhf:
-  allow_failure: true
-  <<: *build_definition
-
-build-quality-checks:
-  <<: *build_definition
+  parallel:
+    matrix:
+      - DISTRO: [
+          alpine-edge,
+          cross-armhf,
+          debian-unstable,
+          ubuntu-devel,
+        ]
