@@ -371,7 +371,7 @@ def configure(ctx):
             "-Wswitch-enum",          # warns on missing enum case handler
         ] + ctx.env.CFLAGS
         cc_test_flags += [
-            ('w_implicit_fallthru', "-Wimplicit-fallthrough=3"),
+            ('w_implicit_fallthru', "-Wimplicit-fallthrough"),
             # Fails on Solaris, OpenBSD 6, and RasPi
             # Complains about a Bison bug
             # Cannot be suppressed
