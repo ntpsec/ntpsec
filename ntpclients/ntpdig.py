@@ -63,20 +63,21 @@ def read_append(s, packets, packet, sockaddr):
     d, a = s.recvfrom(1024)
     if debug >= 2:
         ntp.packet.dump_hex_printable(d)
+    pkt = ntp.packet.SyncPacket(d)
+    pkt.hostname = server
+    pkt.resolved = sockaddr[0]
     if credentials:
         if not ntp.packet.Authenticator.have_mac(d):
+            pkt.trusted = False
             if debug:
-                log("no MAC on reply from %s" % packet.hostname)
-        if not credentials.verify_mac(d, packet_end=48, mac_begin=48):
-            packet.trusted = False
+                log("no MAC on reply from %s" % sockaddr[0])
+        elif not credentials.verify_mac(d, packet_end=48, mac_begin=48):
+            pkt.trusted = False
             log("MAC verification on reply from %s failed"
                 % sockaddr[0])
         elif debug:
             log("MAC verification on reply from %s succeeded"
                 % sockaddr[0])
-    pkt = ntp.packet.SyncPacket(d)
-    pkt.hostname = server
-    pkt.resolved = sockaddr[0]
     packets.append(pkt)
     return packets
 
