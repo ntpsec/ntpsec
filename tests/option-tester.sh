@@ -49,7 +49,7 @@ then
     DISABLE_NTS="--disable-nts"
   fi
 else
-  if ! "$(${PYTHON} ./wafhelpers/tlscheck.py)"
+  if ! ${PYTHON} ./wafhelpers/tlscheck.py
   then
     DISABLE_NTS="--disable-nts"
   fi
