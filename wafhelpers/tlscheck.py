@@ -50,6 +50,6 @@ if __name__ == '__main__':
     # OPENSSL_VERSION_NUMBER is a numeric release version identifier:
     # major minor fix patch status
     # Check if version is earlier than 1.1.1b
-    if ver <= ver_to_int(1, 1, 1, 2, 15):
+    if ver < ver_to_int(1, 1, 1, 2, 15):
         sys.exit(1)
     sys.exit(0)

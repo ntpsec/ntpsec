@@ -128,7 +128,7 @@ static int do_avg_bytes(unsigned int bytes) {
 	return nanos/BATCHSIZE;
 }
 
-#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
+#if (OPENSSL_VERSION_NUMBER >= 0x1010100fL)
 static int do_avg_priv(unsigned int bytes) {
 	int err = 0;
 	struct timespec start, stop;
@@ -215,7 +215,7 @@ static int do_fast_bytes(unsigned bytes) {
 	return fastest;
 }
 
-#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
+#if (OPENSSL_VERSION_NUMBER >= 0x1010100fL)
 static int do_fast_priv(unsigned bytes) {
 	int err = 0;
 	struct timespec start, stop;
@@ -259,7 +259,7 @@ static void do_bytes(int bytes) {
 	fflush(stdout);
 }
 
-#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
+#if (OPENSSL_VERSION_NUMBER >= 0x1010100fL)
 static void do_priv(int bytes) {
 	int average = do_avg_priv(bytes);
 	int fastest = do_fast_priv(bytes);
@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
 	do_bytes(160);
 	do_bytes(320);
 
-#if (OPENSSL_VERSION_NUMBER > 0x1010100fL)
+#if (OPENSSL_VERSION_NUMBER >= 0x1010100fL)
 	do_priv(4);
 	do_priv(16);
 	do_priv(32);
