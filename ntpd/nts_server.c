@@ -336,7 +336,7 @@ void nts_ke_accept_fail(NTS_Server_Info *nsi,
                 msg = "Connection reset";
                 break;
               }
-              // fall through
+              FALLTHRU
             default:
               ntp_strerror_r(errno, nsi->errbuf, sizeof(nsi->errbuf));
               snprintf(buff, sizeof(buff), "code %d, errno=>%d, %s",

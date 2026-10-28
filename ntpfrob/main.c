@@ -107,7 +107,7 @@ main(int argc, char **argv)
 			exit(0);
 		default:
 		    fputs("ntpfrob: no mode option specified.\n", stderr);
-                    /* fall through */
+                    FALLTHRU
                 case 'h':
                 case '?':
                     usage();

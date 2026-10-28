@@ -155,7 +155,7 @@ inp_tsip(
 			t->t_in_pkt = t->t_dle = 0;
 			return PARSE_INP_TIME|PARSE_INP_DATA;
 		}
-		/*FALLTHROUGH*/
+		FALLTHRU
 
 	    default:		/* collect data */
 		t->t_dle = 0;

@@ -657,7 +657,7 @@ local_clock(
 			}
 
 			clock_frequency = direct_freq(fp_offset);
-			/* fall through */
+			FALLTHRU
 
 		/*
 		 * We get here by default in FSET, SPIK and SYNC states.

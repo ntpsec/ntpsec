@@ -691,6 +691,7 @@ true_doevent(
                 case s_Max:
                         msyslog(LOG_INFO, "REFCLOCK: TRUETIME: state %s is unexpected!",
                                 stateStr(up->state));
+                        FALLTHRU
                 default:
                         // huh?
                         break;

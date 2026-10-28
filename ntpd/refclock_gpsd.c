@@ -1176,7 +1176,7 @@ json_token_skip(
 		switch (ctx->tok[tid].type) {
 		case JSMN_OBJECT:
 			len *= 2;
-			/* FALLTHROUGH */
+			FALLTHRU
 		case JSMN_ARRAY:
 			for (++tid; len; --len)
 				tid = json_token_skip(ctx, tid);
