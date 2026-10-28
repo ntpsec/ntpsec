@@ -25,18 +25,6 @@
  * -----------------------------------------
  */
 
-/*
- * macro to silence -Wimplicit-fallthrough
- * of course gcc and clang do it differently
- */
-#ifdef __clang__
-# define FALLTHRU
-#elif defined __GNUC__ && (6 < __GNUC__ )
-# define FALLTHRU __attribute__ ((fallthrough));
-#else
-# define FALLTHRU
-#endif
-
 /* ntpd.c */
 extern	void announce_starting(void);
 

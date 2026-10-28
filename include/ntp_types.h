@@ -123,5 +123,16 @@ typedef int SOCKET;
 # define INVALID_SOCKET		(-1)
 # define SOCKET_ERROR		(-1)
 
+/*
+ * macro to silence -Wimplicit-fallthrough
+ */
+#if defined __has_attribute
+# if __has_attribute(fallthrough)
+#  define FALLTHRU __attribute__ ((fallthrough));
+# endif
+#endif
+#ifndef FALLTHRU
+# define FALLTHRU
+#endif
 
 #endif	/* GUARD_NTP_TYPES_H */
