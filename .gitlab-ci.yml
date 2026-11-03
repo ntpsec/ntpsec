@@ -456,3 +456,25 @@ code-quality-python:
   artifacts:
     reports:
       codequality: gl-code-quality-python.json
+
+code-quality-shell:
+  <<: *job_definition
+  stage: test
+  image: $IMAGE_REGISTRY/quality-checks
+  script:
+    # shell scripts are the files whose first line is an sh-family shebang
+    - |
+      find . -path ./.git -prune -o -type f -print0 |
+        xargs -0 awk 'FNR==1 && /^#! ?\/(usr\/)?bin\/(env +)?(ba|da|k)?sh( |$)/ {print substr(FILENAME, 3)} {nextfile}' |
+        xargs shellcheck -S warning -f json1 > shellcheck.json || true
+    - |
+      jq -e '[.comments[] | {
+        description: .message,
+        check_name: "SC\(.code)",
+        fingerprint: "\(.file):\(.line):\(.column):SC\(.code)",
+        severity: ({error: "major", warning: "minor"}[.level]),
+        location: {path: .file, lines: {begin: .line, end: .endLine}}
+      }]' shellcheck.json > gl-code-quality-shell.json
+  artifacts:
+    reports:
+      codequality: gl-code-quality-shell.json
