@@ -1547,7 +1547,10 @@ parse_time(
 
         dp = field_parse(rd, idx);
         rc = sscanf(dp, "%2u%2u%2u%n.%3lu%n", &h, &m, &s, &p1, &f, &p2);
-        if (rc < 3 || p1 != 6) {
+        // %3lu skips whitespace and accepts a sign; require a digit
+        // right after the '.' so that p2 - p1 - 1 is 1 to 3
+        if (rc < 3 || p1 != 6 ||
+            (rc == 4 && !isdigit((unsigned char)dp[p1 + 1]))) {
                 DPRINT(1, ("nmea: invalid time code: '%.6s'\n", dp));
                 return false;
         }
