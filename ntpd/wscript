@@ -81,9 +81,9 @@ def build(ctx):
     )
 
     # Build the parser separately, so that we can disable -Wswitch-default
-    # on this one build, since old Bisons run afoul of it.  Also, at least
-    # one old Bison generates a couple of references to undefined macros,
-    # so we disable that warning as well.
+    # and -Wimplicit-fallthrough on this one build, since old Bisons run
+    # afoul of them. Also, at least one old Bison generates a couple of
+    # references to undefined macros, so we disable that warning as well.
     ctx(
         target="parser_obj",
         features="c",
@@ -91,7 +91,8 @@ def build(ctx):
         includes=[
             ctx.bldnode.parent.abspath(), "../include",
             "%s/host/ntpd/" % ctx.bldnode.parent.abspath(), "." ],
-        cflags=["-Wno-switch-default", "-Wno-undef"],  # For old Bisons
+        cflags=["-Wno-switch-default", "-Wno-undef",
+                "-Wno-implicit-fallthrough"],  # For old Bisons
     )
 
     use_refclock = ""      # XXX: there must be a better way to do this
