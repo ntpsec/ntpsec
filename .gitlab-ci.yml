@@ -99,19 +99,6 @@ alpine-edge-basic:
     - python3 ./waf install
     - python3 ./waf uninstall
 
-# AsciiDoc-3-Fedora:
-#   <<: *job_definition
-#   image: fedora
-#   script:
-#     - yum -y install bison gcc openssl-devel libcap-devel pps-tools-devel python3-devel wget libxslt docbook-style-xsl
-#     - mkdir asciidoc3
-#     - wget https://asciidoc3.org/download/AsciiDoc3_linux_latest.tar.gz
-#     - tar -xpvf AsciiDoc3_linux_latest.tar.gz -C asciidoc3
-#     - ln -sv src/a2x3.py asciidoc3/a2x3
-#     - ln -sv src/asciidoc3.py asciidoc3/asciidoc3
-#     - asciidoc3/asciidoc3 --version || echo -n
-#     - PATH="$PWD/asciidoc3:$PATH" python3 ./waf configure --enable-warnings --enable-Werror --enable-doc --enable-manpage build
-
 AsciiDoc-py3-Alpine:
   <<: *job_definition
   image: $IMAGE_REGISTRY/alpine
@@ -125,14 +112,6 @@ AsciiDoc-no:
   script:
     - apk update && apk add gcc bison musl-dev openssl-dev libcap-dev python3-dev pythonispython3
     - python ./waf configure --enable-warnings --enable-Werror --disable-doc --disable-manpage build
-
-AsciiDoc-classic3-Debian-Old:
-  <<: *job_definition
-  image: $IMAGE_REGISTRY/debian-oldstable
-  script:
-    - apt-get update
-    - DEBIAN_FRONTEND="noninteractive" apt-get install -y python3-dev asciidoc-base
-    - python3 ./waf configure --enable-warnings --enable-Werror --enable-doc --enable-manpage build --disable-nts --pyshebang "/usr/bin/env python3"
 
 debian-oldstable-basic:
   <<: *job_definition
