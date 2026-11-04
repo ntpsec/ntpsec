@@ -953,7 +953,7 @@ class ControlSession:
             pkt.extension += ntp.poly.polybytes(mac)
         return pkt.send()
 
-    def getresponse(self, opcode, associd, timeo):
+    def getresponse(self, opcode, associd, timeo, auth=False):
         "Get a response expected to match a given opcode and associd."
         # This is pretty tricky.  We may get between 1 and MAXFRAG packets
         # back in response to the request.  We peel the data out of
@@ -1038,7 +1038,7 @@ class ControlSession:
                 continue
 
             # Someday, perhaps, check authentication here
-            if self._authpass and self.auth:
+            if auth and self._authpass and self.auth:
                 _pend = rpkt.count + MODE_SIX_HEADER_LENGTH
                 _pend += (-_pend % MODE_SIX_ALIGNMENT)
                 if len(rawdata) < (_pend + KEYID_LENGTH + MINIMUM_MAC_LENGTH):
@@ -1204,12 +1204,13 @@ class ControlSession:
         if not self.havehost():
             raise ControlException(SERR_NOHOST)
         retry = True
+        auth |= self.always_auth
         while True:
             # Ship the request
             self.sendrequest(opcode, associd, qdata, auth)
             # Get the response.
             try:
-                res = self.getresponse(opcode, associd, not retry)
+                res = self.getresponse(opcode, associd, not retry, auth)
             except ControlException as e:
                 if retry and e.message in (SERR_TIMEOUT, SERR_INCOMPLETE):
                     retry = False

@@ -1395,7 +1395,7 @@ class TestControlSession(unittest.TestCase):
         gets = []
         doerror = [False]
 
-        def getresponse_jig(opcode, associd, retry):
+        def getresponse_jig(opcode, associd, retry, _auth):
             gets.append((opcode, associd, retry))
             if doerror[0]:
                 doerror[0] = False
