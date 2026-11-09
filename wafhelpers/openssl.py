@@ -29,6 +29,9 @@ def check_libssl_tls13(ctx):
 SNIP_OPENSSL_BAD_VERSION_CHECK = """
 #include <openssl/opensslv.h>
 
+#if OPENSSL_VERSION_NUMBER < 0x10101000L
+#error OpenSSL version must be 1.1.1 or later
+#endif
 #if OPENSSL_VERSION_NUMBER == 0x1010101fL
 #error OpenSSL version must not be 1.1.1a
 #endif
@@ -43,8 +46,8 @@ def check_openssl_bad_version(ctx):
     """Report if OpenSSL has a good version to ./waf configure."""
     ctx.check_cc(
       fragment=SNIP_OPENSSL_BAD_VERSION_CHECK,
-      use="SSL CRYPTO",
-      msg="Checking for OpenSSL != 1.1.1a",
+      use="CRYPTO",
+      msg="Checking for OpenSSL >= 1.1.1, != 1.1.1a",
     )
 
 
