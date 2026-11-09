@@ -1,6 +1,6 @@
-NTS needs TLS 1.3 or newer.
-That was first supported in OpenSSL 1.1.1
-  (1.1.1a is broken)
+NTPsec needs OpenSSL 1.1.1 or newer, but not 1.1.1a, which is broken.
+configure rejects anything older.  1.1.1 is also the first version
+with TLS 1.3, which NTS needs.
 Some OSes/Distros don't support a new enough version of OpenSSL
 This file contains notes on how to download, build, and install 3.6.1
 
@@ -95,10 +95,10 @@ time make build_docs -j4  |& tee docs.log
 sudo make install         |& tee install.log
 
 On Linux:
-  sudo su
+  As root (via sudo -i, su, or doas):
     cd /etc/ld.so.conf.d
-    echo "/usr/local/ssl/lib" > openssl.conf    # 32 bit systems
-    echo "/usr/local/ssl/lib64" > openssl.conf  # 64 bit systems
+    # use whichever of lib, lib64, or lib32 the install created
+    echo "/usr/local/ssl/lib64" > openssl.conf
     # running ldconfig before install doesn't work
     ldconfig
 

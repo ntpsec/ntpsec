@@ -12,6 +12,8 @@ on user-visible changes.
 
 == Repository Head
 
+* configure now requires OpenSSL 1.1.1 or newer, other than 1.1.1a, for every build, including --disable-nts builds.
+
 == 2026-10-20: 1.2.6
 
 Note: Python 2 and OpenSSL 1.1.0 support will be removed in the next release.

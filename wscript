@@ -490,7 +490,7 @@ int main(int argc, char **argv) {
             ctx.env.LIBPATH = ["/usr/local/ssl/lib"]
     elif ctx.env.DEST_OS == "linux" and os.path.isdir("/usr/local/ssl/"):
         # This supports building OpenSSL from source
-        # That allows using OpenSSL 1.1.1 on older CentOS
+        # That allows using OpenSSL 1.1.1 or newer where the system's is older
         # or testing pre-release versions of OpenSSL
         # see HOWTO-OpenSSL
         ctx.env.INCLUDES = ["/usr/local/ssl/include"]
