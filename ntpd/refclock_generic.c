@@ -1578,11 +1578,6 @@ static char *mkreadable(char *buffer,
         if (4 > blen) {
                 return NULL;            // don't bother with mini buffers
         }
-        if (2048 < srclen) {
-              /* Ugh, srclen underflowed somewhere.  Ignore ot.
-               * Coverity CID 583320 */
-            return NULL; 
-        }
 
         endb = buffer + blen - sizeof(ellipsis);
 
@@ -1592,7 +1587,7 @@ static char *mkreadable(char *buffer,
                 if (!hex &&                     // no binary only
                     (*src != '\\') &&           // no plain "\"
                     (*src != '"') &&            // no "
-                    isprint((int)*src)) {       // only printables
+                    isprint((unsigned char)*src)) { // only printables
                                                 // they are easy...
                         *buffer++ = *src++;
                         blen--;
@@ -3297,7 +3292,10 @@ parse_process(
                         {
                                 ERR(ERR_BADDATA)
                                         msyslog(LOG_WARNING, "REFCLOCK: PARSE receiver #%d: FAILED TIMECODE: \"%s\" (check receiver configuration / wiring)",
-                                                parse->peer->procptr->refclkunit, mkascii(buffer, sizeof buffer, tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count - 1)));
+                                                parse->peer->procptr->refclkunit,
+                                                mkascii(buffer, sizeof buffer,
+                                                        tmpctl.parsegettc.parse_buffer,
+                                                        (unsigned)tmpctl.parsegettc.parse_count));
                         }
                         // copy status to show only changes in case of failures
                         parse->timedata.parse_status = parsetime->parse_status;
