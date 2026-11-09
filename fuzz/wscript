@@ -1,0 +1,20 @@
+# Copyright the NTPsec project contributors
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
+def build(ctx):
+    # Compile the OSS-Fuzz harnesses so that CI catches API drift.
+    # (Linking is done by fuzz/Makefile in the OSS-Fuzz environment,
+    # where LIB_FUZZING_ENGINE is available.)
+    ctx(
+        features="c",
+        includes=[ctx.bldnode.parent.abspath(), "../include", "../ntpd", "../libaes_siv"],
+        source=[
+            "setup.c",
+            "FuzzClient.c",
+            "FuzzExtens.c",
+            "FuzzExtensClient.c",
+            "FuzzServer.c",
+        ],
+        target="fuzz_obj",
+    )

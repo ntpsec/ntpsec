@@ -757,6 +757,9 @@ int main(int argc, char **argv) {
     if ctx.options.enable_attic:
         ctx.env.ENABLE_ATTIC = True
 
+    if ctx.options.enable_fuzz_harnesses:
+        ctx.env.ENABLE_FUZZ_HARNESSES = True
+
     if ctx.options.disable_nts:
         ctx.env.DISABLE_NTS = True
         ctx.define("DISABLE_NTS", 1,
@@ -1060,6 +1063,8 @@ def build(ctx):
         ctx.recurse("attic")
     ctx.recurse("etc")
     ctx.recurse("tests")
+    if ctx.env.ENABLE_FUZZ_HARNESSES:
+        ctx.recurse("fuzz")
 
     if ctx.env['PYTHON_GPS']:
         python_scripts.add("ntpclients/ntploggps.py")

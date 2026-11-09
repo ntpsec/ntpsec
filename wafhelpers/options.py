@@ -87,6 +87,10 @@ ext, ffi, or none. defaults to ffi.""", nargs=1)
     grp.add_option('--disable-fuzz', action='store_true',
                    default=False,
                    help="Feature gone")
+    grp.add_option('--enable-fuzz-harnesses', action='store_true',
+                   default=False,
+                   help="Compile the OSS-Fuzz harnesses in fuzz/ "
+                        "(compile only; linking happens in OSS-Fuzz)")
 
     # This option group name needs to exactly match the name from
     # waflib/Tools/python.py so this option groups with the other Python

@@ -402,6 +402,7 @@ feature:
           --enable-debug-timing,
           --disable-droproot,
           --enable-early-droproot,
+          --enable-fuzz-harnesses,
           --enable-leap-smear,
           --enable-mssntp,
         ]
