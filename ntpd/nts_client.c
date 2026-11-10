@@ -673,9 +673,26 @@ bool nts_client_send_request(SSL *ssl, struct peer* peer) {
         return true;
 }
 
+// The AEAD algorithm the client offers
+static uint16_t nts_client_aead(const struct peer *peer) {
+        uint16_t aead = NO_AEAD;
+
+        // FIXME: the aead option should accept a colon-separated list of
+        // algorithms; only the first is offered
+        if (NULL != peer->cfg.nts_cfg.aead) {
+                aead = nts_string_to_aead(peer->cfg.nts_cfg.aead);
+        }
+        if ((NO_AEAD == aead) && (NULL != ntsconfig.aead)) {
+                aead = nts_string_to_aead(ntsconfig.aead);
+        }
+        if (NO_AEAD == aead) {
+                aead = AEAD_AES_SIV_CMAC_256;
+        }
+        return aead;
+}
+
 bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct peer* peer) {
         struct  BufCtl_t buf;
-        uint16_t aead = NO_AEAD;
 
         buf.next = buff;
         buf.left = buf_size;
@@ -685,15 +702,8 @@ bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct
                                 NTS_CRITICAL+nts_next_protocol_negotiation, nts_protocol_NTP);
 
         // 4.1.5 AEAD Algorithm List
-        // FIXME should be : separated list
-
-        if ((NO_AEAD == aead) && (NULL != peer->cfg.nts_cfg.aead))
-                aead = nts_string_to_aead(peer->cfg.nts_cfg.aead);
-        if ((NO_AEAD == aead) && (NULL != ntsconfig.aead))
-                aead = nts_string_to_aead(ntsconfig.aead);
-        if (NO_AEAD == aead)
-                aead = AEAD_AES_SIV_CMAC_256;
-        ke_append_record_uint16(&buf, nts_algorithm_negotiation, aead);
+        ke_append_record_uint16(&buf, nts_algorithm_negotiation,
+                                nts_client_aead(peer));
 
         // 4.1.1: End, Critical
         ke_append_record_null(&buf, NTS_CRITICAL+nts_end_of_message);
@@ -707,23 +717,34 @@ bool nts_client_send_request_core(uint8_t *buff, int buf_size, int *used, struct
         return true;
 }
 
+// RFC 8915 4: clients SHOULD accept responses of at least 65536 octets
+#define NTS_MAX_RESPONSE 65536
+
 bool nts_client_process_response(SSL *ssl, struct peer* peer) {
-        uint8_t  buff[2048];  // RFC 4. says SHOULD be 65K
+        // Read into a 65536-octet buffer, allocated on the heap, because
+        // the NTS-KE client runs in a thread whose stack may be small,
+        // such as musl's 128 KiB default.
+        uint8_t *buff = emalloc(NTS_MAX_RESPONSE);
         int transferred;
         const char *errtxt = NULL;
+        bool ok = false;
 
-        transferred = nts_ssl_read(ssl, buff, sizeof(buff), &errtxt);
-        if (0 >= transferred)
-                return false;
-        msyslog(LOG_ERR, "NTSc: read %d bytes", transferred);
-
-        return nts_client_process_response_core(buff, transferred, peer);
+        transferred = nts_ssl_read(ssl, buff, NTS_MAX_RESPONSE, &errtxt);
+        if (0 < transferred) {
+                msyslog(LOG_ERR, "NTSc: read %d bytes", transferred);
+                ok = nts_client_process_response_core(buff, transferred, peer);
+        }
+        free(buff);
+        return ok;
 }
 
 bool nts_client_process_response_core(uint8_t *buff, int transferred, struct peer* peer) {
         int idx;
         struct BufCtl_t buf;
         bool sawEOM = false;
+        bool sawNPN = false;
+        bool sawAEAD = false;
+        bool sawServerNegotiation = false;
 
         peer->nts_state.cookielen = 0;
         peer->nts_state.aead = NO_AEAD;
@@ -764,6 +785,18 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
                         msyslog(LOG_ERR, "NTSc: error: %d", data);
                         return false;
                     case nts_next_protocol_negotiation:
+                        // RFC 8915 4.1.2: exactly once
+                        if (sawNPN) {
+                                msyslog(LOG_ERR, "NTSc: NPN-Duplicate");
+                                return false;
+                        }
+                        sawNPN = true;
+                        if (0 == length) {
+                                // RFC 8915 4.1.2: empty means no protocol
+                                // we offered was accepted
+                                msyslog(LOG_ERR, "NTSc: NPN-Empty: server accepted no offered protocol");
+                                return false;
+                        }
                         if (sizeof(data) != length) {
                                 msyslog(LOG_ERR, "NTSc: NPN-Wrong length: %d", length);
                                 return false;
@@ -775,11 +808,28 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
                         }
                         break;
                     case nts_algorithm_negotiation:
+                        // RFC 8915 4.1.5: the response carries one list
+                        if (sawAEAD) {
+                                msyslog(LOG_ERR, "NTSc: AN-Duplicate");
+                                return false;
+                        }
+                        sawAEAD = true;
+                        if (0 == length) {
+                                // RFC 8915 4.1.5: empty means no algorithm
+                                // we offered was accepted
+                                msyslog(LOG_ERR, "NTSc: AN-Empty: server accepted no offered algorithm");
+                                return false;
+                        }
                         if (sizeof(data) != length) {
                                 msyslog(LOG_ERR, "NTSc: AN-Wrong length: %d", length);
                                 return false;
                         }
                         data = next_uint16(&buf);
+                        // RFC 8915 4.1.5: one of the offered algorithms
+                        if (nts_client_aead(peer) != data) {
+                                msyslog(LOG_ERR, "NTSc: AN-Not offered: %d", data);
+                                return false;
+                        }
                         keylength = nts_get_key_length(data);
                         if (0 == keylength) {
                                 msyslog(LOG_ERR, "NTSc: AN-Unsupported AEAN type: %d", data);
@@ -812,6 +862,12 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
                         peer->nts_state.count++;
                         break;
                     case nts_server_negotiation:
+                        // RFC 8915 4.1.7: servers MUST NOT send more than one
+                        if (sawServerNegotiation) {
+                                msyslog(LOG_ERR, "NTSc: SN-Duplicate");
+                                return false;
+                        }
+                        sawServerNegotiation = true;
                         if (MAX_SERVER < (length+1)) {
                                 msyslog(LOG_ERR, "NTSc: server string too long %d.", length);
                                 return false;
@@ -836,6 +892,12 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
                         SET_PORT(&sockaddr, port);
                         msyslog(LOG_ERR, "NTSc: Using port %d", port);
                         break;
+                    case nts_warning:
+                        // RFC 8915 4.1.4: no warning codes are defined,
+                        // and unrecognized ones are errors
+                        msyslog(LOG_ERR, "NTSc: warning record: C=%d, L=%d",
+                                critical, length);
+                        return false;
                     case nts_end_of_message:
                         if ((0 != length) || !critical) {
                                 msyslog(LOG_ERR, "NTSc: EOM-Wrong length or not Critical: %d, %d",
@@ -866,6 +928,10 @@ bool nts_client_process_response_core(uint8_t *buff, int transferred, struct pee
         // EOM must be last (checked above), so it appears at most once
         if (!sawEOM) {
                 msyslog(LOG_ERR, "NTSc: No EOM.");
+                return false;
+        }
+        if (!sawNPN) {
+                msyslog(LOG_ERR, "NTSc: No NPN.");
                 return false;
         }
 

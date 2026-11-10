@@ -106,6 +106,8 @@ TEST(nts_client, nts_client_process_response_core) {
 	/* General init */
 	bool success;
 	struct peer peer;
+	peer.cfg.nts_cfg.aead = NULL;	/* offer AEAD_AES_SIV_CMAC_256 */
+	ntsconfig.aead = NULL;
 	peer.nts_state.aead = 42; /* Dummy init values */
 	peer.nts_state.cookielen = 0;
 	peer.nts_state.writeIdx = 0;
@@ -125,7 +127,8 @@ TEST(nts_client, nts_client_process_response_core) {
 			0, AEAD_AES_SIV_CMAC_256,
 		0x80, nts_new_cookie, 0, 8,
 			1, 2, 3, 4, 5, 6, 7, 8,
-		/* server_negotiation skipped due to getaddrinfo() containment breach */
+		0x80, nts_server_negotiation, 0, 9,
+			'1', '2', '7', '.', '0', '.', '0', '.', '1',
 		0x80, nts_port_negotiation, 0, 2,
 			0, 123,
 		0x80, nts_end_of_message, 0, 0
@@ -146,6 +149,21 @@ TEST(nts_client, nts_client_process_response_core) {
 	TEST_ASSERT_EQUAL_INT8(8, peer.nts_state.cookies[0][7]);
 	TEST_ASSERT_EQUAL_INT32(1, peer.nts_state.writeIdx);
 	TEST_ASSERT_EQUAL_INT32(1, peer.nts_state.count);
+	/* ===== Test: two server negotiation records ===== */
+	uint8_t buf_dup_server[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2,
+			0, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 2,
+			0, AEAD_AES_SIV_CMAC_256,
+		0x80, nts_server_negotiation, 0, 9,
+			'1', '2', '7', '.', '0', '.', '0', '.', '1',
+		0x80, nts_server_negotiation, 0, 9,
+			'1', '2', '7', '.', '0', '.', '0', '.', '2',
+		0x80, nts_end_of_message, 0, 0
+	};
+	success = nts_client_process_response_core(buf_dup_server,
+		sizeof(buf_dup_server), &peer);
+	TEST_ASSERT_EQUAL(false, success);
 	/* ===== Test: nts_error ===== */
 	/* data */
 	uint8_t buf1[] = {
@@ -190,6 +208,31 @@ TEST(nts_client, nts_client_process_response_core) {
 	};
 	/* run */
 	success = nts_client_process_response_core(buf5, sizeof(buf5), &peer);
+	TEST_ASSERT_EQUAL(false, success);
+	/* ===== Test: nts_algorithm_negotiation, not offered ===== */
+	uint8_t bufna[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2,
+			0, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 2,
+			0, AEAD_AES_SIV_CMAC_512,
+		0x80, nts_new_cookie, 0, 8,
+			1, 2, 3, 4, 5, 6, 7, 8,
+		0x80, nts_end_of_message, 0, 0
+	};
+	success = nts_client_process_response_core(bufna, sizeof(bufna), &peer);
+	TEST_ASSERT_EQUAL(false, success);
+	/* ===== Test: nts_warning, even without the critical bit ===== */
+	uint8_t bufw[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2,
+			0, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 2,
+			0, AEAD_AES_SIV_CMAC_256,
+		0x80, nts_new_cookie, 0, 8,
+			1, 2, 3, 4, 5, 6, 7, 8,
+		0x00, nts_warning, 0, 2, 0, 1,
+		0x80, nts_end_of_message, 0, 0
+	};
+	success = nts_client_process_response_core(bufw, sizeof(bufw), &peer);
 	TEST_ASSERT_EQUAL(false, success);
 	/* ===== Test: nts_new_cookie, over max cookie length ===== */
 	/* data */
@@ -277,6 +320,8 @@ TEST(nts_client, nts_client_process_response_core) {
 	/* data */
 	peer.nts_state.count = 0;
 	uint8_t buf12[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2, 0, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 2, 0, AEAD_AES_SIV_CMAC_256,
 		0x80, nts_end_of_message, 0, 0
 	};
 	/* run */
@@ -287,10 +332,62 @@ TEST(nts_client, nts_client_process_response_core) {
 	peer.nts_state.count = 8; /* So this doesn't trigger an error */
 	peer.nts_state.aead = NO_AEAD;
 	uint8_t buf13[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2, 0, nts_protocol_NTP,
 		0x80, nts_end_of_message, 0, 0
 	};
 	/* run */
 	success = nts_client_process_response_core(buf13, sizeof(buf13), &peer);
+	TEST_ASSERT_EQUAL(false, success);
+	/* ===== Test: nts_next_protocol_negotiation, duplicate ===== */
+	/* data */
+	uint8_t buf14[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2, 0, nts_protocol_NTP,
+		0x80, nts_next_protocol_negotiation, 0, 2, 0, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 2, 0, AEAD_AES_SIV_CMAC_256,
+		0x80, nts_end_of_message, 0, 0
+	};
+	/* run */
+	success = nts_client_process_response_core(buf14, sizeof(buf14), &peer);
+	TEST_ASSERT_EQUAL(false, success);
+	/* ===== Test: nts_next_protocol_negotiation, missing ===== */
+	/* data */
+	uint8_t buf15[] = {
+		0x80, nts_algorithm_negotiation, 0, 2, 0, AEAD_AES_SIV_CMAC_256,
+		0x80, nts_end_of_message, 0, 0
+	};
+	/* run */
+	success = nts_client_process_response_core(buf15, sizeof(buf15), &peer);
+	TEST_ASSERT_EQUAL(false, success);
+	/* ===== Test: nts_next_protocol_negotiation, empty (server accepted nothing) ===== */
+	/* data */
+	uint8_t buf16[] = {
+		0x80, nts_next_protocol_negotiation, 0, 0,
+		0x80, nts_algorithm_negotiation, 0, 2, 0, AEAD_AES_SIV_CMAC_256,
+		0x80, nts_end_of_message, 0, 0
+	};
+	/* run */
+	success = nts_client_process_response_core(buf16, sizeof(buf16), &peer);
+	TEST_ASSERT_EQUAL(false, success);
+	/* ===== Test: nts_algorithm_negotiation, duplicate ===== */
+	/* data */
+	uint8_t buf17[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2, 0, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 2, 0, AEAD_AES_SIV_CMAC_256,
+		0x80, nts_algorithm_negotiation, 0, 2, 0, AEAD_AES_SIV_CMAC_256,
+		0x80, nts_end_of_message, 0, 0
+	};
+	/* run */
+	success = nts_client_process_response_core(buf17, sizeof(buf17), &peer);
+	TEST_ASSERT_EQUAL(false, success);
+	/* ===== Test: nts_algorithm_negotiation, empty (server accepted no offered algorithm) ===== */
+	/* data */
+	uint8_t buf18[] = {
+		0x80, nts_next_protocol_negotiation, 0, 2, 0, nts_protocol_NTP,
+		0x80, nts_algorithm_negotiation, 0, 0,
+		0x80, nts_end_of_message, 0, 0
+	};
+	/* run */
+	success = nts_client_process_response_core(buf18, sizeof(buf18), &peer);
 	TEST_ASSERT_EQUAL(false, success);
 }
 
