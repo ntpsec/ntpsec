@@ -677,8 +677,8 @@ bool nts_client_send_request(SSL *ssl, struct peer* peer) {
 static uint16_t nts_client_aead(const struct peer *peer) {
         uint16_t aead = NO_AEAD;
 
-        // FIXME: the aead option should accept a colon-separated list of
-        // algorithms; only the first is offered
+        // FIXME: the aead option takes one algorithm name; it should
+        // accept a colon-separated list
         if (NULL != peer->cfg.nts_cfg.aead) {
                 aead = nts_string_to_aead(peer->cfg.nts_cfg.aead);
         }
