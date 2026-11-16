@@ -189,7 +189,7 @@ cvt_trimtsip(
 	clock_time->flags = 0;
 
 	if (!t) {
-		return CVT_NONE;		/* local data not allocated - sigh! */
+		return CVT_NONE;    // local data not allocated - sigh!
 	}
 
 	if ((size < 4) ||
@@ -211,8 +211,14 @@ cvt_trimtsip(
 			    l_fp utcoffset;
 			    l_fp gpstime;
 
+                            if (10 > size) {
+                                    printf("TRIMBLE BAD packet, size %d:\n",
+                                           size);
+                                    return CVT_NONE;
+                            }
 			    bp = &mb(0);
-			    if (fetch_ieee754(&bp, IEEE_SINGLE, &secs, trim_offsets) != IEEE_OK)
+			    if (fetch_ieee754(&bp, IEEE_SINGLE, &secs,
+                                              trim_offsets) != IEEE_OK)
 				    return CVT_FAIL|CVT_BADFMT;
 
 			    if ((lfpsint(secs) <= 0) ||
@@ -229,7 +235,8 @@ cvt_trimtsip(
 
 			    /* fetch UTC offset */
 			    bp = &mb(6);
-			    if (fetch_ieee754(&bp, IEEE_SINGLE, &utcoffset, trim_offsets) != IEEE_OK)
+			    if (fetch_ieee754(&bp, IEEE_SINGLE, &utcoffset,
+                                              trim_offsets) != IEEE_OK)
 				    return CVT_FAIL|CVT_BADFMT;
 
 			    secs -= utcoffset; /* adjust GPS time to UTC time */
@@ -275,12 +282,18 @@ cvt_trimtsip(
 			    return CVT_OK;
 
 		    } /* case 0x41 */
+                    return CVT_NONE;
 
 		    case CMD_RRECVHEALTH:
 		    {
 			    /* TRIMBLE health */
 			    uint8_t status = mb(0);
 
+                            if (6 > size) {
+                                    printf("TRIMBLE BAD packet, size %d:\n",
+                                           size);
+                                    return CVT_NONE;
+                            }
 			    switch (status)
 			    {
 				case 0x00: /* position fixes */
@@ -306,6 +319,11 @@ cvt_trimtsip(
 			    l_fp t0t;
 			    unsigned char *lbp;
 
+                            if (28 > size) {
+                                    printf("TRIMBLE BAD packet, size %d:\n",
+                                           size);
+                                    return CVT_NONE;
+                            }
 			    /* UTC correction data - derive a leap warning */
 			    /* current leap correction (GPS-UTC) */
 			    int tls = t->t_gpsutc = get_msb_ushort(&mb(12));
