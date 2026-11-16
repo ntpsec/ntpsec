@@ -123,7 +123,8 @@ cvt_sel240x( unsigned char *buffer,
 		buffer++;
 		buffer = (unsigned char *)strptime(
 			(const char *)buffer, "%Y:%j:%H:%M:%S", &ptime );
-		if( *(buffer+1) != '\x0d' ) {
+                if (NULL == buffer ||
+		    '\x0d' != *(buffer+1) ) {
 			rc = CVT_FAIL | CVT_BADFMT;
 		} else {
 			clock_time->day = ptime.tm_mday;
