@@ -207,7 +207,7 @@ cvt_trimtsip(
 		    case CMD_RCURTIME:
 		    {			/* GPS time */
 			    l_fp secs;
-			    int week = getmsb_short(&mb(4));
+                            int week;
 			    l_fp utcoffset;
 			    l_fp gpstime;
 
@@ -227,6 +227,7 @@ cvt_trimtsip(
 				    clock_time->flags = PARSEB_POWERUP;
 				    return CVT_OK;
 			    }
+                            week = getmsb_short(&mb(4));
 			    if (week < GPSWRAP) {
 				    week += GPSWEEKS;
 			    }
