@@ -285,14 +285,16 @@ cvt_trimtsip(
 
 		    case CMD_RRECVHEALTH:
 		    {
-			    /* TRIMBLE health */
-			    uint8_t status = mb(0);
+			    // TRIMBLE health
+			    uint8_t status;
 
                             if (6 > size) {
                                     printf("TRIMBLE BAD packet, size %d:\n",
                                            size);
                                     return CVT_NONE;
                             }
+
+			    status = mb(0);
 			    switch (status)
 			    {
 				case 0x00: /* position fixes */
