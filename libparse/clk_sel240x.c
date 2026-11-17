@@ -119,7 +119,7 @@ cvt_sel240x( unsigned char *buffer,
 	UNUSED_ARG(local);
 
 	if( Strok(buffer, format->fixed_string) ) {
-		struct tm ptime;
+		struct tm ptime = {0};
 		buffer++;
 		buffer = (unsigned char *)strptime(
 			(const char *)buffer, "%Y:%j:%H:%M:%S", &ptime );
