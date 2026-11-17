@@ -278,11 +278,8 @@ cvt_trimtsip(
 				    clock_time->flags |= PARSEB_POSITION;
 			    }
 			    clock_time->flags |= PARSEB_S_LEAP|PARSEB_S_POSITION;
-
-			    return CVT_OK;
-
 		    } /* case 0x41 */
-                    return CVT_NONE;
+                    return CVT_OK;
 
 		    case CMD_RRECVHEALTH:
 		    {
