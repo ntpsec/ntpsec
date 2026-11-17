@@ -316,45 +316,49 @@ cvt_trimtsip(
 		    {
 			    l_fp t0t;
 			    unsigned char *lbp;
+			    int tlsf;
 
-                            if (28 > size) {
+                            if (30 > size) {
                                     printf("TRIMBLE BAD packet, size %d:\n",
                                            size);
                                     return CVT_NONE;
                             }
-			    /* UTC correction data - derive a leap warning */
-			    /* current leap correction (GPS-UTC) */
+			    /* UTC correction data - derive a leap warning
+			     * current leap correction (GPS-UTC) */
 			    int tls = t->t_gpsutc = get_msb_ushort(&mb(12));
 
-			    /* new leap correction */
-			    int tlsf = t->t_gpsutcleap = get_msb_ushort(&mb(24));
-
-			    /* week no of leap correction */
-			    t->t_weekleap = get_msb_ushort(&mb(20));
-			    if (t->t_weekleap < GPSWRAP) {
-				    t->t_weekleap = (unsigned short)(t->t_weekleap + GPSWEEKS);
+                            // last update time
+			    lbp = (unsigned char *)&mb(14);
+			    if (fetch_ieee754(&lbp, IEEE_SINGLE, &t0t,
+                                              trim_offsets) != IEEE_OK) {
+				    return CVT_FAIL|CVT_BADFMT;
 			    }
 
-			    /* day in week of leap correction */
-			    t->t_dayleap = get_msb_ushort(&mb(22));
-			    /* current week no */
+			    // current week no
 			    t->t_week = get_msb_ushort(&mb(18));
 			    if (t->t_week < GPSWRAP) {
 				    t->t_week += GPSWEEKS;
 			    }
 
-			    lbp = (unsigned char *)&mb(14); /* last update time */
-			    if (fetch_ieee754(&lbp, IEEE_SINGLE, &t0t, trim_offsets) != IEEE_OK) {
-				    return CVT_FAIL|CVT_BADFMT;
+			    // week no of leap correction
+			    t->t_weekleap = get_msb_ushort(&mb(20));
+			    if (t->t_weekleap < GPSWRAP) {
+				    t->t_weekleap = t->t_weekleap + GPSWEEKS;
 			    }
 
-			    t->t_utcknown = lfpuint(t0t) != 0;
+			    // day in week of leap correction
+			    t->t_dayleap = get_msb_ushort(&mb(22));
 
-			    if ((t->t_utcknown) && /* got UTC information */
-				(tlsf != tls)   && /* something will change */
-				((t->t_weekleap - t->t_week) < 5)) /* and close in the future */
+			    t->t_utcknown = lfpuint(t0t) != 0;
+			    // new leap correction
+			    tlsf = t->t_gpsutcleap = get_msb_ushort(&mb(24));
+
+			    if ((t->t_utcknown) &&  // got UTC information
+				(tlsf != tls)   &&  // something will change
+                                // and close in the future
+				((t->t_weekleap - t->t_week) < 5))
 			    {
-				    /* generate a leap warning */
+				    // generate a leap warning
 				    if (tlsf > tls) {
 					    t->t_leap = ADDSECOND;
 				    } else {
