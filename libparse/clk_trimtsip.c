@@ -211,7 +211,7 @@ cvt_trimtsip(
 			    l_fp utcoffset;
 			    l_fp gpstime;
 
-                            if (10 > size) {
+                            if (13 > size) {
                                     printf("TRIMBLE BAD packet, size %d:\n",
                                            size);
                                     return CVT_NONE;
@@ -240,14 +240,15 @@ cvt_trimtsip(
                                               trim_offsets) != IEEE_OK)
 				    return CVT_FAIL|CVT_BADFMT;
 
-			    secs -= utcoffset; /* adjust GPS time to UTC time */
+			    secs -= utcoffset; // adjust GPS time to UTC time
 
-			    gpstolfp((unsigned short)week, (unsigned short)0,
+			    gpstolfp((unsigned short)week, 0,
 				     lfpuint(secs), &gpstime);
 
 			    setlfpfrac(gpstime, lfpfrac(secs));
 
-			    clock_time->utctime = (time_t)(lfpuint(gpstime) - JAN_1970);
+			    clock_time->utctime = (time_t)(lfpuint(gpstime) -
+                                                           JAN_1970);
 
 			    clock_time->usecond = lfp_intv_to_tspec(gpstime).tv_nsec / 1000;
 
