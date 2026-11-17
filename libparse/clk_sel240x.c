@@ -123,7 +123,7 @@ cvt_sel240x( unsigned char *buffer,
 		buffer++;
 		buffer = (unsigned char *)strptime(
 			(const char *)buffer, "%Y:%j:%H:%M:%S", &ptime );
-                if (NULL == buffer ||
+		if (NULL == buffer ||
 		    '\x0d' != *(buffer+1) ) {
 			rc = CVT_FAIL | CVT_BADFMT;
 		} else {
