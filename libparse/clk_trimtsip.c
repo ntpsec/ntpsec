@@ -211,7 +211,7 @@ cvt_trimtsip(
 			    l_fp utcoffset;
 			    l_fp gpstime;
 
-                            if (13 > size) {
+                            if (14 > size) {
                                     printf("TRIMBLE BAD packet, size %d:\n",
                                            size);
                                     return CVT_NONE;
