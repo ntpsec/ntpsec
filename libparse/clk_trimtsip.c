@@ -73,7 +73,7 @@ struct trimble
 	uint8_t  t_operable;	/* receiver feels OK */
 	uint8_t  t_mode;		/* actual operating mode */
 	uint8_t  t_leap;		/* possible leap warning */
-        uint8_t  t_utcknown;	/* utc offset known */
+	uint8_t  t_utcknown;	/* utc offset known */
 };
 
 #define STATUS_BAD    0		/* BAD or UNINITIALIZED receiver status */
@@ -180,7 +180,7 @@ cvt_trimtsip(
 	     void          *local
 	     )
 {
-        struct trimble *t = (struct trimble *)local; /* get local data space */
+	struct trimble *t = (struct trimble *)local; /* get local data space */
 #define mb(_X_) (buffer[2+(_X_)]) /* shortcut for buffer access */
 	uint8_t cmd;
 
@@ -189,7 +189,7 @@ cvt_trimtsip(
 	clock_time->flags = 0;
 
 	if (!t) {
-		return CVT_NONE;		/* local data not allocated - sigh! */
+		return CVT_NONE;    // local data not allocated - sigh!
 	}
 
 	if ((size < 4) ||
@@ -207,12 +207,18 @@ cvt_trimtsip(
 		    case CMD_RCURTIME:
 		    {			/* GPS time */
 			    l_fp secs;
-			    int week = getmsb_short(&mb(4));
+			    int week;
 			    l_fp utcoffset;
 			    l_fp gpstime;
 
+			    if (14 > size) {
+				    printf("TRIMBLE BAD packet, size %d:\n",
+					   size);
+				    return CVT_NONE;
+			    }
 			    bp = &mb(0);
-			    if (fetch_ieee754(&bp, IEEE_SINGLE, &secs, trim_offsets) != IEEE_OK)
+			    if (fetch_ieee754(&bp, IEEE_SINGLE, &secs,
+					      trim_offsets) != IEEE_OK)
 				    return CVT_FAIL|CVT_BADFMT;
 
 			    if ((lfpsint(secs) <= 0) ||
@@ -221,6 +227,7 @@ cvt_trimtsip(
 				    clock_time->flags = PARSEB_POWERUP;
 				    return CVT_OK;
 			    }
+			    week = getmsb_short(&mb(4));
 			    if (week < GPSWRAP) {
 				    week += GPSWEEKS;
 			    }
@@ -229,17 +236,19 @@ cvt_trimtsip(
 
 			    /* fetch UTC offset */
 			    bp = &mb(6);
-			    if (fetch_ieee754(&bp, IEEE_SINGLE, &utcoffset, trim_offsets) != IEEE_OK)
+			    if (fetch_ieee754(&bp, IEEE_SINGLE, &utcoffset,
+					      trim_offsets) != IEEE_OK)
 				    return CVT_FAIL|CVT_BADFMT;
 
-			    secs -= utcoffset; /* adjust GPS time to UTC time */
+			    secs -= utcoffset; // adjust GPS time to UTC time
 
-			    gpstolfp((unsigned short)week, (unsigned short)0,
+			    gpstolfp((unsigned short)week, 0,
 				     lfpuint(secs), &gpstime);
 
 			    setlfpfrac(gpstime, lfpfrac(secs));
 
-			    clock_time->utctime = (time_t)(lfpuint(gpstime) - JAN_1970);
+			    clock_time->utctime = (time_t)(lfpuint(gpstime) -
+							   JAN_1970);
 
 			    clock_time->usecond = lfp_intv_to_tspec(gpstime).tv_nsec / 1000;
 
@@ -271,16 +280,21 @@ cvt_trimtsip(
 				    clock_time->flags |= PARSEB_POSITION;
 			    }
 			    clock_time->flags |= PARSEB_S_LEAP|PARSEB_S_POSITION;
-
-			    return CVT_OK;
-
 		    } /* case 0x41 */
+		    return CVT_OK;
 
 		    case CMD_RRECVHEALTH:
 		    {
-			    /* TRIMBLE health */
-			    uint8_t status = mb(0);
+			    // TRIMBLE health
+			    uint8_t status;
 
+			    if (6 > size) {
+				    printf("TRIMBLE BAD packet, size %d:\n",
+					   size);
+				    return CVT_NONE;
+			    }
+
+			    status = mb(0);
 			    switch (status)
 			    {
 				case 0x00: /* position fixes */
@@ -305,40 +319,49 @@ cvt_trimtsip(
 		    {
 			    l_fp t0t;
 			    unsigned char *lbp;
+			    int tlsf;
 
-			    /* UTC correction data - derive a leap warning */
-			    /* current leap correction (GPS-UTC) */
+			    if (30 > size) {
+				    printf("TRIMBLE BAD packet, size %d:\n",
+					   size);
+				    return CVT_NONE;
+			    }
+			    /* UTC correction data - derive a leap warning
+			     * current leap correction (GPS-UTC) */
 			    int tls = t->t_gpsutc = get_msb_ushort(&mb(12));
 
-			    /* new leap correction */
-			    int tlsf = t->t_gpsutcleap = get_msb_ushort(&mb(24));
-
-			    /* week no of leap correction */
-			    t->t_weekleap = get_msb_ushort(&mb(20));
-			    if (t->t_weekleap < GPSWRAP) {
-				    t->t_weekleap = (unsigned short)(t->t_weekleap + GPSWEEKS);
+			    // last update time
+			    lbp = (unsigned char *)&mb(14);
+			    if (fetch_ieee754(&lbp, IEEE_SINGLE, &t0t,
+					      trim_offsets) != IEEE_OK) {
+				    return CVT_FAIL|CVT_BADFMT;
 			    }
 
-			    /* day in week of leap correction */
-			    t->t_dayleap = get_msb_ushort(&mb(22));
-			    /* current week no */
+			    // current week no
 			    t->t_week = get_msb_ushort(&mb(18));
 			    if (t->t_week < GPSWRAP) {
 				    t->t_week += GPSWEEKS;
 			    }
 
-			    lbp = (unsigned char *)&mb(14); /* last update time */
-			    if (fetch_ieee754(&lbp, IEEE_SINGLE, &t0t, trim_offsets) != IEEE_OK) {
-				    return CVT_FAIL|CVT_BADFMT;
+			    // week no of leap correction
+			    t->t_weekleap = get_msb_ushort(&mb(20));
+			    if (t->t_weekleap < GPSWRAP) {
+				    t->t_weekleap = t->t_weekleap + GPSWEEKS;
 			    }
 
-			    t->t_utcknown = lfpuint(t0t) != 0;
+			    // day in week of leap correction
+			    t->t_dayleap = get_msb_ushort(&mb(22));
 
-			    if ((t->t_utcknown) && /* got UTC information */
-				(tlsf != tls)   && /* something will change */
-				((t->t_weekleap - t->t_week) < 5)) /* and close in the future */
+			    t->t_utcknown = lfpuint(t0t) != 0;
+			    // new leap correction
+			    tlsf = t->t_gpsutcleap = get_msb_ushort(&mb(24));
+
+			    if ((t->t_utcknown) &&  // got UTC information
+				(tlsf != tls)   &&  // something will change
+				// and close in the future
+				((t->t_weekleap - t->t_week) < 5))
 			    {
-				    /* generate a leap warning */
+				    // generate a leap warning
 				    if (tlsf > tls) {
 					    t->t_leap = ADDSECOND;
 				    } else {
